@@ -71,6 +71,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/console-kit-v')
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout Console Kit
         uses: actions/checkout@v6
@@ -141,7 +142,5 @@ jobs:
 
       - name: Publish public package
         if: steps.published.outputs.published != 'true'
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         working-directory: console-kit
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
