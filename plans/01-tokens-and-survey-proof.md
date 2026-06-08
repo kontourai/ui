@@ -17,7 +17,7 @@ folder and the survey repo's CSS.
 
 1. **Package skeleton** at `/Users/brian/dev/github/kontourai/console-kit/`:
    ```
-   console-ui/
+   console-kit/
      package.json          # name "@kontourai/console-kit", version 0.0.0, private:false,
                            # type:module, exports map for ./tokens, ./tokens.css, ./themes.css
      tokens/
@@ -59,7 +59,7 @@ folder and the survey repo's CSS.
    - You MAY keep a thin survey-local alias block (e.g. `--accent: var(--k-brand)`) if it
      reduces churn — but the source of truth must be `--k-*`.
 
-3. **ADR** `console-ui/docs/adr/0001-console-kit-token-contract.md`: the token names,
+3. **ADR** `console-kit/docs/adr/0001-console-kit-token-contract.md`: the token names,
    the light/dark strategy, the status-scale mapping table, the per-product brand decision,
    the org-scope note (`@kontour` vs `@kontourai`), and the "components read only tokens"
    principle. Keep it to ~1 page.
@@ -111,7 +111,7 @@ at viewport 1440×1200. Compare against the current design — the redesign must
 **effectively identical** (same dark forensic look, mint accent, value hero, verify-glow).
 The whole point is that swapping local vars for `--k-*` changes nothing visible.
 
-Token sanity: confirm `console-ui/tokens/index.css` parses (no `@import` typos) and that
+Token sanity: confirm `console-kit/tokens/index.css` parses (no `@import` typos) and that
 toggling `[data-theme="light"]` on `<html>` produces a coherent light skin.
 
 ## Acceptance criteria (how this will be evaluated)

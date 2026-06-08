@@ -20,9 +20,9 @@ across stacks.
 
 ## Deliverables
 
-1. **`@kontourai/console-kit/elements`** in `console-ui/`:
+1. **`@kontourai/console-kit/elements`** in `console-kit/`:
    ```
-   console-ui/
+   console-kit/
      elements/
        src/
          index.ts            # registers all custom elements
@@ -41,7 +41,7 @@ across stacks.
      `title`, `count`) to mirror the React props.
    - Build to ESM + `.d.ts`, same toolchain as Step 2.
 
-2. **flow adopts tokens + theme** (`flow/src/console-kit/`):
+2. **flow adopts tokens + theme** (`flow/src/console-ui/`):
    - Replace `styles.css`'s local `:root` vars (`--bg/--surface/--ink/--muted/--line/
      --pass/--block/--wait/--current/--accent`) with `--k-*`:
      - `--ink` → `--k-text`, `--surface` → `--k-panel`, `--bg` → `--k-bg`, `--line` → `--k-line`
@@ -58,7 +58,7 @@ across stacks.
    - In Step 1 survey vendored a copy of the tokens. Now point it at the package:
      either add `"@kontourai/console-kit": "file:../console-kit"` and reference the installed
      CSS, or (for the static example) replace the vendored copy with a symlink/relative
-     `<link>` to `console-ui/tokens/index.css`. Pick whichever keeps the example loadable
+     `<link>` to `console-kit/tokens/index.css`. Pick whichever keeps the example loadable
      when served over HTTP and note it.
    - Remove the now-duplicated vendored token files.
    - **Survey validator still applies** — see DO-NOT-BREAK.

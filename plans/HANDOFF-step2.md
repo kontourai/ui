@@ -5,7 +5,7 @@
 - Package scope is `@kontourai/console-kit`.
 - `kontour-console/console-ui` consumes the kit through `"@kontourai/console-kit": "file:../../console-kit"`.
 - The app imports kit token files and React primitive styles once from `src/main.tsx`, then keeps app-specific layout and texture in local CSS.
-- `theme-console` is applied on the document root in `kontour-console/console-kit/index.html` so root-level app aliases and body background read the console theme.
+- `theme-console` is applied on the document root in `kontour-console/console-ui/index.html` so root-level app aliases and body background read the console theme.
 - Local app primitive files were thinned to re-export portable kit primitives where possible. App-specific row, process, and diagram components stayed local.
 
 ## Component Inventory
@@ -32,7 +32,7 @@ Kept app-local:
 - `ProcessFlowDiagram.tsx`: console-core SVG visualization.
 - Section components and hub connection logic.
 
-Thin re-export files in `kontour-console/console-kit/src/components/`:
+Thin re-export files in `kontour-console/console-ui/src/components/`:
 
 - `Badge.tsx`
 - `StatusBadge.tsx`
@@ -105,12 +105,12 @@ Semantic tones are `positive`, `caution`, `negative`, `active`, and `neutral`.
 
 ## Verification
 
-- `console-ui`: `npm install` passed.
-- `console-ui`: `npm run build` passed and emitted ESM plus `.d.ts` under `dist/react/`.
+- `console-kit`: `npm install` passed.
+- `console-kit`: `npm run build` passed and emitted ESM plus `.d.ts` under `dist/react/`.
 - `kontour-console/console-ui`: `npm install` passed.
 - `kontour-console/console-ui`: `npm run typecheck` passed.
 - `kontour-console/console-ui`: `npm run test` passed, 4 tests.
 - `kontour-console/console-ui`: `npm run build` passed.
-- `console-ui/react/styles.css` grep found no literal hex/rgb colors and no non-`--k-*` custom-property reads.
-- `kontour-console/console-kit/src/styles.css` grep found no duplicate app-local base blocks for `.status`, `.metric`, `.badge`, `.progress`, `.panel`, `.tone-good`, `.tone-warn`, or `.tone-bad` after review cleanup.
+- `console-kit/react/styles.css` grep found no literal hex/rgb colors and no non-`--k-*` custom-property reads.
+- `kontour-console/console-ui/src/styles.css` grep found no duplicate app-local base blocks for `.status`, `.metric`, `.badge`, `.progress`, `.panel`, `.tone-good`, `.tone-warn`, or `.tone-bad` after review cleanup.
 - `npm run dev` was served over HTTP for screenshot verification.

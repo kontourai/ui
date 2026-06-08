@@ -6,7 +6,7 @@ The package name is `@kontourai/console-kit`. Step 3 therefore ships the vanilla
 
 ## Element implementation
 
-Location: `console-ui/elements/`
+Location: `console-kit/elements/`
 
 The web components are light-DOM wrappers that emit the same className contracts documented in `HANDOFF-step2.md` and use the shared React tone resolver through `elements/react/tones.ts`.
 
@@ -25,7 +25,7 @@ The web components are light-DOM wrappers that emit the same className contracts
 
 ## Flow adoption
 
-Location: `flow/src/console-kit/`
+Location: `flow/src/console-ui/`
 
 Flow stays light: `<html class="theme-flow" data-theme="light">`. Local variables are now aliases over `--k-*` tokens:
 
@@ -77,7 +77,7 @@ Reviewer remediation:
 
 ## Verification
 
-- `console-ui`: `npm run build` passed.
+- `console-kit`: `npm run build` passed.
 - `survey`: `npm run check:review-workbench` passed.
 - `flow`: `npm run typecheck` passed.
 - `flow`: `npm run typecheck:console-ui` passed.

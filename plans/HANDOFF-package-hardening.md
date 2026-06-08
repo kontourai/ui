@@ -6,7 +6,7 @@ Stabilize `@kontourai/console-kit` consumption before any new product adoption. 
 
 ## Console Kit
 
-Location: `console-ui/`
+Location: `console-kit/`
 
 - Added `scripts/clean-dist.mjs` and made `npm run build` remove stale `dist/` before emitting React and elements output.
 - Strengthened `scripts/check-package-exports.mjs` to verify:
@@ -46,7 +46,7 @@ Location: `survey/`
 
 ## Verification
 
-- `console-ui`: `npm run check` passed.
+- `console-kit`: `npm run check` passed.
 - `flow`: `npm install`, `npm run check:console-kit-assets`, `npm run typecheck`, `npm run typecheck:console-ui`, `npm run build`, and `npm run test` passed.
 - `survey`: `npm install`, `npm run check:review-workbench-assets`, `npm run check:review-workbench`, and `npm run verify` passed.
 - Browser screenshot through the hardened survey vendor path: `plans/package-hardening-survey.png`.
