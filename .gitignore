@@ -10,3 +10,5 @@ react/src/*.d.ts
 react/src/*.d.ts.map
 react/src/*.js
 react/src/*.js.map
+
+.flow-agents/

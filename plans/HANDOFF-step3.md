@@ -72,7 +72,7 @@ Reviewer remediation:
 - Survey initial: `plans/step3-survey-initial.png`
 - Survey after `[data-decision="accept-proposed"]`: `plans/step3-survey-accept-proposed.png`
 - Flow source presentation: `plans/step3-flow-source.png`
-- Flow built smoke screenshot: `../flow/.agents/flow-agents/flow-console-shell/console-smoke.png`
+- Flow built smoke screenshot: `../flow/.flow-agents/flow-console-shell/console-smoke.png`
 - Elements parity demo: `plans/step3-elements-demo.png`
 
 ## Verification
