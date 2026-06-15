@@ -5,7 +5,7 @@ test("renders the package gallery with tokens, themes, and primitive components"
 
   await expect(page).toHaveTitle("Kontour Console Kit Gallery");
   await expect(page.getByRole("main")).toContainText("Primitive Gallery");
-  await expect(page.getByRole("main")).toContainText("@kontourai/console-kit");
+  await expect(page.getByRole("main")).toContainText("@kontourai/ui");
   await expect(page.getByRole("main")).toContainText("theme-console");
   await expect(page.getByRole("main")).toContainText("theme-flow light");
   await expect(page.getByRole("main")).toContainText("theme-survey");

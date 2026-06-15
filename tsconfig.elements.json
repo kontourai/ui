@@ -14,5 +14,5 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true
   },
-  "include": ["elements/**/*.ts", "react/src/tones.ts"]
+  "include": ["elements/**/*.ts", "react/src/tones.ts", "react/src/product-icon-paths.ts"]
 }

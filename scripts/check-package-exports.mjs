@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
 
-assertEqual(pkg.name, "@kontourai/console-kit", "Package name must stay @kontourai/console-kit.");
+assertEqual(pkg.name, "@kontourai/ui", "Package name must stay @kontourai/ui.");
 assertNoLegacyScope(JSON.stringify(pkg, null, 2), "package.json");
 
 const requiredExports = [
@@ -41,6 +41,8 @@ const elementFiles = [
 
 assertIncludes(reactIndex, "Badge", "React index should export Badge.");
 assertIncludes(reactIndex, "StatusBadge", "React index should export StatusBadge.");
+assertIncludes(reactIndex, "ProductIcon", "React index should export ProductIcon.");
+assertIncludes(reactIndex, "productIcons", "React index should export the productIcons map.");
 assertIncludes(elementsIndex, "k-badge", "Elements index should register k-badge.");
 assertIncludes(elementsIndex, "k-topbar", "Elements index should register k-topbar.");
 assertNoLegacyScope(reactIndex, "dist/react/index.js");
@@ -58,7 +60,7 @@ assert.equal(tones.toneForValue("verified"), "positive");
 assert.equal(tones.toneForValue("disconnected"), "negative");
 assert.equal(tones.normalizedClassSuffix("In Review"), "in-review");
 
-const { Badge } = await import("@kontourai/console-kit/react");
+const { Badge } = await import("@kontourai/ui/react");
 const badge = Badge({ value: "verified" });
 assert.equal(badge.type, "span");
 assert.equal(badge.props.className, "badge tone-positive");
@@ -74,8 +76,8 @@ globalThis.customElements = {
     return registry.get(name);
   }
 };
-await import("@kontourai/console-kit/elements");
-for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar"]) {
+await import("@kontourai/ui/elements");
+for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon"]) {
   assert.ok(registry.has(tag), `${tag} should be registered.`);
 }
 

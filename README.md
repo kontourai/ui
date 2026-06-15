@@ -2,19 +2,19 @@
 
 **The shared design-token and component layer for Kontour consoles.**
 
-`@kontourai/console-kit`
+`@kontourai/ui`
 
-[![npm version](https://img.shields.io/npm/v/%40kontourai%2Fconsole-kit)](https://www.npmjs.com/package/@kontourai/console-kit)
-[![CI](https://github.com/kontourai/console-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/kontourai/console-kit/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/%40kontourai%2Fui)](https://www.npmjs.com/package/@kontourai/ui)
+[![CI](https://github.com/kontourai/ui/actions/workflows/ci.yml/badge.svg)](https://github.com/kontourai/ui/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 Use Console Kit when you are building a Kontour console product (Surface Console, Flow Console, Survey Review Workbench, or a custom operator UI) and need to stay visually consistent with the `--k-*` token contract without copying CSS by hand. If you are building a general-purpose application with its own design system, you do not need this package.
 
 Console Kit ships three layers:
 
-- `@kontourai/console-kit/tokens` — CSS custom properties for any renderer, no framework required.
-- `@kontourai/console-kit/react` — class-driven React primitives (`Badge`, `Button`, `Panel`, `StatusBadge`, `Topbar`) that read the token contract.
-- `@kontourai/console-kit/elements` — light-DOM web-component wrappers for vanilla products.
+- `@kontourai/ui/tokens` — CSS custom properties for any renderer, no framework required.
+- `@kontourai/ui/react` — class-driven React primitives (`Badge`, `Button`, `Panel`, `StatusBadge`, `Topbar`) that read the token contract.
+- `@kontourai/ui/elements` — light-DOM web-component wrappers for vanilla products.
 
 Package docs:
 
@@ -44,13 +44,13 @@ All themes support `[data-theme="light"]` for light-mode overrides. See [`docs/g
 Import primitive styles once at your app root:
 
 ```ts
-import "@kontourai/console-kit/react/styles.css";
+import "@kontourai/ui/react/styles.css";
 ```
 
 Then use the primitives:
 
 ```ts
-import { Badge, Button, Panel, StatusBadge, Topbar } from "@kontourai/console-kit/react";
+import { Badge, Button, Panel, StatusBadge, Topbar } from "@kontourai/ui/react";
 ```
 
 ## Custom elements
@@ -58,7 +58,7 @@ import { Badge, Button, Panel, StatusBadge, Topbar } from "@kontourai/console-ki
 Load the element module for vanilla or web-component-based products:
 
 ```html
-<script type="module" src="./vendor/console-kit/dist/elements/elements/src/index.js"></script>
+<script type="module" src="./vendor/ui/dist/elements/elements/src/index.js"></script>
 ```
 
 Then render:
@@ -74,15 +74,15 @@ Then render:
 Import the full token layer:
 
 ```css
-@import "@kontourai/console-kit/tokens";
+@import "@kontourai/ui/tokens";
 ```
 
 Or import individual files:
 
 ```css
-@import "@kontourai/console-kit/fonts.css";
-@import "@kontourai/console-kit/tokens.css";
-@import "@kontourai/console-kit/themes.css";
+@import "@kontourai/ui/fonts.css";
+@import "@kontourai/ui/tokens.css";
+@import "@kontourai/ui/themes.css";
 ```
 
 For static HTML consoles served without a bundler, add a local package dependency and copy the CSS assets into the product's asset tree during build or setup:
@@ -90,14 +90,14 @@ For static HTML consoles served without a bundler, add a local package dependenc
 ```json
 {
   "devDependencies": {
-    "@kontourai/console-kit": "file:../console-kit"
+    "@kontourai/ui": "file:../ui"
   }
 }
 ```
 
 ```html
-<link rel="stylesheet" href="./vendor/console-kit/tokens/index.css">
-<link rel="stylesheet" href="./vendor/console-kit/react/styles.css">
+<link rel="stylesheet" href="./vendor/ui/tokens/index.css">
+<link rel="stylesheet" href="./vendor/ui/react/styles.css">
 ```
 
 Products should style components with `--k-*` variables and treat the product theme class as the product identity boundary. Domain status words map to the shared semantic scale: positive, caution, negative, active, and neutral.

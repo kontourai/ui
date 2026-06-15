@@ -12,3 +12,4 @@ react/src/*.js
 react/src/*.js.map
 
 .flow-agents/
+*.tgz

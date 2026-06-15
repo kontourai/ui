@@ -1,12 +1,13 @@
 {
-  "name": "@kontourai/console-kit",
-  "version": "1.0.0",
+  "name": "@kontourai/ui",
+  "version": "1.1.0",
   "description": "Framework-agnostic console tokens and shared UI primitives for Kontour console products.",
   "type": "module",
   "private": false,
   "license": "Apache-2.0",
   "scripts": {
     "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.json && tsc -p tsconfig.elements.json",
+    "prepack": "npm run build",
     "check:exports": "npm run build && node scripts/check-package-exports.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:readiness": "node scripts/check-readiness.mjs",
@@ -33,6 +34,7 @@
       "import": "./dist/react/index.js"
     },
     "./react/styles.css": "./react/styles.css",
+    "./icons/*": "./icons/*",
     "./elements": {
       "types": "./dist/elements/elements/src/index.d.ts",
       "import": "./dist/elements/elements/src/index.js"
@@ -42,6 +44,7 @@
     "dist/",
     "docs/",
     "elements/",
+    "icons/",
     "react/styles.css",
     "tokens/",
     "README.md"
@@ -51,7 +54,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kontourai/console-kit.git"
+    "url": "git+https://github.com/kontourai/ui.git"
   },
   "engines": {
     "node": ">=22"
