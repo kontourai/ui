@@ -1,10 +1,10 @@
 # Console Kit Consumer Guide
 
-`@kontourai/console-kit` ships three layers:
+`@kontourai/ui` ships three layers:
 
-- CSS tokens: `@kontourai/console-kit/tokens`
-- React primitives: `@kontourai/console-kit/react`
-- Light-DOM custom elements: `@kontourai/console-kit/elements`
+- CSS tokens: `@kontourai/ui/tokens`
+- React primitives: `@kontourai/ui/react`
+- Light-DOM custom elements: `@kontourai/ui/elements`
 
 ## Theme Boundary
 
@@ -30,7 +30,7 @@ Install locally while unpublished:
 ```json
 {
   "dependencies": {
-    "@kontourai/console-kit": "file:../../console-kit"
+    "@kontourai/ui": "file:../../ui"
   }
 }
 ```
@@ -38,15 +38,15 @@ Install locally while unpublished:
 Import tokens and primitive styles once:
 
 ```ts
-import "@kontourai/console-kit/tokens.css";
-import "@kontourai/console-kit/themes.css";
-import "@kontourai/console-kit/react/styles.css";
+import "@kontourai/ui/tokens.css";
+import "@kontourai/ui/themes.css";
+import "@kontourai/ui/react/styles.css";
 ```
 
 Use primitives from the React entry:
 
 ```tsx
-import { Badge, Button, Panel, StatusBadge, Topbar } from "@kontourai/console-kit/react";
+import { Badge, Button, Panel, StatusBadge, Topbar } from "@kontourai/ui/react";
 
 export function Header() {
   return (
@@ -65,9 +65,9 @@ export function Header() {
 Load CSS and the element module:
 
 ```html
-<link rel="stylesheet" href="./vendor/console-kit/tokens/index.css">
-<link rel="stylesheet" href="./vendor/console-kit/react/styles.css">
-<script type="module" src="./vendor/console-kit/dist/elements/elements/src/index.js"></script>
+<link rel="stylesheet" href="./vendor/ui/tokens/index.css">
+<link rel="stylesheet" href="./vendor/ui/react/styles.css">
+<script type="module" src="./vendor/ui/dist/elements/elements/src/index.js"></script>
 ```
 
 Render light-DOM components:

@@ -26,23 +26,23 @@ jobs:
       - name: Checkout Console Kit
         uses: actions/checkout@v6
         with:
-          path: console-kit
+          path: ui
 
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: console-kit/package-lock.json
+          cache-dependency-path: ui/package-lock.json
 
       - name: Install
         run: npm ci --no-fund --no-audit
-        working-directory: console-kit
+        working-directory: ui
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-        working-directory: console-kit
+        working-directory: ui
 
       - name: Verify
         run: npm run verify
-        working-directory: console-kit
+        working-directory: ui

@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const workspace = path.resolve(root, "..");
 const pkg = readJson(path.join(root, "package.json"));
 
-assert.equal(pkg.name, "@kontourai/console-kit", "Package name must stay @kontourai/console-kit.");
+assert.equal(pkg.name, "@kontourai/ui", "Package name must stay @kontourai/ui.");
 assertNoLegacyScope(JSON.stringify(pkg), "console-kit/package.json");
 assert.equal(pkg.private, false, "Package should remain publishable when release policy changes.");
 assert.equal(pkg.license, "Apache-2.0", "Public package license metadata must stay explicit.");
@@ -29,9 +29,9 @@ for (const file of [
 
 const readme = read(path.join(root, "README.md"));
 for (const expected of [
-  "@kontourai/console-kit/tokens",
-  "@kontourai/console-kit/react",
-  "@kontourai/console-kit/elements",
+  "@kontourai/ui/tokens",
+  "@kontourai/ui/react",
+  "@kontourai/ui/elements",
   "theme-console",
   "theme-flow",
   "theme-survey",

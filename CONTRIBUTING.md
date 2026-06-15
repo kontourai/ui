@@ -48,6 +48,6 @@ Releases are automated with release-please: merges to main accumulate into a rel
 
 ## Repository
 
-https://github.com/kontourai/console-kit
+https://github.com/kontourai/ui
 
 All projects are Apache-2.0.
