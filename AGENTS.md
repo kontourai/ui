@@ -4,6 +4,9 @@ Console Kit is the shared presentation layer for the Kontour family: the `--k-*`
 
 ## Source Of Truth
 
+- Product/domain context: `CONTEXT.md`.
+- Agent-facing repo instructions: `AGENTS.md`.
+- Broad verification: `npm run verify`.
 - Token contract: `tokens/` (CSS custom properties; per-product accents live in `themes.css`).
 - React primitives: `react/`; light-DOM wrappers: `elements/`; docs in `docs/`.
 - `dist/` is generated.
