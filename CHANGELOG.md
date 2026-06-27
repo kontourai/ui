@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/kontourai/ui/compare/v1.2.0...v1.3.0) (2026-06-27)
+
+
+### Features
+
+* **empty:** support description + call-to-action ([#17](https://github.com/kontourai/ui/issues/17)) ([7670e91](https://github.com/kontourai/ui/commit/7670e913179a0aff67a18231d2c5d06372d9386e))
+
 ## [1.2.0](https://github.com/kontourai/ui/compare/v1.1.1...v1.2.0) (2026-06-27)
 
 
