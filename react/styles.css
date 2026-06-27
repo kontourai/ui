@@ -130,6 +130,24 @@
   line-height: 1.35;
 }
 
+.empty__label {
+  margin: 0;
+  color: var(--k-text);
+  font-size: var(--k-text-md);
+  line-height: 1.35;
+}
+
+.empty__description {
+  margin: var(--k-space-1) 0 0;
+  color: var(--k-text-muted);
+  font-size: var(--k-text-sm);
+  line-height: 1.4;
+}
+
+.empty__action {
+  margin-top: var(--k-space-3);
+}
+
 .progress {
   height: var(--k-space-2);
   background: var(--k-bg);
