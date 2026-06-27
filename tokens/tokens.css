@@ -8,6 +8,13 @@
   --k-line: rgba(150, 180, 210, 0.12);
   --k-line-strong: rgba(150, 180, 210, 0.22);
   --k-shadow: 0 26px 60px -42px rgba(0, 0, 0, 0.95);
+  /* Layered, downward-weighted overlay elevation (contact -> ambient falloff).
+     The single shadow floating surfaces — dialogs, menus, palettes, toasts —
+     should use, so elevation tunes in one place. */
+  --k-elevation-overlay:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 24px 56px rgba(0, 0, 0, 0.4);
 
   /* text */
   --k-text: #eef3f8;
@@ -40,6 +47,10 @@
   /* radius */
   --k-radius-sm: 9px;
   --k-radius-md: 14px;
+  /* Tight, desktop-grade radii for dense product chrome (controls + overlays),
+     alongside the softer sm/md. */
+  --k-radius-control: 4px;
+  --k-radius-overlay: 10px;
 
   /* type */
   --k-text-xs: 11px;
@@ -67,6 +78,10 @@
   --k-line: rgba(36, 40, 46, 0.12);
   --k-line-strong: rgba(36, 40, 46, 0.20);
   --k-shadow: 0 18px 50px -30px rgba(0, 0, 0, 0.25);
+  --k-elevation-overlay:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.1),
+    0 18px 48px rgba(0, 0, 0, 0.08);
   --k-text: #202124;
   --k-text-muted: #5b626b;
   --k-text-faint: #707782;

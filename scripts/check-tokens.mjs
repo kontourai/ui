@@ -25,6 +25,9 @@ const requiredTokens = [
   "--k-active",
   "--k-radius-sm",
   "--k-radius-md",
+  "--k-radius-control",
+  "--k-radius-overlay",
+  "--k-elevation-overlay",
   "--k-font-ui",
 ];
 
