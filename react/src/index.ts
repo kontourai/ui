@@ -18,6 +18,7 @@ export {
 } from "./ProductIcon.js";
 export { Progress, type ProgressProps } from "./Progress.js";
 export { StatusBadge, type StatusBadgeProps, type StatusBadgeStatus } from "./StatusBadge.js";
+export { StatusBar, type StatusBarItem, type StatusBarProps } from "./StatusBar.js";
 export { Topbar, type TopbarMetaItem, type TopbarProps } from "./Topbar.js";
 export {
   normalizedClassSuffix,
