@@ -12,6 +12,31 @@
   text-transform: uppercase;
 }
 
+/* `.status` and `.badge` are tone-bearing primitives: every StatusBadge/Badge
+   also carries a `.tone-*` class that sets the correct text/background pair.
+   Both must therefore be declared BEFORE the `.tone-*` rules so the tone's
+   contrast color wins (equal specificity → source order). `.status` was
+   previously declared after the tones, so its base `color: var(--k-text-muted)`
+   clobbered every tone's contrast color — yielding low-contrast badges
+   (light-grey text on a saturated tone background, e.g. a near-white
+   "READY TO MERGE" on light green). Keeping it here fixes that for all
+   consumers. */
+.status {
+  min-width: calc(var(--k-space-6) * 4);
+  min-height: calc(var(--k-space-6) + var(--k-space-2));
+  display: grid;
+  place-items: center;
+  padding: 0 var(--k-space-3);
+  border-color: var(--k-line);
+  border-style: solid;
+  border-width: calc(var(--k-space-1) / 4);
+  color: var(--k-text-muted);
+  font-family: var(--k-font-mono);
+  font-size: var(--k-text-xs);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .tone-positive {
   color: var(--k-brand-contrast);
   background: var(--k-positive);
@@ -40,22 +65,6 @@
   color: var(--k-text-muted);
   background: var(--k-panel-raised);
   border-color: var(--k-line);
-}
-
-.status {
-  min-width: calc(var(--k-space-6) * 4);
-  min-height: calc(var(--k-space-6) + var(--k-space-2));
-  display: grid;
-  place-items: center;
-  padding: 0 var(--k-space-3);
-  border-color: var(--k-line);
-  border-style: solid;
-  border-width: calc(var(--k-space-1) / 4);
-  color: var(--k-text-muted);
-  font-family: var(--k-font-mono);
-  font-size: var(--k-text-xs);
-  font-weight: 900;
-  text-transform: uppercase;
 }
 
 .metric {
