@@ -7,6 +7,7 @@ import { KPanel } from "./k-panel.js";
 import { KProductIcon } from "./k-product-icon.js";
 import { KProgress } from "./k-progress.js";
 import { KStatusBadge } from "./k-status-badge.js";
+import { KStatusBar } from "./k-statusbar.js";
 import { KTopbar } from "./k-topbar.js";
 
 defineElement("k-badge", KBadge);
@@ -17,6 +18,7 @@ defineElement("k-panel", KPanel);
 defineElement("k-product-icon", KProductIcon);
 defineElement("k-progress", KProgress);
 defineElement("k-status-badge", KStatusBadge);
+defineElement("k-statusbar", KStatusBar);
 defineElement("k-topbar", KTopbar);
 
 export { KBadge } from "./k-badge.js";
@@ -27,6 +29,7 @@ export { KPanel } from "./k-panel.js";
 export { KProductIcon } from "./k-product-icon.js";
 export { KProgress } from "./k-progress.js";
 export { KStatusBadge } from "./k-status-badge.js";
+export { KStatusBar } from "./k-statusbar.js";
 export { KTopbar } from "./k-topbar.js";
 export {
   normalizedClassSuffix,

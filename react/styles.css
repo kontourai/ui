@@ -148,6 +148,42 @@
   margin-top: var(--k-space-3);
 }
 
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: var(--k-space-3);
+  padding: 0 var(--k-space-3);
+  min-height: 22px;
+  border-top: 1px solid var(--k-line);
+  background: var(--k-panel);
+  color: var(--k-text-muted);
+  font-size: var(--k-text-xs);
+  user-select: none;
+}
+
+.statusbar-items {
+  display: flex;
+  align-items: center;
+  gap: var(--k-space-3);
+}
+
+.statusbar-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k-space-1);
+}
+
+.statusbar-item-label {
+  color: var(--k-text-faint);
+}
+
+.statusbar-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k-space-2);
+}
+
 .progress {
   height: var(--k-space-2);
   background: var(--k-bg);
