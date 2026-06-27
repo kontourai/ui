@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/kontourai/ui/compare/v1.3.0...v1.4.0) (2026-06-27)
+
+
+### Features
+
+* **statusbar:** add a thin bottom status-bar primitive ([#19](https://github.com/kontourai/ui/issues/19)) ([04a4fd4](https://github.com/kontourai/ui/commit/04a4fd4b2c45853d69f3d03da62cbc9c0ed7945f))
+
 ## [1.3.0](https://github.com/kontourai/ui/compare/v1.2.0...v1.3.0) (2026-06-27)
 
 
