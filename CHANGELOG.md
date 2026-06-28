@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/kontourai/ui/compare/v1.4.0...v1.4.1) (2026-06-28)
+
+
+### Fixes
+
+* **tokens:** accessible light-mode brand teal ([#21](https://github.com/kontourai/ui/issues/21)) ([5a34246](https://github.com/kontourai/ui/commit/5a34246004eda31e7e20080fbc2c2896540624e6))
+
 ## [1.4.0](https://github.com/kontourai/ui/compare/v1.3.0...v1.4.0) (2026-06-27)
 
 
