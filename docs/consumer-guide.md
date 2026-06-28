@@ -140,6 +140,25 @@ mount the `k-toast-host` element once and call its `notify()` method:
 </script>
 ```
 
+`Tooltip` is a CSS-driven hover/focus bubble (pure factory); `Popover` is a
+click-triggered panel (stateful — outside-click and Esc dismiss). Both anchor to
+their trigger and layer at the `--k-z-popover` tier:
+
+```tsx
+import { Button, Popover, Tooltip } from "@kontourai/ui/react";
+
+<Tooltip label="Recorded in the run receipt">
+  <Button>Merge</Button>
+</Tooltip>
+
+<Popover trigger={<Button>Actions</Button>} placement="bottom-start">
+  <ul>…menu…</ul>
+</Popover>;
+```
+
+Vanilla consumers use `k-tooltip` (label attribute + trigger child) and
+`k-popover` (mark children with `data-popover-trigger` / `data-popover-panel`).
+
 ## Custom Elements Consumer
 
 Load CSS and the element module:

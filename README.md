@@ -13,7 +13,7 @@ Use Console Kit when you are building a Kontour console product (Surface Console
 Console Kit ships three layers:
 
 - `@kontourai/ui/tokens` — CSS custom properties for any renderer, no framework required.
-- `@kontourai/ui/react` — class-driven React primitives: display (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `Empty`, `ProductIcon`), form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`), and overlays/feedback (`Dialog`, `Toast`, `ToastHost`) that read the token contract.
+- `@kontourai/ui/react` — class-driven React primitives: display (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `Empty`, `ProductIcon`), form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`), and overlays/feedback (`Dialog`, `Toast`, `ToastHost`, `Tooltip`, `Popover`) that read the token contract.
 - `@kontourai/ui/elements` — light-DOM web-component wrappers for vanilla products.
 
 Package docs:
