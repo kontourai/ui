@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/kontourai/ui/compare/v1.6.0...v1.7.0) (2026-06-28)
+
+
+### Features
+
+* **empty:** accept a ReactNode description ([#27](https://github.com/kontourai/ui/issues/27)) ([87e4fdd](https://github.com/kontourai/ui/commit/87e4fdd1349b68abd1382d32a78c54b8019544f7))
+
 ## [1.6.0](https://github.com/kontourai/ui/compare/v1.5.0...v1.6.0) (2026-06-28)
 
 
