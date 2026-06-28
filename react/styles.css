@@ -622,3 +622,87 @@
     transform: rotate(360deg);
   }
 }
+
+/* Dialog: native <dialog> in the top layer. Reads the shared overlay
+   elevation + the semantic modal z-index so cross-product layering stays
+   consistent. */
+.dialog {
+  width: min(calc(var(--k-space-6) * 16), calc(100vw - var(--k-space-6)));
+  max-height: calc(100vh - var(--k-space-6) * 2);
+  padding: 0;
+  color: var(--k-text);
+  background: var(--k-panel);
+  border: var(--k-border-thin) solid var(--k-line-strong);
+  border-radius: var(--k-radius-overlay);
+  box-shadow: var(--k-elevation-overlay);
+  z-index: var(--k-z-modal);
+}
+
+.dialog::backdrop {
+  background: color-mix(in oklab, var(--k-bg) 70%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.dialog__surface {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--k-space-6) * 2);
+}
+
+.dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--k-space-3);
+  padding: var(--k-space-4) var(--k-space-4) var(--k-space-3);
+  border-bottom: var(--k-border-thin) solid var(--k-line);
+}
+
+.dialog__title {
+  margin: 0;
+  color: var(--k-text);
+  font-family: var(--k-font-display);
+  font-size: var(--k-text-lg);
+  letter-spacing: var(--k-tracking-normal);
+  text-transform: uppercase;
+}
+
+.dialog__close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--k-space-5);
+  height: var(--k-space-5);
+  padding: 0;
+  color: var(--k-text-muted);
+  background: transparent;
+  border: var(--k-border-thin) solid transparent;
+  border-radius: var(--k-radius-control);
+  font-size: var(--k-text-lg);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--k-dur) var(--k-ease), border-color var(--k-dur) var(--k-ease);
+}
+
+.dialog__close:hover,
+.dialog__close:focus-visible {
+  outline: none;
+  color: var(--k-text);
+  border-color: var(--k-line-strong);
+}
+
+.dialog__body {
+  padding: var(--k-space-4);
+  overflow: auto;
+  color: var(--k-text-muted);
+  line-height: var(--k-leading-normal);
+}
+
+.dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--k-space-2);
+  padding: var(--k-space-3) var(--k-space-4) var(--k-space-4);
+  border-top: var(--k-border-thin) solid var(--k-line);
+}

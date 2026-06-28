@@ -31,6 +31,24 @@ test("renders the element demo from built custom elements and React class contra
   expect(consoleErrors).toEqual([]);
 });
 
+test("opens and dismisses the k-dialog modal overlay", async ({ page }) => {
+  const consoleErrors = await loadKitPage(page, "/elements/demo.html");
+
+  const dialog = page.locator("k-dialog .dialog");
+  await expect(dialog).toBeHidden();
+
+  await page.getByRole("button", { name: "Open dialog" }).click();
+  // Native <dialog> opened modally is matched by the :modal/open dialog role.
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole("dialog")).toContainText("Confirm merge");
+
+  // Esc dismisses and fires the native close path.
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+
+  expect(consoleErrors).toEqual([]);
+});
+
 test("keeps gallery layout within the mobile viewport", async ({ page }) => {
   test.skip(test.info().project.name !== "chromium-mobile", "mobile-only layout check");
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");
