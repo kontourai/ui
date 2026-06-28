@@ -1,6 +1,7 @@
 export { Badge, type BadgeProps } from "./Badge.js";
 export { Button, type ButtonProps, type ButtonVariant } from "./Button.js";
 export { Checkbox, type CheckboxProps } from "./Checkbox.js";
+export { Dialog, type DialogProps } from "./Dialog.js";
 export { Empty, type EmptyProps } from "./Empty.js";
 export { Field, type FieldProps } from "./Field.js";
 export { Input, type InputProps } from "./Input.js";

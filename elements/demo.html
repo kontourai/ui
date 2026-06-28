@@ -163,7 +163,22 @@
             <k-empty label="No queued work"></k-empty>
           </div>
         </k-panel>
+
+        <k-panel title="Dialog" count="modal overlay">
+          <div class="row">
+            <button type="button" class="btn btn-primary" id="open-dialog">Open dialog</button>
+          </div>
+          <k-dialog id="demo-dialog" title="Confirm merge">
+            Merging closes the gate. This action is recorded in the run receipt.
+          </k-dialog>
+        </k-panel>
       </section>
     </main>
+    <script type="module">
+      const dialog = document.getElementById("demo-dialog");
+      document.getElementById("open-dialog").addEventListener("click", () => {
+        dialog.setAttribute("open", "");
+      });
+    </script>
   </body>
 </html>
