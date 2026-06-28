@@ -2,8 +2,11 @@ import type { ReactNode } from "react";
 
 export interface EmptyProps {
   label: string;
-  /** Optional secondary line explaining the empty state. */
-  description?: string;
+  /**
+   * Optional secondary line explaining the empty state. Accepts a node so
+   * consumers can include inline markup (e.g. a `<code>` path or a link).
+   */
+  description?: ReactNode;
   /** Optional call-to-action (e.g. a button) so the state isn't a dead-end. */
   action?: ReactNode;
   /** Optional leading icon/glyph shown above the label. */
