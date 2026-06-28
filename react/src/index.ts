@@ -7,6 +7,7 @@ export { Field, type FieldProps } from "./Field.js";
 export { Input, type InputProps } from "./Input.js";
 export { Metric, type MetricProps } from "./Metric.js";
 export { Panel, type PanelProps } from "./Panel.js";
+export { Popover, type PopoverPlacement, type PopoverProps } from "./Popover.js";
 export {
   ConsoleIcon,
   FlowAgentsIcon,
@@ -30,6 +31,7 @@ export { Textarea, type TextareaProps } from "./Textarea.js";
 export { Toast, type ToastProps } from "./Toast.js";
 export { ToastHost, type ToastHostProps, type ToastPlacement } from "./ToastHost.js";
 export { Toggle, type ToggleProps } from "./Toggle.js";
+export { Tooltip, type TooltipPlacement, type TooltipProps } from "./Tooltip.js";
 export { Topbar, type TopbarMetaItem, type TopbarProps } from "./Topbar.js";
 export {
   normalizedClassSuffix,

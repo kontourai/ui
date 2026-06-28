@@ -178,6 +178,18 @@
             <button type="button" class="btn btn-primary" id="fire-toast">Notify</button>
           </div>
         </k-panel>
+
+        <k-panel title="Tooltip and Popover" count="anchored overlays">
+          <div class="row">
+            <k-tooltip label="Recorded in the run receipt" placement="top">
+              <button type="button" class="btn btn-ghost">Hover me</button>
+            </k-tooltip>
+            <k-popover placement="bottom-start">
+              <button type="button" class="btn btn-ghost" data-popover-trigger>Open menu</button>
+              <div data-popover-panel>Re-run gate · View evidence · Dismiss</div>
+            </k-popover>
+          </div>
+        </k-panel>
       </section>
     </main>
     <k-toast-host id="demo-toast-host" placement="bottom"></k-toast-host>
