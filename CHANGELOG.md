@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.9.0](https://github.com/kontourai/ui/compare/v1.8.0...v1.9.0) (2026-06-28)
+
+
+### Features
+
+* **controls:** build out the form-control layer ([#31](https://github.com/kontourai/ui/issues/31)) ([1a9bb67](https://github.com/kontourai/ui/commit/1a9bb67fd14ac9178bedab554549079115b9d6df))
+* **dialog:** add Dialog overlay + stateful-primitive convention ([#35](https://github.com/kontourai/ui/issues/35)) ([eacd099](https://github.com/kontourai/ui/commit/eacd09919dc54781d919032b4fb757b17df847e8))
+
 ## [1.8.0](https://github.com/kontourai/ui/compare/v1.7.0...v1.8.0) (2026-06-28)
 
 
