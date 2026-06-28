@@ -2,6 +2,11 @@
 
 _Audit date: 2026-06-28 · Package version: 1.7.0_
 
+> **Delivery status.** Track B (package build-out) started: foundational tokens
+> + form-control primitives + CK2/CK4 shipped in PR #31. Follow-ups tracked as
+> issues: overlay/feedback primitives + runtime-hooks convention (#32) and the
+> Track A downstream adoption sweep (#33).
+
 ## 1. Scope & method
 
 Audited every directory in the workspace for how it relates to the shared design-system package `@kontourai/ui` ("Console Kit"): the `--k-*` token contract, 11 React primitives, mirrored web-component elements, 4 product theme classes, and product icons.
