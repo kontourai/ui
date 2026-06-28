@@ -68,6 +68,38 @@
   /* motion */
   --k-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --k-dur: 0.16s;
+
+  /* border width — replaces the ad-hoc calc(var(--k-space-1) / 4) math that
+     hairline borders computed inline across primitives. */
+  --k-border-thin: 1px;
+  --k-border-thick: 2px;
+
+  /* line-height — unitless ratios for display headings vs. body copy. */
+  --k-leading-tight: 1.1;
+  --k-leading-normal: 1.45;
+  --k-leading-loose: 1.7;
+
+  /* letter-spacing — eyebrows/badges track wide; body tracks normal. */
+  --k-tracking-tight: -0.01em;
+  --k-tracking-normal: 0;
+  --k-tracking-wide: 0.08em;
+
+  /* focus — one ring contract so every interactive primitive (controls,
+     buttons, links) shows the same keyboard-focus affordance. */
+  --k-focus-ring: var(--k-brand);
+  --k-focus-ring-width: 2px;
+  --k-focus-ring-offset: 2px;
+
+  /* z-index — semantic stacking scale for layered surfaces. Overlays read
+     these instead of inventing local magic numbers, so cross-product layering
+     stays consistent (a Flow toast never renders under a Console dialog). */
+  --k-z-base: 0;
+  --k-z-sticky: 100;
+  --k-z-dropdown: 1000;
+  --k-z-overlay: 1100;
+  --k-z-modal: 1200;
+  --k-z-popover: 1300;
+  --k-z-toast: 1400;
 }
 
 [data-theme="light"] {

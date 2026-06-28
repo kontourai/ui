@@ -408,3 +408,217 @@
   display: grid;
   gap: var(--k-space-2);
 }
+
+/* Panel header affordances (CK2). Trailing-edge slot for buttons/menus. */
+.panel-head__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--k-space-2);
+}
+
+/* Form field wrapper: label + control + hint/error. */
+.field {
+  display: grid;
+  gap: var(--k-space-2);
+}
+
+.field__label {
+  color: var(--k-text-muted);
+  font-family: var(--k-font-mono);
+  font-size: var(--k-text-xs);
+  font-weight: 800;
+  letter-spacing: var(--k-tracking-wide);
+  text-transform: uppercase;
+}
+
+.field__required {
+  margin-left: var(--k-space-1);
+  color: var(--k-negative);
+}
+
+.field__hint {
+  margin: 0;
+  color: var(--k-text-faint);
+  font-size: var(--k-text-sm);
+  line-height: var(--k-leading-normal);
+}
+
+.field__error {
+  margin: 0;
+  color: var(--k-negative);
+  font-size: var(--k-text-sm);
+  line-height: var(--k-leading-normal);
+}
+
+/* Shared text-control contract: Input, Textarea, Select. */
+.control {
+  width: 100%;
+  min-height: calc(var(--k-space-6) + var(--k-space-2));
+  padding: var(--k-space-2) var(--k-space-3);
+  color: var(--k-text);
+  background: var(--k-panel-raised);
+  border-color: var(--k-line-strong);
+  border-style: solid;
+  border-width: var(--k-border-thin);
+  border-radius: var(--k-radius-control);
+  font-family: var(--k-font-ui);
+  font-size: var(--k-text-md);
+  line-height: var(--k-leading-normal);
+  transition: border-color var(--k-dur) var(--k-ease), box-shadow var(--k-dur) var(--k-ease);
+}
+
+.control::placeholder {
+  color: var(--k-text-faint);
+}
+
+.control:hover {
+  border-color: var(--k-brand);
+}
+
+.control:focus-visible {
+  outline: none;
+  border-color: var(--k-focus-ring);
+  box-shadow: 0 0 0 var(--k-focus-ring-width) color-mix(in oklab, var(--k-focus-ring) 35%, transparent);
+}
+
+.control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.control--invalid,
+.control--invalid:hover {
+  border-color: var(--k-negative);
+}
+
+.control--invalid:focus-visible {
+  border-color: var(--k-negative);
+  box-shadow: 0 0 0 var(--k-focus-ring-width) color-mix(in oklab, var(--k-negative) 35%, transparent);
+}
+
+.control--textarea {
+  min-height: calc(var(--k-space-6) * 3);
+  resize: vertical;
+}
+
+/* Native select styled to the control contract, with a token chevron. */
+.select {
+  position: relative;
+  display: block;
+}
+
+.control--select {
+  appearance: none;
+  padding-right: var(--k-space-6);
+  cursor: pointer;
+}
+
+.select__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--k-space-3);
+  width: var(--k-space-2);
+  height: var(--k-space-2);
+  border-right: var(--k-border-thick) solid var(--k-text-muted);
+  border-bottom: var(--k-border-thick) solid var(--k-text-muted);
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+}
+
+/* Checkbox: native input accent-colored to brand. */
+.checkbox {
+  width: var(--k-space-4);
+  height: var(--k-space-4);
+  accent-color: var(--k-brand);
+  cursor: pointer;
+}
+
+.checkbox:focus-visible {
+  outline: var(--k-focus-ring-width) solid var(--k-focus-ring);
+  outline-offset: var(--k-focus-ring-offset);
+}
+
+.checkbox-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k-space-2);
+  cursor: pointer;
+}
+
+.checkbox-field__label {
+  color: var(--k-text);
+  font-size: var(--k-text-md);
+}
+
+/* Toggle: native checkbox styled as a track + thumb switch. */
+.toggle {
+  appearance: none;
+  position: relative;
+  flex: 0 0 auto;
+  width: calc(var(--k-space-5) + var(--k-space-2));
+  height: var(--k-space-4);
+  border-radius: var(--k-space-4);
+  background: var(--k-panel-raised);
+  border-color: var(--k-line-strong);
+  border-style: solid;
+  border-width: var(--k-border-thin);
+  cursor: pointer;
+  transition: background var(--k-dur) var(--k-ease), border-color var(--k-dur) var(--k-ease);
+}
+
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--k-space-1) / 2);
+  width: calc(var(--k-space-3) - var(--k-border-thin));
+  height: calc(var(--k-space-3) - var(--k-border-thin));
+  border-radius: 50%;
+  background: var(--k-text-muted);
+  transform: translateY(-50%);
+  transition: transform var(--k-dur) var(--k-ease), background var(--k-dur) var(--k-ease);
+}
+
+.toggle:checked {
+  background: var(--k-brand);
+  border-color: var(--k-brand);
+}
+
+.toggle:checked::after {
+  background: var(--k-brand-contrast);
+  transform: translateY(-50%) translateX(calc(var(--k-space-4) - var(--k-space-1)));
+}
+
+.toggle:focus-visible {
+  outline: var(--k-focus-ring-width) solid var(--k-focus-ring);
+  outline-offset: var(--k-focus-ring-offset);
+}
+
+.toggle-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k-space-2);
+  cursor: pointer;
+}
+
+.toggle-field__label {
+  color: var(--k-text);
+  font-size: var(--k-text-md);
+}
+
+/* Spinner: indeterminate activity ring (in-flight work, not cold-start). */
+.spinner {
+  display: inline-block;
+  width: var(--k-spinner-size, 18px);
+  height: var(--k-spinner-size, 18px);
+  border-radius: 50%;
+  border: var(--k-border-thick) solid var(--k-line-strong);
+  border-top-color: var(--k-brand);
+  animation: k-spinner-spin 0.7s linear infinite;
+}
+
+@keyframes k-spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
