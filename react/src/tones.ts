@@ -6,9 +6,12 @@ export interface ToneMatcher {
 }
 
 export const toneMatchers: ToneMatcher[] = [
-  { tone: "negative", pattern: /(failed|blocked|stale|error|rejected|bad|disconnected|disconnect)/i },
-  { tone: "positive", pattern: /(passed|verified|fresh|completed|accepted|resolved|connected|good|success)/i },
-  { tone: "caution", pattern: /(open|waiting|pending|warn|warning|hold|escalated)/i },
+  // Family vocabulary (CK4): Veritas readiness + Surface claim words that products
+  // previously hard-coded downstream (e.g. station-tones.ts) now resolve here.
+  // Existing words keep their tone; this only adds previously-unmatched terms.
+  { tone: "negative", pattern: /(failed|blocked|stale|error|rejected|bad|disconnected|disconnect|failing|missing|disputed)/i },
+  { tone: "positive", pattern: /(passed|(?<!un)verified|fresh|completed|accepted|resolved|connected|good|success|satisfied)/i },
+  { tone: "caution", pattern: /(open|waiting|pending|warn|warning|hold|escalated|advisory|recheckable|unverified|assumed)/i },
   { tone: "active", pattern: /(running|current|active|in-review|connecting|proposed)/i },
 ];
 
