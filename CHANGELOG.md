@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/kontourai/ui/compare/v1.7.0...v1.8.0) (2026-06-28)
+
+
+### Features
+
+* **skeleton:** add a Skeleton loading-placeholder primitive ([#29](https://github.com/kontourai/ui/issues/29)) ([71b61ea](https://github.com/kontourai/ui/commit/71b61ea37984abb75f0f83c6904307ec376c41b2))
+
 ## [1.7.0](https://github.com/kontourai/ui/compare/v1.6.0...v1.7.0) (2026-06-28)
 
 
