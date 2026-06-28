@@ -89,6 +89,41 @@ export function RunSettings() {
 }
 ```
 
+`Dialog` is a controlled modal built on the native `<dialog>` element (top-layer,
+backdrop, focus trap, and Esc handling come from the platform):
+
+```tsx
+import { useState } from "react";
+import { Button, Dialog } from "@kontourai/ui/react";
+
+export function ConfirmMerge() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button variant="primary" onClick={() => setOpen(true)}>Merge</Button>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Confirm merge"
+        actions={
+          <>
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="positive" onClick={() => setOpen(false)}>Merge</Button>
+          </>
+        }
+      >
+        Merging closes the gate. This action is recorded in the run receipt.
+      </Dialog>
+    </>
+  );
+}
+```
+
+`Dialog` is a stateful primitive (it uses React hooks), unlike the pure-factory
+display primitives. Vanilla consumers use the mirrored `k-dialog` custom element,
+which owns the same behavior and class contract — toggle its `open` attribute to
+show/hide and listen for the `k-dialog-close` event.
+
 ## Custom Elements Consumer
 
 Load CSS and the element module:
