@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/kontourai/ui/compare/v1.5.0...v1.6.0) (2026-06-28)
+
+
+### Features
+
+* **empty:** add an icon slot and a compact variant ([#25](https://github.com/kontourai/ui/issues/25)) ([141c2fd](https://github.com/kontourai/ui/commit/141c2fddc0258e5f82849d63f5508afd29a113be))
+
 ## [1.5.0](https://github.com/kontourai/ui/compare/v1.4.1...v1.5.0) (2026-06-28)
 
 
