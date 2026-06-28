@@ -49,6 +49,23 @@ test("opens and dismisses the k-dialog modal overlay", async ({ page }) => {
   expect(consoleErrors).toEqual([]);
 });
 
+test("fires and dismisses a k-toast-host notification", async ({ page }) => {
+  const consoleErrors = await loadKitPage(page, "/elements/demo.html");
+
+  const toast = page.locator("#demo-toast-host .toast");
+  await expect(toast).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Notify" }).click();
+  await expect(toast).toHaveCount(1);
+  await expect(toast).toHaveClass(/toast--positive/);
+  await expect(toast).toContainText("Readiness met");
+
+  await toast.getByRole("button", { name: "Dismiss" }).click();
+  await expect(toast).toHaveCount(0);
+
+  expect(consoleErrors).toEqual([]);
+});
+
 test("keeps gallery layout within the mobile viewport", async ({ page }) => {
   test.skip(test.info().project.name !== "chromium-mobile", "mobile-only layout check");
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");

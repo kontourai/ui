@@ -27,6 +27,8 @@ export { Spinner, type SpinnerProps } from "./Spinner.js";
 export { StatusBadge, type StatusBadgeProps, type StatusBadgeStatus } from "./StatusBadge.js";
 export { StatusBar, type StatusBarItem, type StatusBarProps } from "./StatusBar.js";
 export { Textarea, type TextareaProps } from "./Textarea.js";
+export { Toast, type ToastProps } from "./Toast.js";
+export { ToastHost, type ToastHostProps, type ToastPlacement } from "./ToastHost.js";
 export { Toggle, type ToggleProps } from "./Toggle.js";
 export { Topbar, type TopbarMetaItem, type TopbarProps } from "./Topbar.js";
 export {
