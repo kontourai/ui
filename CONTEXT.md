@@ -6,7 +6,7 @@ Console Kit is `@kontourai/ui`, the shared presentation layer for Kontour consol
 
 - **Token contract**: CSS custom properties under `tokens/`. Product surfaces should style with `--k-*` variables instead of hard-coded local design values. Token changes are cross-product changes.
 - **Theme classes**: Product identity classes in `tokens/themes.css`: `theme-console`, `theme-flow`, `theme-survey`, and `theme-surface`. Apply one theme class on a stable root; use `[data-theme="light"]` for light-mode overrides.
-- **React primitives**: Components exported from `react/` through `@kontourai/ui/react`, currently including `Badge`, `Button`, `Panel`, `StatusBadge`, and `Topbar`. They are class-driven and read the shared token contract.
+- **React primitives**: Components exported from `react/` through `@kontourai/ui/react`. Display primitives (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `Empty`, `ProductIcon`) and form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`). They are class-driven and read the shared token contract.
 - **Web components**: Light-DOM custom elements in `elements/`, exported through `@kontourai/ui/elements`. They reuse the same class/style contract as the React primitives.
 - **Generated `dist/`**: Build output for package exports and declarations. Do not hand-edit `dist/`; regenerate it with package checks when code changes require it.
 - **Semantic scale**: Product-specific status words map to shared UI tones: `positive`, `caution`, `negative`, `active`, and `neutral`.

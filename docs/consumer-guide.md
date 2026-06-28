@@ -60,6 +60,35 @@ export function Header() {
 }
 ```
 
+Form controls share one control contract and pair with `Field` for the
+label/hint/error row:
+
+```tsx
+import { Field, Input, Select, Checkbox, Toggle } from "@kontourai/ui/react";
+
+export function RunSettings() {
+  return (
+    <>
+      <Field label="Project name" htmlFor="name" hint="Shown in the run header.">
+        <Input id="name" placeholder="my-service" />
+      </Field>
+      <Field label="Runtime" htmlFor="runtime">
+        <Select
+          id="runtime"
+          placeholder="Choose a runtime"
+          options={[
+            { label: "Claude Code", value: "claude" },
+            { label: "Codex", value: "codex" },
+          ]}
+        />
+      </Field>
+      <Checkbox label="Require evidence" defaultChecked />
+      <Toggle label="Gate on readiness" defaultChecked />
+    </>
+  );
+}
+```
+
 ## Custom Elements Consumer
 
 Load CSS and the element module:

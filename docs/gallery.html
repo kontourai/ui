@@ -180,6 +180,26 @@
           start="kontourai · main"
           items='[{"value":"3 active"},{"label":"branch","value":"main"}]'
         ></k-statusbar>
+        <k-panel title="Form controls" count="inputs and switches">
+          <div class="stack">
+            <k-input placeholder="Project name"></k-input>
+            <k-input placeholder="Invalid value" invalid></k-input>
+            <k-select placeholder="Choose a runtime">
+              <option value="claude">Claude Code</option>
+              <option value="codex">Codex</option>
+              <option value="kiro">Kiro</option>
+            </k-select>
+            <k-textarea placeholder="Notes" rows="2"></k-textarea>
+            <div class="row">
+              <k-checkbox label="Require evidence" checked></k-checkbox>
+              <k-toggle label="Gate on readiness" checked></k-toggle>
+            </div>
+            <div class="row">
+              <k-spinner></k-spinner>
+              <span class="label">Working…</span>
+            </div>
+          </div>
+        </k-panel>
       </section>
     </main>
   </body>
