@@ -66,6 +66,27 @@ test("fires and dismisses a k-toast-host notification", async ({ page }) => {
   expect(consoleErrors).toEqual([]);
 });
 
+test("shows a k-tooltip on hover and toggles a k-popover on click", async ({ page }) => {
+  const consoleErrors = await loadKitPage(page, "/elements/demo.html");
+
+  // Tooltip: hidden until the trigger is hovered.
+  const tip = page.locator("k-tooltip .tooltip");
+  await expect(tip).toBeHidden();
+  await page.getByRole("button", { name: "Hover me" }).hover();
+  await expect(tip).toBeVisible();
+
+  // Popover: click opens the panel, an outside click dismisses it.
+  const panel = page.locator("k-popover .popover__panel");
+  await expect(panel).toBeHidden();
+  await page.getByRole("button", { name: "Open menu" }).click();
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("View evidence");
+  await page.mouse.click(5, 5);
+  await expect(panel).toBeHidden();
+
+  expect(consoleErrors).toEqual([]);
+});
+
 test("keeps gallery layout within the mobile viewport", async ({ page }) => {
   test.skip(test.info().project.name !== "chromium-mobile", "mobile-only layout check");
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");

@@ -828,3 +828,111 @@
   outline: none;
   color: var(--k-text);
 }
+
+/* Tooltip: CSS-driven hover/focus bubble. The wrapper is inline so it hugs its
+   trigger; the bubble layers at the popover tier. */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: var(--k-z-popover);
+  max-width: calc(var(--k-space-6) * 7);
+  width: max-content;
+  padding: var(--k-space-1) var(--k-space-2);
+  color: var(--k-text);
+  background: var(--k-panel-raised);
+  border: var(--k-border-thin) solid var(--k-line-strong);
+  border-radius: var(--k-radius-control);
+  box-shadow: var(--k-elevation-overlay);
+  font-size: var(--k-text-xs);
+  line-height: var(--k-leading-normal);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--k-dur) var(--k-ease);
+  pointer-events: none;
+}
+
+.tooltip-wrapper:hover .tooltip,
+.tooltip-wrapper:focus-within .tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip--top {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: var(--k-space-2);
+}
+
+.tooltip--bottom {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: var(--k-space-2);
+}
+
+.tooltip--left {
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-right: var(--k-space-2);
+}
+
+.tooltip--right {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: var(--k-space-2);
+}
+
+/* Popover: click-triggered panel anchored to its trigger, layering at the
+   popover tier. */
+.popover {
+  position: relative;
+  display: inline-flex;
+}
+
+.popover__trigger {
+  display: inline-flex;
+}
+
+.popover__panel {
+  position: absolute;
+  z-index: var(--k-z-popover);
+  min-width: calc(var(--k-space-6) * 5);
+  max-width: calc(var(--k-space-6) * 10);
+  padding: var(--k-space-3);
+  color: var(--k-text);
+  background: var(--k-panel);
+  border: var(--k-border-thin) solid var(--k-line-strong);
+  border-radius: var(--k-radius-overlay);
+  box-shadow: var(--k-elevation-overlay);
+}
+
+.popover__panel--bottom-start {
+  top: 100%;
+  left: 0;
+  margin-top: var(--k-space-2);
+}
+
+.popover__panel--bottom-end {
+  top: 100%;
+  right: 0;
+  margin-top: var(--k-space-2);
+}
+
+.popover__panel--top-start {
+  bottom: 100%;
+  left: 0;
+  margin-bottom: var(--k-space-2);
+}
+
+.popover__panel--top-end {
+  bottom: 100%;
+  right: 0;
+  margin-bottom: var(--k-space-2);
+}
