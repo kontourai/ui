@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.0](https://github.com/kontourai/ui/compare/v1.9.0...v1.10.0) (2026-06-28)
+
+
+### Features
+
+* **toast:** add Toast feedback primitive + imperative stack ([#36](https://github.com/kontourai/ui/issues/36)) ([5695a27](https://github.com/kontourai/ui/commit/5695a270240fbda8b9c83e31eb7829ec3310fe79))
+
 ## [1.9.0](https://github.com/kontourai/ui/compare/v1.8.0...v1.9.0) (2026-06-28)
 
 
