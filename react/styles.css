@@ -149,17 +149,34 @@
 }
 
 /* Prominent: a centered, dashed-border placeholder card for first-run /
-   get-started states (vs the default inline note). */
-.empty--prominent {
+   get-started states (vs the default inline note). Compact is the same framed
+   card scaled down for inline list/column placeholders. */
+.empty--prominent,
+.empty--compact {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: var(--k-space-2);
-  padding: var(--k-space-6) var(--k-space-4);
   border: 1px dashed var(--k-line-strong);
   border-radius: var(--k-radius-md);
+}
+
+.empty--prominent {
+  gap: var(--k-space-2);
+  padding: var(--k-space-6) var(--k-space-4);
+}
+
+.empty--compact {
+  gap: var(--k-space-1);
+  padding: var(--k-space-4) var(--k-space-3);
+}
+
+.empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--k-text-faint);
 }
 
 .statusbar {
