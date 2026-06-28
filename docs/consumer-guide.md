@@ -124,6 +124,22 @@ display primitives. Vanilla consumers use the mirrored `k-dialog` custom element
 which owns the same behavior and class contract — toggle its `open` attribute to
 show/hide and listen for the `k-dialog-close` event.
 
+`Toast`/`ToastHost` are presentational — render them and drive their lifecycle
+from app state. For an imperative "fire from anywhere" stack with auto-dismiss,
+mount the `k-toast-host` element once and call its `notify()` method:
+
+```html
+<k-toast-host id="toasts" placement="bottom"></k-toast-host>
+<script type="module">
+  document.getElementById("toasts").notify({
+    tone: "positive",
+    title: "Readiness met",
+    message: "All gates passed.",
+    duration: 4000, // 0 keeps it until dismissed
+  });
+</script>
+```
+
 ## Custom Elements Consumer
 
 Load CSS and the element module:
