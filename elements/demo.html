@@ -172,12 +172,29 @@
             Merging closes the gate. This action is recorded in the run receipt.
           </k-dialog>
         </k-panel>
+
+        <k-panel title="Toast" count="notification stack">
+          <div class="row">
+            <button type="button" class="btn btn-primary" id="fire-toast">Notify</button>
+          </div>
+        </k-panel>
       </section>
     </main>
+    <k-toast-host id="demo-toast-host" placement="bottom"></k-toast-host>
     <script type="module">
       const dialog = document.getElementById("demo-dialog");
       document.getElementById("open-dialog").addEventListener("click", () => {
         dialog.setAttribute("open", "");
+      });
+
+      const toastHost = document.getElementById("demo-toast-host");
+      document.getElementById("fire-toast").addEventListener("click", () => {
+        toastHost.notify({
+          tone: "positive",
+          title: "Readiness met",
+          message: "All gates passed. The run receipt was recorded.",
+          duration: 0,
+        });
       });
     </script>
   </body>

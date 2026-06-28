@@ -706,3 +706,125 @@
   padding: var(--k-space-3) var(--k-space-4) var(--k-space-4);
   border-top: var(--k-border-thin) solid var(--k-line);
 }
+
+/* Toast stack: fixed in the top layer, reading the semantic toast z-index so
+   notifications always sit above dialogs/popovers. The host ignores pointer
+   events; individual toasts re-enable them. */
+.toast-host {
+  position: fixed;
+  z-index: var(--k-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--k-space-2);
+  width: min(calc(var(--k-space-6) * 11), calc(100vw - var(--k-space-5)));
+  padding: var(--k-space-3);
+  pointer-events: none;
+}
+
+.toast-host--bottom {
+  right: 0;
+  bottom: 0;
+  align-items: flex-end;
+}
+
+.toast-host--bottom-start {
+  left: 0;
+  bottom: 0;
+  align-items: flex-start;
+}
+
+.toast-host--top {
+  right: 0;
+  top: 0;
+  align-items: flex-end;
+}
+
+.toast-host--top-start {
+  left: 0;
+  top: 0;
+  align-items: flex-start;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--k-space-3);
+  width: 100%;
+  padding: var(--k-space-3);
+  color: var(--k-text);
+  background: var(--k-panel-raised);
+  border: var(--k-border-thin) solid var(--k-line-strong);
+  border-left-width: var(--k-space-1);
+  border-left-color: var(--k-neutral);
+  border-radius: var(--k-radius-overlay);
+  box-shadow: var(--k-elevation-overlay);
+  pointer-events: auto;
+}
+
+.toast--positive {
+  border-left-color: var(--k-positive);
+}
+
+.toast--caution {
+  border-left-color: var(--k-caution);
+}
+
+.toast--negative {
+  border-left-color: var(--k-negative);
+}
+
+.toast--active {
+  border-left-color: var(--k-active);
+}
+
+.toast--neutral {
+  border-left-color: var(--k-neutral);
+}
+
+.toast__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: var(--k-space-1);
+}
+
+.toast__title {
+  margin: 0;
+  color: var(--k-text);
+  font-weight: 800;
+  font-size: var(--k-text-sm);
+}
+
+.toast__message {
+  margin: 0;
+  color: var(--k-text-muted);
+  font-size: var(--k-text-sm);
+  line-height: var(--k-leading-normal);
+  overflow-wrap: anywhere;
+}
+
+.toast__action {
+  margin-top: var(--k-space-1);
+}
+
+.toast__close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--k-space-4);
+  height: var(--k-space-4);
+  padding: 0;
+  color: var(--k-text-faint);
+  background: transparent;
+  border: none;
+  font-size: var(--k-text-md);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--k-dur) var(--k-ease);
+}
+
+.toast__close:hover,
+.toast__close:focus-visible {
+  outline: none;
+  color: var(--k-text);
+}

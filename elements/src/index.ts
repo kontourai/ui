@@ -15,6 +15,7 @@ import { KSpinner } from "./k-spinner.js";
 import { KStatusBadge } from "./k-status-badge.js";
 import { KStatusBar } from "./k-statusbar.js";
 import { KTextarea } from "./k-textarea.js";
+import { KToastHost } from "./k-toast-host.js";
 import { KToggle } from "./k-toggle.js";
 import { KTopbar } from "./k-topbar.js";
 
@@ -34,6 +35,7 @@ defineElement("k-spinner", KSpinner);
 defineElement("k-status-badge", KStatusBadge);
 defineElement("k-statusbar", KStatusBar);
 defineElement("k-textarea", KTextarea);
+defineElement("k-toast-host", KToastHost);
 defineElement("k-toggle", KToggle);
 defineElement("k-topbar", KTopbar);
 
@@ -53,6 +55,7 @@ export { KSpinner } from "./k-spinner.js";
 export { KStatusBadge } from "./k-status-badge.js";
 export { KStatusBar } from "./k-statusbar.js";
 export { KTextarea } from "./k-textarea.js";
+export { KToastHost } from "./k-toast-host.js";
 export { KToggle } from "./k-toggle.js";
 export { KTopbar } from "./k-topbar.js";
 export {
