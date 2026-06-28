@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/kontourai/ui/compare/v1.4.1...v1.5.0) (2026-06-28)
+
+
+### Features
+
+* **empty:** add a prominent (centered, framed) variant ([#23](https://github.com/kontourai/ui/issues/23)) ([dc2bd5b](https://github.com/kontourai/ui/commit/dc2bd5beb0839e08f392860d0c0700e73a75619f))
+
 ## [1.4.1](https://github.com/kontourai/ui/compare/v1.4.0...v1.4.1) (2026-06-28)
 
 
