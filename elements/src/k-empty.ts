@@ -12,19 +12,21 @@ export class KEmpty extends HTMLElement {
   }
 
   private render() {
-    const prominent = textAttribute(this, "variant", "default") === "prominent";
+    const variant = textAttribute(this, "variant", "default");
+    const framed = variant === "prominent" || variant === "compact";
     const className = appendClasses(
       "empty",
-      prominent ? "empty--prominent" : null,
+      variant === "prominent" ? "empty--prominent" : null,
+      variant === "compact" ? "empty--compact" : null,
       this.getAttribute("class-name"),
     );
     const label = textAttribute(this, "label", this.textContent?.trim() ?? "");
     const description = textAttribute(this, "description", "");
 
     // Inline + label-only keeps the original bare paragraph; a description (or
-    // the prominent variant) upgrades to the structured block. (A call-to-action
-    // is React-only — it takes a node.)
-    if (!description && !prominent) {
+    // a framed variant) upgrades to the structured block. (Icon + call-to-action
+    // are React-only — they take nodes.)
+    if (!description && !framed) {
       const empty = document.createElement("p");
       empty.className = className;
       empty.textContent = label;
