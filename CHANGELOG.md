@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/kontourai/ui/compare/v1.10.0...v1.11.0) (2026-06-28)
+
+
+### Features
+
+* **overlays:** add Tooltip and Popover ([#38](https://github.com/kontourai/ui/issues/38)) ([c7e60ad](https://github.com/kontourai/ui/commit/c7e60adda4bf94566b6a193243888058e930d75c))
+
 ## [1.10.0](https://github.com/kontourai/ui/compare/v1.9.0...v1.10.0) (2026-06-28)
 
 
