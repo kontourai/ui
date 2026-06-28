@@ -85,6 +85,11 @@
   --k-text: #202124;
   --k-text-muted: #5b626b;
   --k-text-faint: #707782;
+  /* The dark-mode brand (#5ce0c6) is too light to carry white text or read as
+     text on the light canvas (~1.6:1). Darken it for light mode: #0e7c64 holds
+     the teal hue while clearing WCAG AA both as a button fill (white text,
+     5.1:1) and as text on --k-bg (4.7:1). */
+  --k-brand: #0e7c64;
   --k-brand-contrast: #ffffff;
   --k-positive: #168257;
   --k-caution: #8a5a00;
