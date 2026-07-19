@@ -2,12 +2,12 @@
 
 This file is intentionally short.
 
-The main docs in this repo are written for people installing and using Console Kit.
+The main docs in this repo are written for people installing and using Kontour UI.
 This file is the footnote for people developing the product itself.
 
 ## Development Rules
 
-- Console Kit is the shared presentation layer for the Kontour family — the `--k-*` design-token contract plus React primitives and web-component wrappers built on it
+- Kontour UI is the shared presentation layer for the Kontour family — the `--k-*` design-token contract plus React primitives and web-component wrappers built on it
 - token changes ripple across every downstream product surface (flow console, survey workbench, docs sites); treat them as breaking changes
 - downstream products vendor or import tokens; their vendored copies sync via their own scripts — after a token change, note that downstream syncs are needed
 - no new peer or production dependencies without clear leverage

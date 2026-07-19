@@ -1,6 +1,6 @@
-# Kontour Console Kit
+# Kontour UI
 
-**The shared design-token and component layer for Kontour consoles.**
+**The shared design-token and component layer for Kontour product interfaces.**
 
 `@kontourai/ui`
 
@@ -8,9 +8,13 @@
 [![CI](https://github.com/kontourai/ui/actions/workflows/ci.yml/badge.svg)](https://github.com/kontourai/ui/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-Use Console Kit when you are building a Kontour console product (Surface Console, Flow Console, Survey Review Workbench, or a custom operator UI) and need to stay visually consistent with the `--k-*` token contract without copying CSS by hand. If you are building a general-purpose application with its own design system, you do not need this package.
+Use Kontour UI when you are building a Kontour product interface (Surface
+Console, Flow Console, Survey Review Workbench, Station, or a custom operator
+surface) and need to stay visually consistent with the `--k-*` token contract
+without copying CSS by hand. If you are building a general-purpose application
+with its own design system, you do not need this package.
 
-Console Kit ships three layers:
+Kontour UI ships three layers:
 
 - `@kontourai/ui/tokens` — CSS custom properties for any renderer, no framework required.
 - `@kontourai/ui/react` — class-driven React primitives: display (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `Empty`, `ProductIcon`), form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`), and overlays/feedback (`Dialog`, `Toast`, `ToastHost`, `Tooltip`, `Popover`) that read the token contract.

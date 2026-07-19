@@ -1,4 +1,4 @@
-# Console Kit Release Readiness
+# Kontour UI Release Readiness
 
 This package is ready for release review when the package checks, pack preview, and adopter checks all pass against the same `@kontourai/ui` source.
 
@@ -18,14 +18,14 @@ npm run verify
 - release readiness check
 - machine-checked `npm pack --dry-run --json` package contents
 
-In an isolated `ui` checkout, release readiness verifies package-local artifacts and skips sibling adopter contracts. In a Kontour workspace where `../kontour-console`, `../flow`, `../survey`, and `../surface` are present, the same readiness check also verifies those adopter contracts.
+In an isolated `ui` checkout, release readiness verifies package-local artifacts and skips sibling adopter contracts. In a Kontour workspace where `../console`, `../flow`, `../survey`, and `../surface` are present, the same readiness check also verifies those adopter contracts.
 
 ## Adopter Checks
 
 Kontour Console:
 
 ```sh
-cd ../kontour-console/console-ui
+cd ../console/console-ui
 npm install
 npm run typecheck
 npm run test
@@ -53,7 +53,7 @@ npm run check:review-workbench
 npm run verify
 ```
 
-Survey consumes vendored Console Kit tokens through `sync:review-workbench-assets`; `check:review-workbench-assets` verifies the copied token files have not drifted.
+Survey consumes vendored Kontour UI tokens through `sync:review-workbench-assets`; `check:review-workbench-assets` verifies the copied token files have not drifted.
 
 Surface:
 
