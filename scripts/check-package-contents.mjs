@@ -77,7 +77,7 @@ try {
     if (forbiddenPattern) throw new Error(`Unexpected package file matched ${forbiddenPattern}: ${file}`);
   }
 
-  console.log(`Console Kit package contents check passed: ${files.length} files.`);
+  console.log(`Kontour UI package contents check passed: ${files.length} files.`);
 } finally {
   await rm(cache, { recursive: true, force: true });
 }

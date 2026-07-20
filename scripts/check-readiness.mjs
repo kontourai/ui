@@ -63,11 +63,11 @@ if (hasAdopterWorkspace()) {
   console.log("Skipping adopter contract checks; sibling product repos are not present.");
 }
 assertNoLegacyScopeInReadinessDocs();
-console.log("Console Kit release readiness check passed.");
+console.log("Kontour UI release readiness check passed.");
 
 function hasAdopterWorkspace() {
   return [
-    "kontour-console/console-ui/package.json",
+    "console/console-ui/package.json",
     "flow/package.json",
     "survey/package.json",
     "surface/package.json",
@@ -75,31 +75,31 @@ function hasAdopterWorkspace() {
 }
 
 function assertAdopterContracts() {
-  const consolePkg = readJson(path.join(workspace, "kontour-console/console-ui/package.json"));
-  assert.equal(consolePkg.dependencies?.["@kontourai/console-kit"], "^0.1.0");
-  assertContains(read(path.join(workspace, "kontour-console/console-ui/index.html")), "class=\"theme-console\"");
-  assertContains(read(path.join(workspace, "kontour-console/console-ui/src/main.tsx")), "@kontourai/console-kit/react/styles.css");
+  const consolePkg = readJson(path.join(workspace, "console/console-ui/package.json"));
+  assertCaretRangeIncludesVersion(consolePkg.dependencies?.["@kontourai/ui"], pkg.version, "Console");
+  assertContains(read(path.join(workspace, "console/console-ui/src/main.tsx")), "@kontourai/ui/react/styles.css");
 
   const flowPkg = readJson(path.join(workspace, "flow/package.json"));
-  assert.equal(flowPkg.devDependencies?.["@kontourai/console-kit"], "^0.1.0");
-  assertContains(JSON.stringify(flowPkg.scripts), "check:console-kit-assets");
+  assertCaretRangeIncludesVersion(flowPkg.devDependencies?.["@kontourai/ui"], pkg.version, "Flow");
+  assertContains(JSON.stringify(flowPkg.scripts), "check:ui-assets");
   assertContains(read(path.join(workspace, "flow/src/console-ui/index.html")), "class=\"theme-flow\" data-theme=\"light\"");
-  assertFile(path.join(workspace, "flow/scripts/sync-console-kit-assets.mjs"), "Flow must keep a Console Kit asset sync script.");
+  assertFile(path.join(workspace, "flow/scripts/sync-ui-assets.mjs"), "Flow must keep a Kontour UI asset sync script.");
 
   const surveyPkg = readJson(path.join(workspace, "survey/package.json"));
   assertContains(JSON.stringify(surveyPkg.scripts), "check:review-workbench", "Survey must keep its review workbench validator.");
-  assert.equal(surveyPkg.devDependencies?.["@kontourai/console-kit"], "^0.1.0");
+  assertCaretRangeIncludesVersion(surveyPkg.devDependencies?.["@kontourai/ui"], pkg.version, "Survey");
   assertContains(JSON.stringify(surveyPkg.scripts), "sync:review-workbench-assets", "Survey package scripts must include sync:review-workbench-assets.");
   assertContains(JSON.stringify(surveyPkg.scripts), "check:review-workbench-assets", "Survey package scripts must include check:review-workbench-assets.");
   assertContains(read(path.join(workspace, "survey/examples/review-workbench/index.html")), "class=\"theme-survey\"", "Survey review workbench must apply theme-survey.");
-  assertContains(read(path.join(workspace, "survey/examples/review-workbench/index.html")), "./vendor/console-kit/tokens/index.css", "Survey review workbench must load vendored Console Kit tokens.");
+  assertContains(read(path.join(workspace, "survey/examples/review-workbench/index.html")), "./vendor/kontourai-ui/tokens/index.css", "Survey review workbench must load vendored Kontour UI tokens.");
   assertFile(path.join(workspace, "survey/scripts/sync-review-workbench-assets.cjs"), "Survey must keep a review workbench token sync script.");
-  assertFile(path.join(workspace, "survey/examples/review-workbench/vendor/console-kit/tokens/index.css"), "Survey must keep vendored token assets.");
+  assertFile(path.join(workspace, "survey/examples/review-workbench/vendor/kontourai-ui/tokens/index.css"), "Survey must keep vendored token assets.");
 
   const surfacePkg = readJson(path.join(workspace, "surface/package.json"));
-  assertContains(JSON.stringify(surfacePkg.scripts), "check:console-kit-assets");
-  assertContains(read(path.join(workspace, "surface/scripts/build-pages-site.mjs")), "class=\"theme-surface\"");
-  assertContains(read(path.join(workspace, "surface/scripts/sync-console-kit-assets.mjs")), "@kontourai/console-kit");
+  assertCaretRangeIncludesVersion(surfacePkg.devDependencies?.["@kontourai/ui"], pkg.version, "Surface");
+  assertContains(JSON.stringify(surfacePkg.scripts), "check:ui-assets");
+  assertContains(read(path.join(workspace, "surface/scripts/pages-site/page.mjs")), "class=\"theme-surface\"");
+  assertContains(read(path.join(workspace, "surface/scripts/sync-ui-assets.mjs")), "@kontourai/ui");
 }
 
 function readJson(file) {
@@ -120,6 +120,25 @@ function assertContains(content, expected, message) {
 
 function assertIncludes(values, expected, message) {
   if (!Array.isArray(values) || !values.includes(expected)) throw new Error(message);
+}
+
+function assertCaretRangeIncludesVersion(range, version, adopter) {
+  const rangeMatch = /^\^(\d+)\.(\d+)\.(\d+)$/.exec(range ?? "");
+  const versionMatch = /^(\d+)\.(\d+)\.(\d+)$/.exec(version);
+  assert.ok(rangeMatch, `${adopter} must declare @kontourai/ui with a caret range.`);
+  assert.ok(versionMatch, `Invalid @kontourai/ui package version: ${version}`);
+  const [, rangeMajor, rangeMinor, rangePatch] = rangeMatch.map(Number);
+  const [, versionMajor, versionMinor, versionPatch] = versionMatch.map(Number);
+  const lowerBoundSatisfied =
+    versionMajor > rangeMajor ||
+    (versionMajor === rangeMajor && versionMinor > rangeMinor) ||
+    (versionMajor === rangeMajor && versionMinor === rangeMinor && versionPatch >= rangePatch);
+  const upperBoundSatisfied = rangeMajor > 0
+    ? versionMajor === rangeMajor
+    : rangeMinor > 0
+      ? versionMajor === 0 && versionMinor === rangeMinor
+      : versionMajor === 0 && versionMinor === 0 && versionPatch === rangePatch;
+  assert.ok(lowerBoundSatisfied && upperBoundSatisfied, `${adopter} ${range} must include @kontourai/ui ${version}.`);
 }
 
 function assertNoLegacyScope(content, label) {

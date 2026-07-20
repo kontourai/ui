@@ -51,7 +51,7 @@ for (const [file, content] of Object.entries(tokenFiles)) {
   assertExcludes(content, "@kontour/console-kit", `${file} must not reference @kontour/console-kit.`);
 }
 
-console.log("Console Kit token smoke check passed.");
+console.log("Kontour UI token smoke check passed.");
 
 function read(relativePath) {
   return readFileSync(path.join(root, relativePath), "utf8");

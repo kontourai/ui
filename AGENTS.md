@@ -1,6 +1,10 @@
-# Console Kit Agent Guidance
+# Kontour UI Agent Guidance
 
-Console Kit is the shared presentation layer for the Kontour family: the `--k-*` design-token contract plus React primitives and web-component wrappers built on it. Downstream products (flow console, survey workbench, docs sites) vendor or import these tokens — token changes ripple across every product surface.
+Kontour UI (`@kontourai/ui`) is the shared presentation layer for the Kontour
+family: the `--k-*` design-token contract plus React primitives and web-component
+wrappers built on it. Downstream products (Flow Console, Survey Review Workbench,
+Station, and docs sites) vendor or import these tokens, so token changes ripple
+across every product surface.
 
 ## Source Of Truth
 

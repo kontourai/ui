@@ -1,4 +1,4 @@
-# Console Kit Consumer Guide
+# Kontour UI Consumer Guide
 
 `@kontourai/ui` ships three layers:
 

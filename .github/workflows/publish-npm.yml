@@ -25,7 +25,7 @@ jobs:
       matrix:
         node-version: ["22", "24"]
     steps:
-      - name: Checkout Console Kit
+      - name: Checkout Kontour UI
         uses: actions/checkout@v6
         with:
           path: ui
@@ -57,7 +57,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Checkout Console Kit
+      - name: Checkout Kontour UI
         uses: actions/checkout@v6
         with:
           path: ui

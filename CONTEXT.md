@@ -1,6 +1,10 @@
-# Console Kit Context
+# Kontour UI Context
 
-Console Kit is `@kontourai/ui`, the shared presentation layer for Kontour console products. It owns the `--k-*` design-token contract, framework-specific primitives that consume those tokens, and package artifacts that downstream products import or vendor.
+Kontour UI is `@kontourai/ui`, the shared presentation layer for Kontour product
+interfaces. It owns the `--k-*` design-token contract, framework-specific
+primitives that consume those tokens, and package artifacts that downstream
+products import or vendor. "Console Kit" is the package's former product name;
+retain it only in historical decisions, audits, and compatibility identifiers.
 
 ## Product Vocabulary
 
@@ -14,7 +18,9 @@ Console Kit is `@kontourai/ui`, the shared presentation layer for Kontour consol
 
 ## Boundaries
 
-Console Kit defines shared console presentation. It does not own product domain workflows, copy strategy, data fetching, routing, or app-specific state machines in downstream products.
+Kontour UI defines shared presentation. It does not own product domain workflows,
+copy strategy, data fetching, routing, or app-specific state machines in
+downstream products.
 
 Downstream adopters may import package exports or vendor copied assets, but they remain responsible for their own build, drift checks, and product-specific verification. When changing tokens, themes, primitive class names, package exports, or generated package shape, treat the change as adopter-facing and run the repo checks that match that surface.
 

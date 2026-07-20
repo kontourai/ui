@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 test("renders the package gallery with tokens, themes, and primitive components", async ({ page }) => {
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");
 
-  await expect(page).toHaveTitle("Kontour Console Kit Gallery");
+  await expect(page).toHaveTitle("Kontour UI Gallery");
   await expect(page.getByRole("main")).toContainText("Primitive Gallery");
   await expect(page.getByRole("main")).toContainText("@kontourai/ui");
   await expect(page.getByRole("main")).toContainText("theme-console");
@@ -20,7 +20,7 @@ test("renders the package gallery with tokens, themes, and primitive components"
 test("renders the element demo from built custom elements and React class contracts", async ({ page }) => {
   const consoleErrors = await loadKitPage(page, "/elements/demo.html");
 
-  await expect(page).toHaveTitle("Kontour Console Kit Elements Demo");
+  await expect(page).toHaveTitle("Kontour UI Elements Demo");
   await expect(page.getByRole("main")).toContainText("Elements Parity");
   await expect(page.getByRole("main")).toContainText("React contract comparison");
   await expect(page.locator("#react-badge-mount .badge")).toHaveText("verified");

@@ -81,7 +81,7 @@ for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progre
   assert.ok(registry.has(tag), `${tag} should be registered.`);
 }
 
-console.log("Console Kit package export smoke check passed.");
+console.log("Kontour UI package export smoke check passed.");
 
 function readFile(relativePath) {
   return readFileSync(path.join(root, relativePath), "utf8");
