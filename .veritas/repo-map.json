@@ -82,6 +82,17 @@
         ]
       },
       {
+        "id": "product.packages",
+        "kind": "product-area",
+        "label": "UI packages",
+        "patterns": [
+          "elements/",
+          "icons/",
+          "react/",
+          "tokens/"
+        ]
+      },
+      {
         "id": "docs.docs",
         "kind": "product-area",
         "label": "docs/**",
