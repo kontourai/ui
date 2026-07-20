@@ -37,7 +37,7 @@ Flow:
 ```sh
 cd ../flow
 npm install
-npm run check:console-kit-assets
+npm run check:ui-assets
 npm run typecheck
 npm run typecheck:console-ui
 npm run test
@@ -61,7 +61,7 @@ Surface:
 cd ../surface
 npm install
 npm run docs:build
-npm run check:console-kit-assets
+npm run check:ui-assets
 npm run verify
 ```
 

@@ -2,6 +2,14 @@
 
 _Audit date: 2026-06-28 · Package version: 1.7.0_
 
+> **Historical document (2026-07-20).** This audit is a point-in-time snapshot
+> taken at package version 1.7.0. It is preserved as-is below for historical
+> record. At least one headline finding is now out of date: **F4**'s claim of
+> "zero form controls and zero overlays" no longer holds — the package
+> (currently 1.11.0) ships form-control primitives (Input, Textarea, Select,
+> Checkbox, Toggle) and overlay/feedback primitives (Dialog, Popover, Tooltip,
+> Toast). Treat findings below against the 1.7.0 baseline, not current `main`.
+
 > **Delivery status.** Track B (package build-out) started: foundational tokens
 > + form-control primitives + CK2/CK4 shipped in PR #31. Follow-ups tracked as
 > issues: overlay/feedback primitives + runtime-hooks convention (#32) and the
