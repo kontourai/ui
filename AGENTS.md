@@ -17,7 +17,7 @@ across every product surface.
 
 ## Match Checks To Change Type
 
-- Token changes: `npm run check:tokens` — and remember downstream vendored copies (e.g. flow's `src/console-ui/vendor/console-kit/`) sync via those repos' own scripts.
+- Token changes: `npm run check:tokens` — and remember downstream vendored copies (e.g. flow's `src/console-ui/vendor/ui/`) sync via those repos' own scripts.
 - Export/package changes: `npm run check:exports` and `npm run check:pack`.
 - Visual/browser changes: `npm run test:browser`.
 - Before push: `npm run verify`.
