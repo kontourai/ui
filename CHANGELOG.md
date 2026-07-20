@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.11.1](https://github.com/kontourai/ui/compare/v1.11.0...v1.11.1) (2026-07-20)
+
+
+### Documentation
+
+* content sweep — accuracy and clarity fixes ([#47](https://github.com/kontourai/ui/issues/47)) ([d8365a6](https://github.com/kontourai/ui/commit/d8365a6bda48f093bc88ca6f0eb8d71f08f00656))
+* finish Kontour UI naming migration ([#44](https://github.com/kontourai/ui/issues/44)) ([c01ca9f](https://github.com/kontourai/ui/commit/c01ca9fe03ac064a95f50fc188183159214af294))
+
 ## [1.11.0](https://github.com/kontourai/ui/compare/v1.10.0...v1.11.0) (2026-06-28)
 
 
