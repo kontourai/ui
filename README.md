@@ -101,14 +101,14 @@ rules — nothing is fetched from a third party at render time. A product with
 `default-src 'self'`, the right posture for a tool handling someone's documents, gets the
 brand typography with no CSP allowance and no network request.
 
-| Token | Family | Weights | Licence |
+| Token | Family | Weights | License |
 | --- | --- | --- | --- |
 | `--k-font-display` | Fraunces (variable) | 100–900 | SIL OFL 1.1 |
 | `--k-font-ui` | Hanken Grotesk (variable) | 100–900 | SIL OFL 1.1 |
 | `--k-font-mono` | IBM Plex Mono | 400, 500, 600 | SIL OFL 1.1 |
 
 Coverage is latin + latin-ext; anything outside those ranges falls through to the fallback
-stacks in `tokens.css`. Licences ship alongside the files, and `tokens/fonts/README.md`
+stacks in `tokens.css`. Licenses ship alongside the files, and `tokens/fonts/README.md`
 records provenance. `node scripts/vendor-fonts.mjs` regenerates both the files and
 `tokens/fonts.css`.
 

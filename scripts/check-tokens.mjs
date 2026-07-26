@@ -79,12 +79,12 @@ for (const block of fontFaceBlocks) {
   if (!src) throw new Error("Every @font-face must reference a vendored woff2 file.");
   if (!src[1].endsWith(".woff2")) throw new Error(`Vendored faces must be woff2: ${src[1]}`);
   const fontFile = path.join(root, "tokens", src[1]);
-  if (!existsSync(fontFile)) throw new Error(`Missing vendored font file: tokens/${src[1]}`);
+  if (!existsSync(fontFile)) throw new Error(`Missing vendored font file: ${path.relative(root, fontFile)}`);
 }
 
 for (const license of ["OFL-Fraunces.txt", "OFL-HankenGrotesk.txt", "OFL-IBMPlexMono.txt"]) {
   if (!existsSync(path.join(root, "tokens", "fonts", license))) {
-    throw new Error(`Vendored faces must ship their licence: tokens/fonts/${license}`);
+    throw new Error(`Vendored faces must ship their license: tokens/fonts/${license}`);
   }
 }
 

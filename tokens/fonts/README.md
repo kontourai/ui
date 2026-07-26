@@ -10,7 +10,7 @@ script to refresh a family, weight, or upstream release; do not hand-edit `fonts
 
 ## What ships, and why
 
-| Family | Token | Files | Licence |
+| Family | Token | Files | License |
 | --- | --- | --- | --- |
 | Fraunces | `--k-font-display` | `fraunces-{latin,latin-ext}.woff2` | [OFL 1.1](./OFL-Fraunces.txt) |
 | Hanken Grotesk | `--k-font-ui` | `hanken-grotesk-{latin,latin-ext}.woff2` | [OFL 1.1](./OFL-HankenGrotesk.txt) |
