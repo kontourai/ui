@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <!--
+      Stands in for a consumer with the posture that broke in ui#50: a local tool handling
+      someone's documents, locked to same-origin. Any remote font request from the token
+      layer is blocked here, silently — which is exactly why the regression went unnoticed.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'">
+    <title>Kontour UI CSP Consumer Fixture</title>
+    <!-- The documented entry point, and nothing else. -->
+    <link rel="stylesheet" href="../../../tokens/index.css">
+    <style>
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: var(--k-bg);
+        color: var(--k-text);
+        font-family: var(--k-font-ui);
+      }
+
+      /* Inline so the measured box is the text run, not the container. */
+      .sample {
+        display: inline-block;
+        font-size: 32px;
+        white-space: nowrap;
+      }
+
+      #display { font-family: var(--k-font-display); }
+      #ui { font-family: var(--k-font-ui); }
+      #mono { font-family: var(--k-font-mono); }
+      /* Same fallback chain, but with a family that cannot resolve — the control. */
+      #display-control { font-family: "Kontour Nonexistent Display", Georgia, "Times New Roman", serif; }
+      #ui-control { font-family: "Kontour Nonexistent UI", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+      #mono-control { font-family: "Kontour Nonexistent Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div><span class="sample" id="display">Handwriting the ledger</span></div>
+      <div><span class="sample" id="ui">Handwriting the ledger</span></div>
+      <div><span class="sample" id="mono">Handwriting the ledger</span></div>
+      <div><span class="sample" id="display-control">Handwriting the ledger</span></div>
+      <div><span class="sample" id="ui-control">Handwriting the ledger</span></div>
+      <div><span class="sample" id="mono-control">Handwriting the ledger</span></div>
+    </main>
+  </body>
+</html>
