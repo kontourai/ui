@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.2](https://github.com/kontourai/ui/compare/v1.11.1...v1.11.2) (2026-07-27)
+
+
+### Documentation
+
+* **fonts:** use US spelling in the vendored-font provenance notes ([#55](https://github.com/kontourai/ui/issues/55)) ([cacff22](https://github.com/kontourai/ui/commit/cacff221b1704f4c9bb52bf4484c5a6811ab8d35))
+
 ## [1.11.1](https://github.com/kontourai/ui/compare/v1.11.0...v1.11.1) (2026-07-27)
 
 
