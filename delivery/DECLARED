@@ -4,5 +4,17 @@
     "reason": "Vendors ten woff2 faces (Fraunces, Hanken Grotesk, IBM Plex Mono) with their OFL licenses, adds real @font-face rules, and imports fonts.css from the tokens entry point so a consumer with a restrictive CSP gets brand fonts instead of silent fallbacks (ui#50). Agent-delivered outside builder.build, so no trust bundle exists; Step 1 fresh verify passes. Verification in lieu of a bundle: npm run verify green on Node 22 and 24; npm pack --dry-run confirms all ten faces ship (committed set and packed set diff to empty); zero remote @import survives; tokens/index.css imports fonts.css. Scope is paired with author: per the ADR 0022 2026-07-03 addendum -- branch-prefix alone resolves against a pusher-controlled ref, and dropping the pairing was explicitly rejected in flow-agents#1015.",
     "approved_by": "brian.anderson1222 (delegated approval, 2026-07-26 session: scoped-DECLARED-exemption route)",
     "declared_at": "2026-07-27T00:05:00Z"
+  },
+  {
+    "scope": "author:kontourai-releases[bot] branch-prefix:release-please--",
+    "reason": "release-please automation PR; no agent delivery involved, nothing to reconcile. Verified actor against a live run rather than assumed: release PRs here are opened by the kontourai-releases GitHub App. Paired with author: per the ADR 0022 2026-07-03 addendum -- branch-prefix alone resolves against a pusher-controlled ref. Known and accepted cost: if the release bot's identity rotates, this stops matching and the release train breaks. It will break LOUDLY -- flow-agents#1015 made an unmatched marker a named STALE-SCOPE outcome that prints the failed condition and the resolved actor. Thirteen silent days in flow-agents was the bug; a loud break is the correct outcome.",
+    "approved_by": "brian.anderson1222 (delegated approval, 2026-07-26 session: scoped-DECLARED-exemption route)",
+    "declared_at": "2026-07-27T00:20:00Z"
+  },
+  {
+    "scope": "author:briananderson1222 branch-prefix:chore/release-automation-exemption",
+    "reason": "The governance-file change adding the release-automation entry above. Touches delivery/DECLARED only; no source or behaviour changes and no command-backed agent-delivery claims to reconcile.",
+    "approved_by": "brian.anderson1222 (delegated approval, 2026-07-26 session: scoped-DECLARED-exemption route)",
+    "declared_at": "2026-07-27T00:20:00Z"
   }
 ]
