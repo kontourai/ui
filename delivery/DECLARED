@@ -1,0 +1,8 @@
+[
+  {
+    "scope": "author:briananderson1222 branch-prefix:fix/self-host-fonts",
+    "reason": "Vendors ten woff2 faces (Fraunces, Hanken Grotesk, IBM Plex Mono) with their OFL licenses, adds real @font-face rules, and imports fonts.css from the tokens entry point so a consumer with a restrictive CSP gets brand fonts instead of silent fallbacks (ui#50). Agent-delivered outside builder.build, so no trust bundle exists; Step 1 fresh verify passes. Verification in lieu of a bundle: npm run verify green on Node 22 and 24; npm pack --dry-run confirms all ten faces ship (committed set and packed set diff to empty); zero remote @import survives; tokens/index.css imports fonts.css. Scope is paired with author: per the ADR 0022 2026-07-03 addendum -- branch-prefix alone resolves against a pusher-controlled ref, and dropping the pairing was explicitly rejected in flow-agents#1015.",
+    "approved_by": "brian.anderson1222 (delegated approval, 2026-07-26 session: scoped-DECLARED-exemption route)",
+    "declared_at": "2026-07-27T00:05:00Z"
+  }
+]

@@ -38,10 +38,13 @@ Install locally while unpublished:
 Import tokens and primitive styles once:
 
 ```ts
-import "@kontourai/ui/tokens.css";
-import "@kontourai/ui/themes.css";
+import "@kontourai/ui/tokens";
 import "@kontourai/ui/react/styles.css";
 ```
+
+`@kontourai/ui/tokens` is the whole token layer — base tokens, themes, and the brand
+`@font-face` rules. Importing `tokens.css` and `themes.css` individually gives you the
+`--k-font-*` variables without the faces they name, so the surface renders in fallbacks.
 
 Use primitives from the React entry:
 
@@ -185,7 +188,7 @@ Static sites should not depend on symlinks at runtime. Copy package assets into 
 
 Required assets:
 
-- `tokens/`
+- `tokens/` — including `tokens/fonts/`, which holds the woff2 faces `fonts.css` points at
 - `react/styles.css` if using primitives or custom elements
 - `dist/elements/elements/src/` if using custom elements
 

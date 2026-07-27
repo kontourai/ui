@@ -81,13 +81,36 @@ Import the full token layer:
 @import "@kontourai/ui/tokens";
 ```
 
-Or import individual files:
+That one import is sufficient: it pulls in the base tokens, the theme classes, and the
+`@font-face` rules for the brand faces. The individual files stay exported for consumers
+that compose them by hand:
 
 ```css
 @import "@kontourai/ui/fonts.css";
 @import "@kontourai/ui/tokens.css";
 @import "@kontourai/ui/themes.css";
 ```
+
+Skipping `fonts.css` gives you the `--k-font-*` variables without the faces they name, and
+the surface silently renders in fallback typography.
+
+## Fonts
+
+The brand faces ship inside the package as woff2 and are declared with real `@font-face`
+rules — nothing is fetched from a third party at render time. A product with
+`default-src 'self'`, the right posture for a tool handling someone's documents, gets the
+brand typography with no CSP allowance and no network request.
+
+| Token | Family | Weights | License |
+| --- | --- | --- | --- |
+| `--k-font-display` | Fraunces (variable) | 100–900 | SIL OFL 1.1 |
+| `--k-font-ui` | Hanken Grotesk (variable) | 100–900 | SIL OFL 1.1 |
+| `--k-font-mono` | IBM Plex Mono | 400, 500, 600 | SIL OFL 1.1 |
+
+Coverage is latin + latin-ext; anything outside those ranges falls through to the fallback
+stacks in `tokens.css`. Licenses ship alongside the files, and `tokens/fonts/README.md`
+records provenance. `node scripts/vendor-fonts.mjs` regenerates both the files and
+`tokens/fonts.css`.
 
 For static HTML consoles served without a bundler, add a local package dependency and copy the CSS assets into the product's asset tree during build or setup:
 
