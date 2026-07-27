@@ -54,7 +54,7 @@ const googleSubsets = ["latin", "latin-ext"];
 /**
  * IBM Plex carries the Reserved Font Name "Plex", and OFL clause 5 restricts that name
  * on modified versions. Subsetting is a modification, so the mono faces come from IBM's
- * own published woff2 artefacts rather than a re-subset copy.
+ * own published woff2 artifacts rather than a re-subset copy.
  */
 const ibmPlexMono = {
   package: "@ibm/plex-mono",

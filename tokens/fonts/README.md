@@ -35,7 +35,7 @@ declared in `tokens.css`.
   `fonts.gstatic.com` with their `unicode-range` declarations taken verbatim from the
   Google Fonts CSS. Neither family declares a Reserved Font Name, so the subsetting Google
   applies carries no naming restriction.
-- **IBM Plex Mono** — IBM's own published `@ibm/plex-mono` woff2 artefacts, unmodified.
+- **IBM Plex Mono** — IBM's own published `@ibm/plex-mono` woff2 artifacts, unmodified.
   IBM Plex reserves the font name "Plex", and OFL clause 5 restricts that name on modified
   versions; taking IBM's own build rather than a re-subset copy keeps the family name
   unambiguously licensed.
