@@ -14,12 +14,15 @@
     "check:pack": "node scripts/check-package-contents.mjs",
     "test:browser": "playwright test",
     "check": "npm run check:tokens && npm run check:exports && npm run check:readiness",
-    "verify": "npm run check && npm run check:pack && npm run test:browser"
+    "verify": "npm run check && npm run check:pack && npm run test:browser",
+    "workflow:sidecar": "flow-agents-workflow-sidecar",
+    "workflow:validate-artifacts": "flow-agents-validate-artifacts"
   },
   "peerDependencies": {
     "react": "^19.0.0"
   },
   "devDependencies": {
+    "@kontourai/flow-agents": "5.5.0",
     "@playwright/test": "^1.60.0",
     "@types/react": "^19.2.7",
     "typescript": "^6.0.3"
