@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const PRODUCTS = ["station", "surface", "flow", "veritas", "survey", "console", "flow-agents"] as const;
+const PRODUCTS = ["station", "surface", "flow", "veritas", "survey", "console", "flow-agents", "fieldwork", "hachure", "forage", "traverse", "lookout", "relay", "dispatch", "datum", "bearing", "conduit", "plumb", "cli", "ui", "evals", "kit-research"] as const;
 
 test.describe("product icons", () => {
   test("renders every k-product-icon element as a currentColor svg", async ({ page }) => {
