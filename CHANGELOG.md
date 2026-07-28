@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.12.0](https://github.com/kontourai/ui/compare/v1.11.2...v1.12.0) (2026-07-28)
+
+
+### Features
+
+* ship product marks for the full suite (15 new icons) ([#58](https://github.com/kontourai/ui/issues/58)) ([52c9341](https://github.com/kontourai/ui/commit/52c93419f30aa26e53aa9674dad58deb49ecbd51))
+
 ## [1.11.2](https://github.com/kontourai/ui/compare/v1.11.1...v1.11.2) (2026-07-27)
 
 
