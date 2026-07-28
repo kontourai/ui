@@ -56,6 +56,21 @@ export const VeritasIcon = makeProductIcon("veritas");
 export const SurveyIcon = makeProductIcon("survey");
 export const ConsoleIcon = makeProductIcon("console");
 export const FlowAgentsIcon = makeProductIcon("flow-agents");
+export const FieldworkIcon = makeProductIcon("fieldwork");
+export const HachureIcon = makeProductIcon("hachure");
+export const ForageIcon = makeProductIcon("forage");
+export const TraverseIcon = makeProductIcon("traverse");
+export const LookoutIcon = makeProductIcon("lookout");
+export const RelayIcon = makeProductIcon("relay");
+export const DispatchIcon = makeProductIcon("dispatch");
+export const DatumIcon = makeProductIcon("datum");
+export const BearingIcon = makeProductIcon("bearing");
+export const ConduitIcon = makeProductIcon("conduit");
+export const PlumbIcon = makeProductIcon("plumb");
+export const CliIcon = makeProductIcon("cli");
+export const UiIcon = makeProductIcon("ui");
+export const EvalsIcon = makeProductIcon("evals");
+export const KitResearchIcon = makeProductIcon("kit-research");
 
 /** Map keyed by product slug, so consumers can look up an icon dynamically. */
 export const productIcons: Record<ProductIconSlug, (props: ProductIconProps) => ReactElement> = {
@@ -66,4 +81,19 @@ export const productIcons: Record<ProductIconSlug, (props: ProductIconProps) => 
   survey: SurveyIcon,
   console: ConsoleIcon,
   "flow-agents": FlowAgentsIcon,
+  fieldwork: FieldworkIcon,
+  hachure: HachureIcon,
+  forage: ForageIcon,
+  traverse: TraverseIcon,
+  lookout: LookoutIcon,
+  relay: RelayIcon,
+  dispatch: DispatchIcon,
+  datum: DatumIcon,
+  bearing: BearingIcon,
+  conduit: ConduitIcon,
+  plumb: PlumbIcon,
+  cli: CliIcon,
+  ui: UiIcon,
+  evals: EvalsIcon,
+  "kit-research": KitResearchIcon,
 };
