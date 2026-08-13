@@ -13,10 +13,11 @@
     "check:readiness": "node scripts/check-readiness.mjs",
     "check:pack": "node scripts/check-package-contents.mjs",
     "test:browser": "playwright test",
-    "check": "npm run check:tokens && npm run check:exports && npm run check:readiness",
+    "check": "npm run check:tokens && npm run check:contrast && npm run check:exports && npm run check:readiness",
     "verify": "npm run check && npm run check:pack && npm run test:browser",
     "workflow:sidecar": "flow-agents-workflow-sidecar",
-    "workflow:validate-artifacts": "flow-agents-validate-artifacts"
+    "workflow:validate-artifacts": "flow-agents-validate-artifacts",
+    "check:contrast": "node scripts/check-contrast.mjs"
   },
   "peerDependencies": {
     "react": "^19.0.0"
