@@ -1,0 +1,871 @@
+{
+  "schemaVersion": 3,
+  "generatedFrom": [
+    "react/src/index.ts",
+    "elements/src/index.ts",
+    "tokens/tokens.css",
+    "tokens/themes.css"
+  ],
+  "themes": [
+    "theme-console",
+    "theme-flow",
+    "theme-surface",
+    "theme-survey"
+  ],
+  "tokens": [
+    "--k-active",
+    "--k-active-soft",
+    "--k-bg",
+    "--k-border-thick",
+    "--k-border-thin",
+    "--k-brand",
+    "--k-brand-contrast",
+    "--k-caution",
+    "--k-caution-soft",
+    "--k-dur",
+    "--k-ease",
+    "--k-elevation-overlay",
+    "--k-focus-ring",
+    "--k-focus-ring-offset",
+    "--k-focus-ring-width",
+    "--k-font-display",
+    "--k-font-mono",
+    "--k-font-ui",
+    "--k-leading-loose",
+    "--k-leading-normal",
+    "--k-leading-tight",
+    "--k-line",
+    "--k-line-strong",
+    "--k-negative",
+    "--k-negative-soft",
+    "--k-neutral",
+    "--k-panel",
+    "--k-panel-raised",
+    "--k-positive",
+    "--k-positive-soft",
+    "--k-radius-control",
+    "--k-radius-md",
+    "--k-radius-overlay",
+    "--k-radius-sm",
+    "--k-shadow",
+    "--k-space-1",
+    "--k-space-2",
+    "--k-space-3",
+    "--k-space-4",
+    "--k-space-5",
+    "--k-space-6",
+    "--k-text",
+    "--k-text-2xl",
+    "--k-text-faint",
+    "--k-text-lg",
+    "--k-text-md",
+    "--k-text-muted",
+    "--k-text-sm",
+    "--k-text-xl",
+    "--k-text-xs",
+    "--k-tracking-normal",
+    "--k-tracking-tight",
+    "--k-tracking-wide",
+    "--k-z-base",
+    "--k-z-dropdown",
+    "--k-z-modal",
+    "--k-z-overlay",
+    "--k-z-popover",
+    "--k-z-sticky",
+    "--k-z-toast"
+  ],
+  "exports": [
+    {
+      "id": "react:Badge",
+      "kind": "react-primitive",
+      "name": "Badge",
+      "specification": "react:Badge documented interactive primitive",
+      "playground": "element:k-badge",
+      "states": [
+        "default"
+      ],
+      "variants": [
+        "verified",
+        "pending",
+        "blocked"
+      ],
+      "styleClasses": [
+        "badge",
+        "tone-positive",
+        "tone-caution",
+        "tone-negative",
+        "tone-active",
+        "tone-neutral"
+      ],
+      "tokens": [
+        "--k-active",
+        "--k-brand-contrast",
+        "--k-caution",
+        "--k-font-mono",
+        "--k-line",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-positive",
+        "--k-radius-sm",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-text-muted",
+        "--k-text-xs"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Text badge exposes its value."
+    },
+    {
+      "id": "react:Button",
+      "kind": "react-primitive",
+      "name": "Button",
+      "specification": "react:Button documented interactive primitive",
+      "playground": "element:k-button",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "primary",
+        "ghost",
+        "positive",
+        "caution",
+        "negative"
+      ],
+      "styleClasses": [
+        "btn",
+        "btn-primary",
+        "btn-ghost",
+        "btn-positive",
+        "btn-caution",
+        "btn-negative"
+      ],
+      "tokens": [
+        "--k-brand",
+        "--k-brand-contrast",
+        "--k-caution",
+        "--k-dur",
+        "--k-ease",
+        "--k-font-ui",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel",
+        "--k-positive",
+        "--k-radius-sm",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-space-4",
+        "--k-space-6",
+        "--k-text"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native button label and keyboard activation."
+    },
+    {
+      "id": "react:Checkbox",
+      "kind": "react-primitive",
+      "name": "Checkbox",
+      "specification": "react:Checkbox documented interactive primitive",
+      "playground": "element:k-checkbox",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "checkbox",
+        "checkbox-field",
+        "checkbox-field__label"
+      ],
+      "tokens": [
+        "--k-brand",
+        "--k-focus-ring",
+        "--k-focus-ring-offset",
+        "--k-focus-ring-width",
+        "--k-space-2",
+        "--k-space-4",
+        "--k-text",
+        "--k-text-md"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native checkbox label."
+    },
+    {
+      "id": "react:Input",
+      "kind": "react-primitive",
+      "name": "Input",
+      "specification": "react:Input documented interactive primitive",
+      "playground": "element:k-input",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "control",
+        "control--invalid"
+      ],
+      "tokens": [
+        "--k-border-thin",
+        "--k-brand",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-width",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-radius-control",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-6",
+        "--k-text",
+        "--k-text-faint",
+        "--k-text-md"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Visible label provides the native input's accessible name; placeholder remains supplemental."
+    },
+    {
+      "id": "react:Select",
+      "kind": "react-primitive",
+      "name": "Select",
+      "specification": "react:Select documented interactive primitive",
+      "playground": "element:k-select",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "control",
+        "control--invalid",
+        "select",
+        "control--select",
+        "select__chevron"
+      ],
+      "tokens": [
+        "--k-border-thick",
+        "--k-border-thin",
+        "--k-brand",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-width",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-radius-control",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-6",
+        "--k-text",
+        "--k-text-faint",
+        "--k-text-md",
+        "--k-text-muted"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Visible label provides the native select's accessible name and native keyboard contract."
+    },
+    {
+      "id": "react:Textarea",
+      "kind": "react-primitive",
+      "name": "Textarea",
+      "specification": "react:Textarea documented interactive primitive",
+      "playground": "element:k-textarea",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "control",
+        "control--invalid",
+        "control--textarea"
+      ],
+      "tokens": [
+        "--k-border-thin",
+        "--k-brand",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-width",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-radius-control",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-6",
+        "--k-text",
+        "--k-text-faint",
+        "--k-text-md"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Visible label provides the native textarea's accessible name; placeholder remains supplemental."
+    },
+    {
+      "id": "react:Toggle",
+      "kind": "react-primitive",
+      "name": "Toggle",
+      "specification": "react:Toggle documented interactive primitive",
+      "playground": "element:k-toggle",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "toggle",
+        "toggle-field",
+        "toggle-field__label"
+      ],
+      "tokens": [
+        "--k-border-thin",
+        "--k-brand",
+        "--k-brand-contrast",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-offset",
+        "--k-focus-ring-width",
+        "--k-line-strong",
+        "--k-panel-raised",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-4",
+        "--k-space-5",
+        "--k-text",
+        "--k-text-md",
+        "--k-text-muted"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Labeled native switch supports keyboard interaction."
+    }
+  ],
+  "elements": [
+    {
+      "id": "element:k-badge",
+      "kind": "custom-element",
+      "name": "k-badge",
+      "specification": "element:k-badge documented interactive primitive",
+      "playground": "element:k-badge",
+      "states": [
+        "default"
+      ],
+      "variants": [
+        "verified",
+        "pending",
+        "blocked"
+      ],
+      "styleClasses": [
+        "badge",
+        "tone-positive",
+        "tone-caution",
+        "tone-negative",
+        "tone-active",
+        "tone-neutral"
+      ],
+      "tokens": [
+        "--k-active",
+        "--k-brand-contrast",
+        "--k-caution",
+        "--k-font-mono",
+        "--k-line",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-positive",
+        "--k-radius-sm",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-text-muted",
+        "--k-text-xs"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Text badge exposes its value."
+    },
+    {
+      "id": "element:k-button",
+      "kind": "custom-element",
+      "name": "k-button",
+      "specification": "element:k-button documented interactive primitive",
+      "playground": "element:k-button",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "primary",
+        "ghost",
+        "positive",
+        "caution",
+        "negative"
+      ],
+      "styleClasses": [
+        "btn",
+        "btn-primary",
+        "btn-ghost",
+        "btn-positive",
+        "btn-caution",
+        "btn-negative"
+      ],
+      "tokens": [
+        "--k-brand",
+        "--k-brand-contrast",
+        "--k-caution",
+        "--k-dur",
+        "--k-ease",
+        "--k-font-ui",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel",
+        "--k-positive",
+        "--k-radius-sm",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-space-4",
+        "--k-space-6",
+        "--k-text"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native button label and keyboard activation."
+    },
+    {
+      "id": "element:k-checkbox",
+      "kind": "custom-element",
+      "name": "k-checkbox",
+      "specification": "element:k-checkbox documented interactive primitive",
+      "playground": "element:k-checkbox",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "checkbox",
+        "checkbox-field",
+        "checkbox-field__label"
+      ],
+      "tokens": [
+        "--k-brand",
+        "--k-focus-ring",
+        "--k-focus-ring-offset",
+        "--k-focus-ring-width",
+        "--k-space-2",
+        "--k-space-4",
+        "--k-text",
+        "--k-text-md"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native checkbox label."
+    },
+    {
+      "id": "element:k-input",
+      "kind": "custom-element",
+      "name": "k-input",
+      "specification": "element:k-input documented interactive primitive",
+      "playground": "element:k-input",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "control",
+        "control--invalid"
+      ],
+      "tokens": [
+        "--k-border-thin",
+        "--k-brand",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-width",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-radius-control",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-6",
+        "--k-text",
+        "--k-text-faint",
+        "--k-text-md"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Visible label provides the native input's accessible name; placeholder remains supplemental."
+    },
+    {
+      "id": "element:k-select",
+      "kind": "custom-element",
+      "name": "k-select",
+      "specification": "element:k-select documented interactive primitive",
+      "playground": "element:k-select",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "control",
+        "control--invalid",
+        "select",
+        "control--select",
+        "select__chevron"
+      ],
+      "tokens": [
+        "--k-border-thick",
+        "--k-border-thin",
+        "--k-brand",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-width",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-radius-control",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-6",
+        "--k-text",
+        "--k-text-faint",
+        "--k-text-md",
+        "--k-text-muted"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Visible label provides the native select's accessible name and native keyboard contract."
+    },
+    {
+      "id": "element:k-textarea",
+      "kind": "custom-element",
+      "name": "k-textarea",
+      "specification": "element:k-textarea documented interactive primitive",
+      "playground": "element:k-textarea",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "control",
+        "control--invalid",
+        "control--textarea"
+      ],
+      "tokens": [
+        "--k-border-thin",
+        "--k-brand",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-width",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line-strong",
+        "--k-negative",
+        "--k-panel-raised",
+        "--k-radius-control",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-6",
+        "--k-text",
+        "--k-text-faint",
+        "--k-text-md"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Visible label provides the native textarea's accessible name; placeholder remains supplemental."
+    },
+    {
+      "id": "element:k-toggle",
+      "kind": "custom-element",
+      "name": "k-toggle",
+      "specification": "element:k-toggle documented interactive primitive",
+      "playground": "element:k-toggle",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "styleClasses": [
+        "toggle",
+        "toggle-field",
+        "toggle-field__label"
+      ],
+      "tokens": [
+        "--k-border-thin",
+        "--k-brand",
+        "--k-brand-contrast",
+        "--k-dur",
+        "--k-ease",
+        "--k-focus-ring",
+        "--k-focus-ring-offset",
+        "--k-focus-ring-width",
+        "--k-line-strong",
+        "--k-panel-raised",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-space-4",
+        "--k-space-5",
+        "--k-text",
+        "--k-text-md",
+        "--k-text-muted"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Labeled native switch supports keyboard interaction."
+    }
+  ],
+  "exclusions": [
+    {
+      "id": "react:ConsoleIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Dialog",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Empty",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Field",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:FlowAgentsIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:FlowIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Metric",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Panel",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Popover",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:ProductIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Progress",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Skeleton",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Spinner",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:StationIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:StatusBadge",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:StatusBar",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:SurfaceIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:SurveyIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Toast",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:ToastHost",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Tooltip",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Topbar",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:VeritasIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:normalizedClassSuffix",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:productIcons",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:toneClass",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:toneForValue",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:toneMatchers",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "element:k-dialog",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-empty",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-metric",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-panel",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-popover",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-product-icon",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-progress",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-skeleton",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-spinner",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-status-badge",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-statusbar",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-toast-host",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-tooltip",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-topbar",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    }
+  ]
+}
