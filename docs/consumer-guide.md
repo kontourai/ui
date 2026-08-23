@@ -222,7 +222,13 @@ Package consumers should run their own build/test command plus any asset drift c
 
 `docs/gallery.html` is the package's development/reference explorer. Its
 `docs/explorer-manifest.json` is generated from the real public React exports,
-custom elements, token families, and product themes. Regenerate it with
+custom-element registration AST, CSS token declarations, and CSS theme selectors.
+Each curated component declares the CSS classes its implementation renders; the
+manifest derives the complete `var(--k-*)` dependency set for those classes,
+including spacing, typography, focus, and motion tokens. The explorer check
+independently recomputes that mapping, so incomplete token lists are rejected.
+Its generated text controls use visible native labels, so placeholders are only
+supplemental hints. Regenerate it with
 `node scripts/generate-explorer-manifest.mjs --write`; `npm run check:explorer`
 rejects stale manifests or incomplete metadata. The explorer is documentation
 only and is not an importable production bundle for adopters.

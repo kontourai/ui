@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="theme-console" data-theme="dark">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -70,6 +70,13 @@
         background: var(--k-panel);
       }
 
+      .explorer-control-label {
+        display: grid;
+        gap: var(--k-space-2);
+        color: var(--k-text-muted);
+        font-size: var(--k-text-sm);
+      }
+
       .theme-swatch strong,
       .label {
         display: block;
@@ -103,18 +110,36 @@
 
       const explorer = document.getElementById("explorer-entries");
       const manifest = await fetch("./explorer-manifest.json").then((response) => response.json());
+      const labeledControl = (control, name) => {
+        const label = document.createElement("label");
+        label.className = "explorer-control-label";
+        label.append(`${name} playground`, control);
+        return label;
+      };
+      const createPlayground = (target, name) => {
+        const control = document.createElement(target);
+        if (["k-input", "k-select", "k-textarea"].includes(target)) {
+          control.setAttribute("placeholder", `Enter ${name.toLowerCase()}`);
+          if (target === "k-select") {
+            const option = document.createElement("option");
+            option.value = "example";
+            option.textContent = "Example option";
+            control.append(option);
+          }
+          return labeledControl(control, name);
+        }
+        if (target === "k-button" || target === "k-checkbox" || target === "k-toggle")
+          control.setAttribute("label", `${name} playground`);
+        if (target === "k-badge") control.setAttribute("value", name);
+        return control;
+      };
       for (const entry of [...manifest.exports, ...manifest.elements]) {
         const card = document.createElement("article");
         card.className = "explorer-card";
         card.dataset.explorerId = entry.id;
         card.innerHTML = `<strong>${entry.name}</strong><span class="label">${entry.kind} · ${entry.tokens.join(", ")}</span><p>${entry.specification}</p><p>${entry.accessibility}</p>`;
         const target = entry.playground?.split(":")[1];
-        if (target?.startsWith("k-")) {
-          const control = document.createElement(target);
-          control.setAttribute("label", entry.name);
-          control.textContent = entry.name;
-          card.append(control);
-        }
+        if (target?.startsWith("k-")) card.append(createPlayground(target, entry.name));
         explorer.append(card);
       }
       const matrix = document.getElementById("theme-matrix");
@@ -123,7 +148,17 @@
         sample.className = `theme-swatch ${theme}`;
         sample.dataset.themeMatrix = `${theme}:${mode}`;
         sample.dataset.theme = mode;
-        sample.innerHTML = `<strong>${theme} ${mode}</strong><k-button label="Probe" variant="primary"></k-button>`;
+        const title = document.createElement("strong");
+        title.textContent = `${theme} ${mode}`;
+        const button = document.createElement("k-button");
+        button.setAttribute("label", "Theme probe");
+        button.setAttribute("variant", "primary");
+        const input = document.createElement("k-input");
+        input.setAttribute("placeholder", "Theme field");
+        const toggle = document.createElement("k-toggle");
+        toggle.setAttribute("label", "Theme enabled");
+        toggle.setAttribute("checked", "");
+        sample.append(title, button, labeledControl(input, "Theme field"), toggle);
         matrix.append(sample);
       }
     </script>
