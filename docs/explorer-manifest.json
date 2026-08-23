@@ -1,0 +1,785 @@
+{
+  "schemaVersion": 3,
+  "generatedFrom": [
+    "react/src/index.ts",
+    "elements/src/index.ts",
+    "tokens/tokens.css",
+    "tokens/themes.css"
+  ],
+  "themes": [
+    "theme-console",
+    "theme-flow",
+    "theme-surface",
+    "theme-survey"
+  ],
+  "tokens": [
+    "--k-active",
+    "--k-active-soft",
+    "--k-bg",
+    "--k-border-thick",
+    "--k-border-thin",
+    "--k-brand",
+    "--k-brand-contrast",
+    "--k-caution",
+    "--k-caution-soft",
+    "--k-dur",
+    "--k-ease",
+    "--k-elevation-overlay",
+    "--k-focus-ring",
+    "--k-focus-ring-offset",
+    "--k-focus-ring-width",
+    "--k-font-display",
+    "--k-font-mono",
+    "--k-font-ui",
+    "--k-leading-loose",
+    "--k-leading-normal",
+    "--k-leading-tight",
+    "--k-line",
+    "--k-line-strong",
+    "--k-negative",
+    "--k-negative-soft",
+    "--k-neutral",
+    "--k-panel",
+    "--k-panel-raised",
+    "--k-positive",
+    "--k-positive-soft",
+    "--k-radius-control",
+    "--k-radius-md",
+    "--k-radius-overlay",
+    "--k-radius-sm",
+    "--k-shadow",
+    "--k-space-1",
+    "--k-space-2",
+    "--k-space-3",
+    "--k-space-4",
+    "--k-space-5",
+    "--k-space-6",
+    "--k-text",
+    "--k-text-2xl",
+    "--k-text-faint",
+    "--k-text-lg",
+    "--k-text-md",
+    "--k-text-muted",
+    "--k-text-sm",
+    "--k-text-xl",
+    "--k-text-xs",
+    "--k-tracking-normal",
+    "--k-tracking-tight",
+    "--k-tracking-wide",
+    "--k-z-base",
+    "--k-z-dropdown",
+    "--k-z-modal",
+    "--k-z-overlay",
+    "--k-z-popover",
+    "--k-z-sticky",
+    "--k-z-toast"
+  ],
+  "exports": [
+    {
+      "id": "react:Badge",
+      "kind": "react-primitive",
+      "name": "Badge",
+      "specification": "react:Badge documented interactive primitive",
+      "playground": "element:k-badge",
+      "states": [
+        "default"
+      ],
+      "variants": [
+        "verified",
+        "pending",
+        "blocked"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Text badge exposes its value."
+    },
+    {
+      "id": "react:Button",
+      "kind": "react-primitive",
+      "name": "Button",
+      "specification": "react:Button documented interactive primitive",
+      "playground": "element:k-button",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "primary",
+        "ghost",
+        "positive",
+        "negative"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native button label and keyboard activation."
+    },
+    {
+      "id": "react:Checkbox",
+      "kind": "react-primitive",
+      "name": "Checkbox",
+      "specification": "react:Checkbox documented interactive primitive",
+      "playground": "element:k-checkbox",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native checkbox label."
+    },
+    {
+      "id": "react:Input",
+      "kind": "react-primitive",
+      "name": "Input",
+      "specification": "react:Input documented interactive primitive",
+      "playground": "element:k-input",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native input label/placeholder."
+    },
+    {
+      "id": "react:Select",
+      "kind": "react-primitive",
+      "name": "Select",
+      "specification": "react:Select documented interactive primitive",
+      "playground": "element:k-select",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native select keyboard contract."
+    },
+    {
+      "id": "react:Textarea",
+      "kind": "react-primitive",
+      "name": "Textarea",
+      "specification": "react:Textarea documented interactive primitive",
+      "playground": "element:k-textarea",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native textarea label/placeholder."
+    },
+    {
+      "id": "react:Toggle",
+      "kind": "react-primitive",
+      "name": "Toggle",
+      "specification": "react:Toggle documented interactive primitive",
+      "playground": "element:k-toggle",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Labeled switch keyboard contract."
+    }
+  ],
+  "elements": [
+    {
+      "id": "element:k-badge",
+      "kind": "custom-element",
+      "name": "k-badge",
+      "specification": "element:k-badge documented interactive primitive",
+      "playground": "element:k-badge",
+      "states": [
+        "default"
+      ],
+      "variants": [
+        "verified",
+        "pending",
+        "blocked"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Text badge exposes its value."
+    },
+    {
+      "id": "element:k-button",
+      "kind": "custom-element",
+      "name": "k-button",
+      "specification": "element:k-button documented interactive primitive",
+      "playground": "element:k-button",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "primary",
+        "ghost",
+        "positive",
+        "negative"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native button label and keyboard activation."
+    },
+    {
+      "id": "element:k-checkbox",
+      "kind": "custom-element",
+      "name": "k-checkbox",
+      "specification": "element:k-checkbox documented interactive primitive",
+      "playground": "element:k-checkbox",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native checkbox label."
+    },
+    {
+      "id": "element:k-input",
+      "kind": "custom-element",
+      "name": "k-input",
+      "specification": "element:k-input documented interactive primitive",
+      "playground": "element:k-input",
+      "states": [
+        "default",
+        "invalid",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native input label/placeholder."
+    },
+    {
+      "id": "element:k-select",
+      "kind": "custom-element",
+      "name": "k-select",
+      "specification": "element:k-select documented interactive primitive",
+      "playground": "element:k-select",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native select keyboard contract."
+    },
+    {
+      "id": "element:k-textarea",
+      "kind": "custom-element",
+      "name": "k-textarea",
+      "specification": "element:k-textarea documented interactive primitive",
+      "playground": "element:k-textarea",
+      "states": [
+        "default",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Native textarea label/placeholder."
+    },
+    {
+      "id": "element:k-toggle",
+      "kind": "custom-element",
+      "name": "k-toggle",
+      "specification": "element:k-toggle documented interactive primitive",
+      "playground": "element:k-toggle",
+      "states": [
+        "checked",
+        "unchecked",
+        "disabled"
+      ],
+      "variants": [
+        "default"
+      ],
+      "tokens": [
+        "--k-bg",
+        "--k-text",
+        "--k-line",
+        "--k-space-3"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Labeled switch keyboard contract."
+    }
+  ],
+  "exclusions": [
+    {
+      "id": "react:BadgeProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ButtonProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ButtonVariant",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:CheckboxProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ConsoleIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Dialog",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:DialogProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Empty",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:EmptyProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Field",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:FieldProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:FlowAgentsIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:FlowIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:InputProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Metric",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:MetricProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Panel",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:PanelProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Popover",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:PopoverPlacement",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:PopoverProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ProductIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:ProductIconProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ProductIconSlug",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Progress",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:ProgressProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:SelectOption",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:SelectProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:SemanticTone",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Skeleton",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:SkeletonProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Spinner",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:SpinnerProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:StationIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:StatusBadge",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:StatusBadgeProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:StatusBadgeStatus",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:StatusBar",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:StatusBarItem",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:StatusBarProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:SurfaceIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:SurveyIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:TextareaProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Toast",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:ToastHost",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:ToastHostProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ToastPlacement",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ToastProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ToggleProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:ToneMatcher",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:Tooltip",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:TooltipPlacement",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:TooltipProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:Topbar",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:TopbarMetaItem",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:TopbarProps",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:VeritasIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:normalizedClassSuffix",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:productIcons",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:toneClass",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:toneForValue",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "react:toneMatchers",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "element:k-dialog",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-empty",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-metric",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-panel",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-popover",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-product-icon",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-progress",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-skeleton",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-spinner",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-status-badge",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-statusbar",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-toast-host",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-tooltip",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    },
+    {
+      "id": "element:k-topbar",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
+    }
+  ]
+}

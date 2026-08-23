@@ -218,3 +218,11 @@ Examples:
 ## Verification
 
 Package consumers should run their own build/test command plus any asset drift check. The current cross-adopter command matrix lives in `docs/release-readiness.md`.
+# Explorer
+
+`docs/gallery.html` is the package's development/reference explorer. Its
+`docs/explorer-manifest.json` is generated from the real public React exports,
+custom elements, token families, and product themes. Regenerate it with
+`node scripts/generate-explorer-manifest.mjs --write`; `npm run check:explorer`
+rejects stale manifests or incomplete metadata. The explorer is documentation
+only and is not an importable production bundle for adopters.

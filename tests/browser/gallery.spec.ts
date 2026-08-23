@@ -13,6 +13,12 @@ test("renders the package gallery with tokens, themes, and primitive components"
   await expect(page.getByRole("main")).toContainText("Badge parity");
   await expect(page.getByRole("main")).toContainText("Metrics and progress");
   await expect(page.locator("#react-badge-mount .badge")).toHaveText("verified");
+  await expect(page.locator("[data-explorer-id='react:Badge']")).toContainText("react-primitive");
+  await expect(page.locator("[data-explorer-id='element:k-badge']")).toContainText("custom-element");
+  await expect(page.locator("[data-explorer-id='react:Button'] k-button")).toBeVisible();
+  for (const theme of ["theme-console", "theme-flow", "theme-surface", "theme-survey"])
+    for (const mode of ["light", "dark"])
+      await expect(page.locator(`[data-theme-matrix='${theme}:${mode}']`)).toBeVisible();
   await assertTokenStylesResolved(page);
   expect(consoleErrors).toEqual([]);
 });
@@ -93,7 +99,7 @@ test("keeps gallery layout within the mobile viewport", async ({ page }) => {
 
   const viewport = page.viewportSize();
   const mainBox = await page.locator("main").boundingBox();
-  const topbarBox = await page.locator(".topbar").boundingBox();
+  const topbarBox = await page.getByTitle("Primitive Gallery").locator(".topbar").boundingBox();
   expect(viewport).not.toBeNull();
   expect(mainBox).not.toBeNull();
   expect(topbarBox).not.toBeNull();

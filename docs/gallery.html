@@ -63,6 +63,13 @@
         background: var(--k-panel);
       }
 
+      .explorer-card {
+        border: 1px solid var(--k-line);
+        border-radius: var(--k-radius-md);
+        padding: var(--k-space-3);
+        background: var(--k-panel);
+      }
+
       .theme-swatch strong,
       .label {
         display: block;
@@ -93,6 +100,32 @@
       node.className = badge.props.className;
       node.textContent = badge.props.children;
       mount.replaceChildren(node);
+
+      const explorer = document.getElementById("explorer-entries");
+      const manifest = await fetch("./explorer-manifest.json").then((response) => response.json());
+      for (const entry of [...manifest.exports, ...manifest.elements]) {
+        const card = document.createElement("article");
+        card.className = "explorer-card";
+        card.dataset.explorerId = entry.id;
+        card.innerHTML = `<strong>${entry.name}</strong><span class="label">${entry.kind} · ${entry.tokens.join(", ")}</span><p>${entry.specification}</p><p>${entry.accessibility}</p>`;
+        const target = entry.playground?.split(":")[1];
+        if (target?.startsWith("k-")) {
+          const control = document.createElement(target);
+          control.setAttribute("label", entry.name);
+          control.textContent = entry.name;
+          card.append(control);
+        }
+        explorer.append(card);
+      }
+      const matrix = document.getElementById("theme-matrix");
+      for (const theme of manifest.themes) for (const mode of ["light", "dark"]) {
+        const sample = document.createElement("div");
+        sample.className = `theme-swatch ${theme}`;
+        sample.dataset.themeMatrix = `${theme}:${mode}`;
+        sample.dataset.theme = mode;
+        sample.innerHTML = `<strong>${theme} ${mode}</strong><k-button label="Probe" variant="primary"></k-button>`;
+        matrix.append(sample);
+      }
     </script>
   </head>
   <body>
@@ -111,6 +144,7 @@
         <div class="theme-swatch theme-survey"><strong>theme-survey</strong><k-badge value="verified"></k-badge></div>
         <div class="theme-swatch theme-surface" data-theme="light"><strong>theme-surface light</strong><k-badge value="published"></k-badge></div>
       </section>
+      <section id="theme-matrix" class="theme-strip" aria-label="Theme matrix"></section>
 
       <section class="grid">
         <k-panel title="Badge parity" count="React beside element">
@@ -198,6 +232,15 @@
               <k-spinner></k-spinner>
               <span class="label">Working…</span>
             </div>
+          </div>
+        </k-panel>
+      </section>
+
+      <section aria-labelledby="explorer-title">
+        <k-panel title="Generated explorer" count="public contract metadata">
+          <div class="stack">
+            <span id="explorer-title" class="label">Specification, playground, tokens, responsive behavior, accessibility</span>
+            <div id="explorer-entries" class="grid"></div>
           </div>
         </k-panel>
       </section>
