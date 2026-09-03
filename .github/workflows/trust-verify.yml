@@ -38,19 +38,23 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Reads the exact pnpm version from package.json's packageManager field.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
       - name: Install
-        run: npm ci --no-fund --no-audit
+        run: pnpm install --frozen-lockfile
 
       # Browsers for test:browser (part of `npm run verify`) — mirrors ci.yml's
       # own "Install Playwright browser" step.
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       # The external anchor: re-run this repo's real verify fresh + reconcile any
       # delivered bundle. SHA-pinned (mutable tags are not trusted for a cross-repo

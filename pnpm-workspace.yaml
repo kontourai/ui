@@ -1,0 +1,10 @@
+# Dependency install scripts are blocked by default (pnpm >= 10). Only the
+# packages listed here, at exactly these versions, may run a build script.
+# esbuild: postinstall selects the platform binary; without it the JS fallback
+# runs and Playwright's config loader is ~10x slower. Bump the pin with the dep.
+allowBuilds:
+  esbuild@0.28.1: true
+
+# mise supplies node and pnpm on developer machines; CI installs the exact
+# version pinned in package.json. Do not reject a same-major pnpm from mise.
+pmOnFail: ignore

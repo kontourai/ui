@@ -7,7 +7,7 @@ This package is ready for release review when the package checks, pack preview, 
 From `ui`:
 
 ```sh
-npm install
+pnpm install
 npm run verify
 ```
 
