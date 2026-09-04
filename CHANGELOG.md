@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.0](https://github.com/kontourai/ui/compare/v1.12.0...v1.13.0) (2026-09-04)
+
+
+### Features
+
+* **explorer:** generate the public design-system contract ([#68](https://github.com/kontourai/ui/issues/68)) ([cc4ca43](https://github.com/kontourai/ui/commit/cc4ca43d93b9dd78295368bbeb842fc7ac5d35bc))
+* **tokens:** WCAG contrast conformance joins the check chain ([#64](https://github.com/kontourai/ui/issues/64)) ([0723acf](https://github.com/kontourai/ui/commit/0723acf89de59b451ffb99ab0d71b24f4131be22))
+
 ## [1.12.0](https://github.com/kontourai/ui/compare/v1.11.2...v1.12.0) (2026-07-28)
 
 
