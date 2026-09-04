@@ -147,5 +147,10 @@ jobs:
             echo "::error::npm publish --dry-run failed for a reason other than an already-published version." >&2
             exit "${STATUS}"
           fi
-          echo "Publish path proven from a pnpm-installed tree: ${FILES} files assembled, version not yet published."
+          # Exit zero here means npm raised no objection. It does NOT establish
+          # that the version is unpublished: with an unreachable registry
+          # `--dry-run` also exits zero (verified by injection), so claiming
+          # anything about registry state from this branch would assert
+          # something unestablished.
+          echo "Publish path proven from a pnpm-installed tree: ${FILES} files assembled; npm raised no objection."
         working-directory: ui
