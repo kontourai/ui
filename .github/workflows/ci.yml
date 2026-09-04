@@ -112,10 +112,14 @@ jobs:
       - name: Publish path dry run
         run: |
           set -uo pipefail
-          # Deliberately not `set -e`: a non-zero exit here is expected on any
-          # ordinary pull request, and the exit code alone is not the signal.
-          npm publish --dry-run --access public > /tmp/publish-dry-run.log 2>&1
-          STATUS=$?
+          # GitHub runs `run:` blocks as `bash -e {0}`, and `set -uo pipefail`
+          # does NOT clear that -e. A bare `npm publish` here therefore kills
+          # the step the moment npm exits non-zero — which is every ordinary
+          # pull request — and every line below becomes unreachable. Capturing
+          # the status with `|| STATUS=$?` marks the failure handled, so -e
+          # leaves it alone and the assertions actually run.
+          STATUS=0
+          npm publish --dry-run --access public > /tmp/publish-dry-run.log 2>&1 || STATUS=$?
           cat /tmp/publish-dry-run.log
 
           # What this job proves: `npm publish` ran this package's prepack
