@@ -14,7 +14,8 @@
     "check:pack": "node scripts/check-package-contents.mjs",
     "test:browser": "playwright test",
     "check:explorer": "node scripts/check-explorer.mjs",
-    "check": "npm run check:tokens && npm run check:contrast && npm run check:exports && npm run check:readiness && npm run check:explorer",
+    "check:design": "node scripts/generate-design-md.mjs --check",
+    "check": "npm run check:tokens && npm run check:contrast && npm run check:design && npm run check:exports && npm run check:readiness && npm run check:explorer",
     "verify": "npm run check && npm run check:pack && npm run test:browser",
     "workflow:sidecar": "flow-agents-workflow-sidecar",
     "workflow:validate-artifacts": "flow-agents-validate-artifacts",
@@ -55,7 +56,8 @@
     "icons/",
     "react/styles.css",
     "tokens/",
-    "README.md"
+    "README.md",
+    "DESIGN.md"
   ],
   "publishConfig": {
     "access": "public"
