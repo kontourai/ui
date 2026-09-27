@@ -15,7 +15,7 @@ retain it only in historical decisions, audits, and compatibility identifiers.
 - **Web components**: Light-DOM custom elements in `elements/`, exported through `@kontourai/ui/elements`. They reuse the same class/style contract as the React primitives.
 - **Generated `dist/`**: Build output for package exports and declarations. Do not hand-edit `dist/`; regenerate it with package checks when code changes require it.
 - **Semantic scale**: Product-specific status words map to shared UI tones: `positive`, `caution`, `negative`, `active`, and `neutral`.
-- **Trust states**: What a product can establish about a value: `verified`, `known`, `inferred`, `estimated`, `uncertain`, `conflicting`, `failed`, `unavailable`, `not-checked`. Separate from the tones and from product accents; each has its own `--k-trust-*` tokens and non-color cue. They are presentation states, not Surface claim statuses.
+- **Trust states**: Surface's claim statuses as presentation states: `unknown`, `proposed`, `assumed`, `verified`, `stale`, `disputed`, `superseded`, `rejected`, `revoked`, with Surface's display names as default labels. Separate from the tones and from product accents; each has its own `--k-trust-*` tokens and non-color cue. `@kontourai/surface` is a test-only devDependency that `check:surface-parity` compares against.
 
 ## Boundaries
 

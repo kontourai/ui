@@ -86,6 +86,12 @@
         letter-spacing: 0;
       }
 
+      .trust-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--k-space-2);
+      }
+
       @media (max-width: 820px) {
         main {
           width: min(100% - var(--k-space-4), 1180px);
@@ -160,9 +166,9 @@
         toggle.setAttribute("label", "Theme enabled");
         toggle.setAttribute("checked", "");
         const trust = document.createElement("div");
-        trust.className = "row";
+        trust.className = "trust-row";
         trust.dataset.trustRow = "";
-        for (const state of ["verified", "known", "inferred", "estimated", "uncertain", "conflicting", "failed", "unavailable", "not-checked"]) {
+        for (const state of ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"]) {
           const chip = document.createElement("k-trust-state");
           chip.setAttribute("state", state);
           trust.append(chip);
@@ -281,18 +287,18 @@
       </section>
 
       <section aria-labelledby="trust-title" data-trust-gallery>
-        <k-panel title="Trust states" count="what Kontour can establish">
+        <k-panel title="Trust states" count="Surface claim statuses">
           <div class="stack">
             <span id="trust-title" class="label">Label, glyph, and line style carry the state; color reinforces it</span>
+            <k-trust-state state="unknown" detail="No evidence has been recorded for this claim"></k-trust-state>
+            <k-trust-state state="proposed" detail="Asserted by the producer; awaiting review"></k-trust-state>
+            <k-trust-state state="assumed" detail="Treated as true without evidence"></k-trust-state>
             <k-trust-state state="verified" detail="12 cited records matched the extracted values"></k-trust-state>
-            <k-trust-state state="known" detail="Read from the source of record"></k-trust-state>
-            <k-trust-state state="inferred" detail="Model derived this from 3 related fields"></k-trust-state>
-            <k-trust-state state="estimated" detail="Projected from last month's run rate"></k-trust-state>
-            <k-trust-state state="uncertain" detail="Two of five sources support this value"></k-trust-state>
-            <k-trust-state state="conflicting" detail="Invoice and contract disagree on the amount"></k-trust-state>
-            <k-trust-state state="failed" detail="Schema validation rejected 4 rows"></k-trust-state>
-            <k-trust-state state="unavailable" detail="The source system did not respond"></k-trust-state>
-            <k-trust-state state="not-checked" detail="No verification step has run yet"></k-trust-state>
+            <k-trust-state state="stale" detail="The source changed after verification"></k-trust-state>
+            <k-trust-state state="disputed" detail="Invoice and contract disagree on the amount"></k-trust-state>
+            <k-trust-state state="superseded" detail="Replaced by the March filing"></k-trust-state>
+            <k-trust-state state="rejected" detail="Schema validation rejected 4 rows"></k-trust-state>
+            <k-trust-state state="revoked" detail="The producer withdrew this claim"></k-trust-state>
           </div>
         </k-panel>
       </section>

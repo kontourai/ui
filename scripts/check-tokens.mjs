@@ -130,9 +130,11 @@ for (const rule of [".btn-primary", ".btn:hover", ".btn:focus-visible", ".toggle
 const interactiveRules = interactiveSelectors.size;
 if (interactiveRules < 9) throw new Error(`react/styles.css: only ${interactiveRules} interactive selectors scanned.`);
 
-// Trust states (ui#73). Pinned independently of the component source so a
-// state removed from both the tokens and the component still fails here.
-const TRUST_STATES = ["verified", "known", "inferred", "estimated", "uncertain", "conflicting", "failed", "unavailable", "not-checked"];
+// Trust states (ui#73): Surface's TRUST_STATUSES, in Surface's order. Pinned
+// independently of the component source so a state removed from both the
+// tokens and the component still fails here; check:surface-parity ties the
+// component's list to the published @kontourai/surface.
+const TRUST_STATES = ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"];
 const LINE_STYLES = new Set(["solid", "dashed", "dotted", "double"]);
 const tokenBlock = (selector) => {
   for (const block of tokenFiles["tokens/tokens.css"].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {

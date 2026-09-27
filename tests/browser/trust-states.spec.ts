@@ -1,32 +1,33 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Trust states (ui#73). Pinned here, independently of the component source, so
-// a state or label dropped from the implementation fails instead of shrinking
-// the loop.
+// Trust states (ui#73) are Surface's TRUST_STATUSES with Surface's display
+// names (owner decision, 2026-09-27; check:surface-parity ties the source to
+// the published @kontourai/surface). Pinned here, independently of the
+// component source, so a state or label dropped from the implementation fails
+// instead of shrinking the loop.
 const LABELS: Record<string, string> = {
+  unknown: "No evidence",
+  proposed: "Pending review",
+  assumed: "Assumed",
   verified: "Verified",
-  known: "Known",
-  inferred: "Inferred",
-  estimated: "Estimated",
-  uncertain: "Uncertain",
-  conflicting: "Conflicting",
-  failed: "Failed",
-  unavailable: "Unavailable",
-  "not-checked": "Not checked",
+  stale: "Needs refresh",
+  disputed: "Disputed",
+  superseded: "Superseded",
+  rejected: "Rejected",
+  revoked: "Revoked",
 };
 const STATES = Object.keys(LABELS);
-// The line style groups states by how established they are; the glyph tells
-// states within a group apart.
+// The line style groups states; the glyph tells states within a group apart.
 const LINE_STYLES: Record<string, string> = {
   verified: "solid",
-  known: "solid",
-  failed: "solid",
-  inferred: "dashed",
-  estimated: "dashed",
-  uncertain: "dotted",
-  unavailable: "dotted",
-  "not-checked": "dotted",
-  conflicting: "double",
+  rejected: "solid",
+  proposed: "dashed",
+  assumed: "dashed",
+  unknown: "dotted",
+  stale: "dotted",
+  superseded: "dotted",
+  revoked: "dotted",
+  disputed: "double",
 };
 
 type Probe = {
@@ -35,7 +36,7 @@ type Probe = {
   dataState: string | null;
   label: string;
   visible: boolean;
-  glyph: string;
+  glyph: string | null;
   glyphHidden: string | null;
   borderStyle: string;
   color: string;
@@ -46,7 +47,6 @@ type Probe = {
 
 async function probe(page: Page, scopeSelector: string): Promise<Probe[]> {
   return page.locator(scopeSelector).evaluateAll((scopes) => scopes.flatMap((scope) => {
-    const scopeStyle = getComputedStyle(scope);
     const paint = (token: string) => {
       const probeNode = document.createElement("span");
       probeNode.style.color = `var(${token})`;
@@ -61,18 +61,18 @@ async function probe(page: Page, scopeSelector: string): Promise<Probe[]> {
       const root = host.querySelector(".trust-state");
       const chip = host.querySelector(".trust-state__chip");
       const label = host.querySelector(".trust-state__label");
-      const glyph = host.querySelector(".trust-state__glyph");
-      if (!root || !chip || !label || !glyph) throw new Error(`k-trust-state[state=${host.getAttribute("state")}] rendered no chip.`);
+      const glyph = host.querySelector("svg.trust-state__glyph");
+      if (!root || !chip || !label) throw new Error(`k-trust-state[state=${host.getAttribute("state")}] rendered no chip.`);
       const chipStyle = getComputedStyle(chip);
       const box = (label as HTMLElement).getBoundingClientRect();
       return {
-        scope: scope.getAttribute("data-theme-matrix") ?? `page:${document.documentElement.dataset.theme ?? scopeStyle.colorScheme}`,
+        scope: scope.getAttribute("data-theme-matrix") ?? `page:${document.documentElement.dataset.theme}`,
         state: host.getAttribute("state") ?? "",
         dataState: root.getAttribute("data-trust-state"),
         label: (label as HTMLElement).innerText.trim(),
         visible: box.width > 0 && box.height > 0 && getComputedStyle(label).visibility !== "hidden",
-        glyph: getComputedStyle(glyph, "::before").content,
-        glyphHidden: glyph.getAttribute("aria-hidden"),
+        glyph: glyph?.querySelector("path")?.getAttribute("d") ?? null,
+        glyphHidden: glyph?.getAttribute("aria-hidden") ?? null,
         borderStyle: chipStyle.borderTopStyle,
         color: chipStyle.color,
         fill: chipStyle.backgroundColor,
@@ -101,7 +101,7 @@ test("every trust state renders its visible text label in every theme and both m
   ].sort());
   for (const scope of scopes) {
     const inScope = probes.filter((entry) => entry.scope === scope);
-    expect(inScope.map((entry) => entry.state).sort(), `${scope}: states rendered`).toEqual([...STATES].sort());
+    expect(inScope.map((entry) => entry.state), `${scope}: states rendered in Surface's order`).toEqual(STATES);
     for (const entry of inScope) {
       // innerText applies the chip's uppercase transform, so compare case-free.
       expect(entry.label.toLowerCase(), `${scope} ${entry.state}: visible label text`).toBe(LABELS[entry.state].toLowerCase());
@@ -121,62 +121,107 @@ test("every trust state renders its visible text label in every theme and both m
 test("each trust state carries its own non-color cue", async ({ page }) => {
   const errors = await load(page);
   const probes = await probe(page, "[data-trust-gallery]");
-  expect(probes.map((entry) => entry.state).sort()).toEqual([...STATES].sort());
+  expect(probes.map((entry) => entry.state)).toEqual(STATES);
 
   for (const entry of probes) {
     expect(entry.borderStyle, `${entry.state}: line style`).toBe(LINE_STYLES[entry.state]);
-    expect(entry.glyph, `${entry.state}: glyph`).toMatch(/^".+"$/);
+    expect(entry.glyph, `${entry.state}: glyph path`).toBeTruthy();
   }
   // The glyph alone tells every state apart, so a grayscale or color-blind
-  // reading never depends on hue.
+  // reading never depends on hue. Assumed in particular never shares
+  // verified's line or glyph.
   expect(new Set(probes.map((entry) => entry.glyph)).size).toBe(STATES.length);
-  expect(new Set(probes.map((entry) => `${entry.glyph}|${entry.borderStyle}`)).size).toBe(STATES.length);
+  const byState = Object.fromEntries(probes.map((entry) => [entry.state, entry]));
+  expect(byState.assumed.borderStyle).not.toBe(byState.verified.borderStyle);
+  expect(byState.stale.borderStyle).not.toBe(byState.verified.borderStyle);
   expect(errors).toEqual([]);
 });
 
-test("k-trust-state keeps a text label and does not invent a state", async ({ page }) => {
+test("k-trust-state keeps a text label, keeps the state audible, and does not invent a state", async ({ page }) => {
   const errors = await load(page);
   const result = await page.evaluate(async () => {
     const host = document.createElement("div");
+    host.id = "trust-fixture";
     host.innerHTML = [
       '<k-trust-state id="empty-label" state="verified" label="  "></k-trust-state>',
-      '<k-trust-state id="custom" state="uncertain" label="Needs refresh" detail="Verification expired 3 days ago"></k-trust-state>',
-      '<k-trust-state id="spelled" state="NOT_CHECKED"></k-trust-state>',
-      '<k-trust-state id="unknown" state="stale"></k-trust-state>',
+      '<k-trust-state id="custom" state="stale" label="Expired" detail="Verification expired 3 days ago"></k-trust-state>',
+      '<k-trust-state id="same" state="stale" label="Needs refresh"></k-trust-state>',
+      '<k-trust-state id="cased" state=" VERIFIED "></k-trust-state>',
+      '<k-trust-state id="unrecognized" state="pending"></k-trust-state>',
       '<k-trust-state id="linked" state="verified"><a href="#evidence">12 source records</a></k-trust-state>',
     ].join("");
     document.querySelector("main")!.append(host);
     await new Promise((resolve) => requestAnimationFrame(resolve));
+    document.querySelector("#linked")!.setAttribute("state", "rejected");
+    await new Promise((resolve) => requestAnimationFrame(resolve));
     const read = (id: string) => {
       const root = document.querySelector(`#${id} .trust-state`)!;
+      const hidden = root.querySelector(".trust-state__hidden");
       return {
         className: root.className,
         state: root.getAttribute("data-trust-state"),
         label: root.querySelector(".trust-state__label")?.textContent,
+        hidden: hidden?.textContent ?? null,
+        hiddenWidth: hidden ? hidden.getBoundingClientRect().width : null,
+        glyphs: root.querySelectorAll("svg").length,
         detail: root.querySelector(".trust-state__detail")?.innerHTML ?? null,
       };
     };
-    const linked = document.querySelector("#linked")!;
-    linked.setAttribute("state", "failed");
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-    const out = {
+    return {
       empty: read("empty-label"),
       custom: read("custom"),
-      spelled: read("spelled"),
-      unknown: read("unknown"),
+      same: read("same"),
+      cased: read("cased"),
+      unrecognized: read("unrecognized"),
       linked: read("linked"),
     };
-    host.remove();
-    return out;
   });
 
-  expect(result.empty).toMatchObject({ state: "verified", label: "Verified", detail: null });
-  expect(result.custom).toMatchObject({ state: "uncertain", label: "Needs refresh", detail: "Verification expired 3 days ago" });
-  expect(result.spelled).toMatchObject({ state: "not-checked", label: "Not checked" });
-  // An unrecognized word shows as itself, with no state class or attribute.
-  expect(result.unknown).toEqual({ className: "trust-state", state: null, label: "stale", detail: null });
+  expect(result.empty).toMatchObject({ state: "verified", label: "Verified", hidden: null, detail: null });
+  // An override keeps Surface's label for assistive tech, visually hidden.
+  expect(result.custom).toMatchObject({ state: "stale", label: "Expired", hidden: " (Needs refresh)", detail: "Verification expired 3 days ago" });
+  expect(result.custom.hiddenWidth).toBeLessThanOrEqual(1);
+  expect(result.same).toMatchObject({ label: "Needs refresh", hidden: null });
+  expect(result.cased).toMatchObject({ state: "verified", label: "Verified" });
+  // An unrecognized word shows as itself: no state class, attribute, or glyph box.
+  expect(result.unrecognized).toMatchObject({ className: "trust-state", state: null, label: "pending", hidden: null, glyphs: 0 });
   // Child content is the detail, and survives a re-render.
-  expect(result.linked).toMatchObject({ state: "failed", label: "Failed", detail: '<a href="#evidence">12 source records</a>' });
+  expect(result.linked).toMatchObject({ state: "rejected", label: "Rejected", detail: '<a href="#evidence">12 source records</a>' });
+  // The accessible text carries the default label; the glyph is not announced.
+  expect(await page.locator("#custom").ariaSnapshot()).toContain("Expired (Needs refresh)");
+  expect(errors).toEqual([]);
+});
+
+test("k-trust-state keeps parser-created child detail inside the chip", async ({ page }) => {
+  const errors = await load(page);
+  // document.write after load reopens the document in the same window, so the
+  // element is already defined when the parser creates it and its children:
+  // the path where connectedCallback runs before the children exist.
+  const result = await page.evaluate(async () => {
+    const defined = Boolean(customElements.get("k-trust-state"));
+    document.open();
+    document.write('<!doctype html><body><k-trust-state id="parsed" state="verified"><a href="#evidence">12 source records</a></k-trust-state></body>');
+    document.close();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const host = document.querySelector("#parsed")!;
+    const first = { children: host.children.length, detail: host.querySelector(".trust-state__detail")?.innerHTML ?? null };
+    host.setAttribute("state", "stale");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    return {
+      defined,
+      upgraded: host instanceof customElements.get("k-trust-state")!,
+      first,
+      after: {
+        children: host.children.length,
+        state: host.querySelector(".trust-state")?.getAttribute("data-trust-state"),
+        detail: host.querySelector(".trust-state__detail")?.innerHTML ?? null,
+      },
+    };
+  });
+  expect(result.defined).toBe(true);
+  expect(result.upgraded).toBe(true);
+  expect(result.first).toEqual({ children: 1, detail: '<a href="#evidence">12 source records</a>' });
+  expect(result.after).toEqual({ children: 1, state: "stale", detail: '<a href="#evidence">12 source records</a>' });
   expect(errors).toEqual([]);
 });
 

@@ -254,30 +254,30 @@ Rules:
 
 ## Trust States
 
-Use a trust state, not a status tone, to say what your product can establish about a value:
-`verified`, `known`, `inferred`, `estimated`, `uncertain`, `conflicting`, `failed`,
-`unavailable`, or `not-checked`. Each renders a text label, a glyph, and a line style, so the
-meaning survives without color; put the evidence in the detail.
+Use a trust state, not a status tone, for the status of a claim. The states are Surface's claim
+statuses, in Surface's order, with Surface's display names as default labels: `unknown` (No
+evidence), `proposed` (Pending review), `assumed`, `verified`, `stale` (Needs refresh),
+`disputed`, `superseded`, `rejected`, `revoked`. Each renders a text label, an SVG glyph, and a
+line style, so the meaning survives without color; put the evidence in the detail.
 
 ```tsx
 import { TrustState } from "@kontourai/ui/react";
 
-<TrustState state="verified" detail="Verified against 12 source records" />
-<TrustState state="uncertain" label="Needs refresh" detail="Verification expired 3 days ago" />
+<TrustState state="verified" detail="12 source records matched" />
+<TrustState state="stale" label="Expired" detail="Verification expired 3 days ago" />
 ```
 
 ```html
-<k-trust-state state="conflicting" detail="Invoice and contract disagree on the amount"></k-trust-state>
+<k-trust-state state="disputed" detail="Invoice and contract disagree on the amount"></k-trust-state>
 <k-trust-state state="verified"><a href="#evidence">12 source records</a></k-trust-state>
 ```
 
-- `label` replaces the default wording (keep your product's vocabulary); an empty label falls
-  back to the default, so the chip always has text.
-- The element takes its detail from the `detail` attribute, or else from its children.
-- `trustStateFor(value)` parses spellings such as `"Not checked"` and returns `null` for
-  anything else. An unrecognized state renders as its own text with no state styling.
-- These are not Surface claim statuses. Choose the state deliberately and pass Surface's label
-  (see DESIGN.md, "Trust states and Surface statuses").
+- `label` replaces the visible wording; the default label stays available to assistive
+  technology as visually hidden text, and an empty label falls back to the default.
+- The element takes its detail from the `detail` attribute, or else from its children. Children
+  are read once, on the first render; children added later are not picked up.
+- `trustStateFor(value)` accepts any casing and surrounding space and returns `null` for
+  anything else. An unrecognized state renders as its own text with no state styling or glyph.
 - Chart series can reuse `--k-trust-<state>` and `--k-trust-<state>-line`.
 
 ## Tone Mapping
