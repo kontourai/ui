@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/kontourai/ui/compare/v1.13.0...v1.14.0) (2026-09-27)
+
+
+### Features
+
+* **tokens:** separate brand from action and focus roles ([#79](https://github.com/kontourai/ui/issues/79)) ([52ae45c](https://github.com/kontourai/ui/commit/52ae45ca98eb16c6abcdd04220204a13e99dc21f))
+
 ## [1.13.0](https://github.com/kontourai/ui/compare/v1.12.0...v1.13.0) (2026-09-27)
 
 
