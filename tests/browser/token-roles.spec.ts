@@ -11,15 +11,23 @@ const PALE_RGB = "rgb(247, 243, 161)";
 test("a brand-only override leaves primary actions readable in every theme and mode", async ({ page }) => {
   await loadGallery(page);
 
-  const samples = await page.locator("[data-theme-matrix]").evaluateAll((nodes, pale) => nodes.map((sample) => {
-    (sample as HTMLElement).style.setProperty("--k-brand", pale);
-    // A probe that paints with the brand proves the override reached the
-    // sample's descendants; without it a no-op override would pass.
-    const probe = document.createElement("span");
-    probe.style.color = "var(--k-brand)";
-    sample.append(probe);
+  await page.locator("[data-theme-matrix]").evaluateAll((nodes, pale) => {
+    for (const sample of nodes) {
+      (sample as HTMLElement).style.setProperty("--k-brand", pale);
+      // A probe that paints with the brand proves the override reached the
+      // sample's descendants; without it a no-op override would pass.
+      const probe = document.createElement("span");
+      probe.dataset.brandProbe = "";
+      probe.style.color = "var(--k-brand)";
+      sample.append(probe);
+    }
+  }, PALE_BRAND);
+  await settleTransitions(page);
+
+  const samples = await page.locator("[data-theme-matrix]").evaluateAll((nodes) => nodes.map((sample) => {
     const button = sample.querySelector("k-button button");
-    if (!button) throw new Error("Theme matrix sample has no primary button.");
+    const probe = sample.querySelector("[data-brand-probe]");
+    if (!button || !probe) throw new Error("Theme matrix sample has no primary button or brand probe.");
     const style = getComputedStyle(button);
     return {
       id: sample.getAttribute("data-theme-matrix"),
@@ -27,7 +35,7 @@ test("a brand-only override leaves primary actions readable in every theme and m
       text: style.color,
       fill: style.backgroundColor,
     };
-  }), PALE_BRAND);
+  }));
 
   expect(samples.length).toBeGreaterThanOrEqual(10);
   for (const sample of samples) {
@@ -49,6 +57,9 @@ test("a brand-slot override on the root keeps actions, focus, and status text re
       // choice must not reach status badges.
       root.style.setProperty("--k-brand-contrast", mode === "dark" ? "#ffffff" : "#000000");
     }, [mode, PALE_BRAND]);
+    // Buttons transition background and border for --k-dur; reading mid-flight
+    // rates a blend of the old and new fills instead of what users see.
+    await settleTransitions(page);
 
     const eyebrow = page.locator("k-topbar .eyebrow");
     await expect(eyebrow).toHaveCSS("color", PALE_RGB);
@@ -66,8 +77,46 @@ test("a brand-slot override on the root keeps actions, focus, and status text re
     await page.keyboard.press("Tab");
     const checkbox = page.locator("k-panel k-checkbox input").first();
     await checkbox.focus();
-    const outline = await checkbox.evaluate((node) => getComputedStyle(node).outlineColor);
-    expect(outline, `${mode}: focus ring followed the brand`).not.toBe(PALE_RGB);
+    const ring = await checkbox.evaluate((node) => {
+      const role = document.createElement("span");
+      role.style.color = "var(--k-focus)";
+      node.parentElement!.append(role);
+      const style = getComputedStyle(node);
+      const result = { style: style.outlineStyle, color: style.outlineColor, role: getComputedStyle(role).color };
+      role.remove();
+      return result;
+    });
+    expect(ring.style, `${mode}: focused checkbox shows no ring`).toBe("solid");
+    expect(ring.color, `${mode}: focus ring followed the brand`).not.toBe(PALE_RGB);
+    expect(ring.color, `${mode}: focus ring is not the --k-focus role`).toBe(ring.role);
+  }
+});
+
+// A theme scope nested under another theme's scope (the gallery's matrix
+// samples under a themed <html>) must carry its own action text color: a scope
+// that set only the action fill would inherit the outer scope's text onto it.
+test("nested theme scopes keep a readable primary action under every root theme and mode", async ({ page }) => {
+  await loadGallery(page);
+  const themes = await page.locator("[data-theme-matrix]").evaluateAll((nodes) =>
+    [...new Set(nodes.map((node) => node.getAttribute("data-theme-matrix")!.split(":")[0]))]);
+  expect(themes.length).toBeGreaterThanOrEqual(5);
+
+  for (const rootTheme of ["", ...themes]) for (const mode of ["dark", "light"]) {
+    await page.evaluate(([rootTheme, mode]) => {
+      document.documentElement.className = rootTheme;
+      document.documentElement.dataset.theme = mode;
+    }, [rootTheme, mode]);
+    await settleTransitions(page);
+    const buttons = await page.locator("[data-theme-matrix] k-button button").evaluateAll((nodes) => nodes.map((node) => ({
+      id: node.closest("[data-theme-matrix]")!.getAttribute("data-theme-matrix"),
+      text: getComputedStyle(node).color,
+      fill: getComputedStyle(node).backgroundColor,
+    })));
+    expect(buttons.length).toBe(themes.length * 2);
+    for (const button of buttons) {
+      expect(contrast(button.text, button.fill), `root ${rootTheme || "default"}:${mode} > ${button.id}: primary text on fill`)
+        .toBeGreaterThanOrEqual(4.5);
+    }
   }
 });
 
@@ -125,6 +174,18 @@ for (const placement of PLACEMENTS) {
     for (const [tone, { token, local }] of Object.entries(resolved.soft)) {
       expect(token, `--k-${tone}-soft must mix the scope's --k-${tone}`).toBe(local);
     }
+  });
+}
+
+// Waits for every running CSS transition to finish so computed colors are the
+// settled values. Reading layout first flushes style, which starts any
+// transition the preceding change triggered; infinite animations (spinner,
+// skeleton) are CSSAnimations and are not awaited.
+async function settleTransitions(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    void document.documentElement.offsetHeight;
+    const transitions = document.getAnimations().filter((animation) => animation instanceof CSSTransition);
+    await Promise.all(transitions.map((transition) => transition.finished.catch(() => undefined)));
   });
 }
 

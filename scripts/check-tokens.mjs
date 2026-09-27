@@ -58,6 +58,12 @@ for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
         if (!declared.has(role)) throw new Error(`${file} ${selector}: sets --k-brand but not ${role}.`);
       }
     }
+    // The action fill and its text travel together; a scope that sets only the
+    // fill inherits an ancestor scope's text color (a nested theme under a
+    // different theme or mode) and can fail contrast.
+    if (declared.has("--k-action") !== declared.has("--k-action-contrast")) {
+      throw new Error(`${file} ${selector}: --k-action and --k-action-contrast must be declared together.`);
+    }
     for (const role of ["--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast"]) {
       if (declared.has(role) && declared.get(role).includes("var(")) {
         throw new Error(`${file} ${selector}: ${role} must hold a literal value, not ${declared.get(role)}.`);
