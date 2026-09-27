@@ -94,7 +94,9 @@ test("a brand-slot override on the root keeps actions, focus, and status text re
     const ghost = page.locator("k-topbar .btn-ghost");
     await page.keyboard.press("Tab");
     await ghost.focus();
-    const toggle = page.locator("main k-toggle input.toggle").first();
+    // Outside the theme matrix: its samples set their own brand, so the root
+    // override would not reach a toggle there.
+    const toggle = page.locator("main > .grid k-toggle input.toggle").first();
     const focused = { button: await focusedState(page, ghost), toggle: undefined as FocusState | undefined };
     await toggle.focus();
     focused.toggle = await focusedState(page, toggle);
