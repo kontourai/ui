@@ -216,9 +216,13 @@ from `tokens/tokens.css`, `tokens/themes.css`, and `react/styles.css` by
 `scripts/generate-design-md.mjs`; `npm run check:design` fails when it drifts. Change a value in
 `tokens/`, then run `node scripts/generate-design-md.mjs --write`. Never hand-edit the front
 matter. Prose restates a shipped value only as a backticked token name, an equals sign, and a
-backticked value (optionally with a scope such as `(light)` or `(flow)` after the name); the
-same check verifies every such quote against `tokens/`, and fails on any other value-looking
-text that follows a token name on the same line (or in the same table cell).
+backticked value (optionally with a scope such as `(light)` or `(flow)` after the name). The
+same check verifies every such quote against `tokens/`, and fails when any other value-looking
+text (a px/em/rem size, hex or `rgb()`-style color, or bare number) appears anywhere on a prose
+line, or anywhere in a table row, that names a token. Table columns whose header starts with
+"Draft" are exempt, since they hold the draft's direction rather than shipped values. Issue
+links and references (`#72`), acronym versions (WCAG 2.2), and `OPEN-n` ids are ignored. Not
+covered: a value placed on a different line from the token name.
 
 Reading the packaged copy under `node_modules/@kontourai/ui/`: the generator script is not in
 the package. The `tokens/*.css` files next to this file are the source of every value; the
@@ -252,7 +256,8 @@ A reference such as `focus-ring: "{colors.brand}"` means "the brand value of the
 theme", with a caveat from CSS: `--k-focus-ring` is declared once, on `:root`, as
 `var(--k-brand)`, and custom properties inherit their computed value. It therefore follows a
 theme's or light mode's brand only when the theme class and `data-theme` sit on the root
-(`<html>`) element itself; on a descendant root, focus rings keep the default dark brand.
+(`<html>`) element itself; with the theme class on a descendant, focus rings keep the brand
+resolved on `<html>` (the default brand for that mode).
 `primary` is not a CSS token; it is derived from whatever `.btn-primary` paints, so the format's
 required `primary` color stays truthful (see OPEN-8).
 
@@ -333,10 +338,25 @@ Products share a grammar (contour-derived geometry, compatible line weights, con
 organic forms, environmental semantics, flat and monochrome viability, typography, and
 restrained material depth), not one recolored icon.
 
-**OPEN-9 — product endorsement form and hierarchy.** The company name is Kontour AI. How
-products are named and endorsed under it is pending a brand-architecture decision. Don't
-invent compound names that stack the company name, a product name, and "AI" or "Platform"
-(e.g. "Kontour <Product> AI"); use the approved endorsement form once decided.
+### Brand hierarchy
+
+The company name is Kontour AI. Decided: the preferred lockup text endorses a product under
+the company name.
+
+```text
+Station
+by Kontour AI
+
+Surface
+by Kontour AI
+```
+
+**OPEN-9 — Flow endorsement form and product tiering.** Whether the endorsed product is
+presented as "Flow" or "Flow Agents", and how other products are tiered, is open.
+
+Don't invent compound names that stack the company name, a product name, and "AI" or
+"Platform" (e.g. "Kontour <Product> AI"); use the endorsement form above, or the approved one
+once an open entry is decided.
 
 ## Colors
 
@@ -349,7 +369,7 @@ Color roles, not values. The values for each mode and theme are in the front mat
 | `--k-panel-raised` | Raised or inset surface inside a panel (controls, nested regions). |
 | `--k-line`, `--k-line-strong` | Hairline separation; `line-strong` for control borders and emphasis. |
 | `--k-text`, `--k-text-muted` | Primary and secondary text. |
-| `--k-text-faint` | Tertiary, non-essential text only. Meets WCAG AA for normal text on `--k-panel` in the default dark and light skins; it does not on `--k-panel-raised`, on the light `--k-bg`, or in `.theme-console`. Not machine-checked. |
+| `--k-text-faint` | Tertiary, non-essential text only. Meets WCAG AA for normal text on `--k-panel` in the default dark and light skins; it does not on `--k-panel-raised`, on the light `--k-bg`, or in `.theme-console` or `.theme-survey`. Not machine-checked. |
 | `--k-brand`, `--k-brand-contrast` | The product identity slot, and the text color that sits on it. |
 | `--k-positive`, `--k-caution`, `--k-negative`, `--k-active`, `--k-neutral` | Shared status tones (see below). |
 | `--k-*-soft` | Low-alpha tone fills behind status text; derived at runtime from the active tone. |
@@ -456,7 +476,8 @@ create these tokens):
 Note that shipped control text is `--k-text-md` = `14px`, the size of the draft's `body-sm`.
 
 Shipped styling sets `text-transform: uppercase` on buttons, badges, status labels, field
-labels, eyebrows, panel headings, and titles (`.topbar h1`, `.dialog__title`). That is current
+labels, metric labels (`.metric span`), top-bar meta labels (`.topbar-meta-item span`),
+eyebrows, panel headings, and titles (`.topbar h1`, `.dialog__title`). That is current
 implementation, not a rule from the draft; keep it consistent until a typography decision
 changes it.
 
@@ -471,15 +492,15 @@ Use a 4px base rhythm, and only the spacing tokens.
 
 > **OPEN-1 — spacing scale. Danger: the same step numbers mean different sizes.**
 >
-> | Step | Shipped `--k-space-N` | Draft `space-N` |
-> | --- | --- | --- |
-> | 1 | `--k-space-1` = `4px` | 4px |
-> | 2 | `--k-space-2` = `8px` | 8px |
-> | 3 | `--k-space-3` = `12px` | 12px |
-> | 4 | `--k-space-4` = `16px` | 16px |
-> | 5 | **`--k-space-5` = `24px`** | **20px** |
-> | 6 | **`--k-space-6` = `32px`** | **24px** |
-> | 8, 10, 12, 16, 20, 24 | not shipped | 32, 40, 48, 64, 80, 96px |
+> | Shipped | Draft |
+> | --- | --- |
+> | `--k-space-1` = `4px` | `space-1`: 4px |
+> | `--k-space-2` = `8px` | `space-2`: 8px |
+> | `--k-space-3` = `12px` | `space-3`: 12px |
+> | `--k-space-4` = `16px` | `space-4`: 16px |
+> | **`--k-space-5` = `24px`** | **`space-5`: 20px** |
+> | **`--k-space-6` = `32px`** | **`space-6`: 24px** |
+> | not shipped | `space-8` to `space-24`: 32, 40, 48, 64, 80, 96px |
 >
 > A layout written against the draft's `space-5` or `space-6` renders larger than intended on
 > the shipped tokens. Always read the step's value from the front matter, never from its number.
@@ -524,8 +545,8 @@ rounded. `.theme-console` sets `--k-radius-sm` (console) = `0`, `--k-radius-md` 
 `--k-radius-control` (console) = `0`, and `--k-radius-overlay` (console) = `0`.
 
 **OPEN-2 — radius scale.** Shipped: `--k-radius-sm` = `9px`, `--k-radius-md` = `14px`,
-`--k-radius-control` = `4px`, `--k-radius-overlay` = `10px`. Draft direction: 6 / 10 / 16 / 24px
-as `radius-sm` / `md` / `lg` / `xl`. The names overlap and the values do not; do not add
+`--k-radius-control` = `4px`, `--k-radius-overlay` = `10px`.
+Draft direction: 6 / 10 / 16 / 24px as `radius-sm` / `md` / `lg` / `xl`. The names overlap and the values do not; do not add
 `--radius-*` properties.
 
 ## Components
@@ -792,7 +813,7 @@ assets and tokens together, in the same change.
 | OPEN-6 | Palette and product accents | per-theme `--k-brand`; no `theme-station` | Ink, Stone, Station, Flow, Surface accents | [#72](https://github.com/kontourai/ui/issues/72), [#74](https://github.com/kontourai/ui/issues/74) |
 | OPEN-7 | Status model | five tones | nine semantic and trust states | [#73](https://github.com/kontourai/ui/issues/73) |
 | OPEN-8 | Primary action and focus | driven by `--k-brand` | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
-| OPEN-9 | Product endorsement form and hierarchy | company name Kontour AI | pending a brand-architecture decision | — |
+| OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "<Product> by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
 | OPEN-10 | Console and Survey themes | shipped | not covered by the draft | — |
 | OPEN-11 | Marketing-site palette relationship | — | undecided | — |
 

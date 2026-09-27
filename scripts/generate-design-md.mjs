@@ -19,6 +19,12 @@ import { fileURLToPath } from "node:url";
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
 
+// Generator errors are contract violations, not crashes: print the message, exit 1.
+process.on("uncaughtException", (error) => {
+  console.error(`Error: ${error.message}`);
+  process.exit(1);
+});
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (file) => readFileSync(path.join(root, file), "utf8").replace(/\r\n?/g, "\n");
 const DESIGN_FILE = "DESIGN.md";
@@ -290,32 +296,60 @@ const splitDesign = (text) => {
 
 // The body may quote a shipped value only as `--k-token` = `value` or
 // `--k-token` (scope) = `value`, where scope is a front-matter suffix such as light,
-// flow, or flow-light. Every such quote must still match the token contract, and any
-// other value-looking text after a token mention (same line, or same table cell) fails,
-// so a malformed quote cannot pass unchecked.
+// flow, or flow-light. Every such quote must still match the token contract.
+//
+// Any unit that mentions a token (a prose line, or a table row) must carry no other
+// value-looking text anywhere in it (before or after the mention, and after a valid
+// quote), so a malformed or contradicting quote cannot pass unchecked. In a table, cells
+// under a header that starts with "Draft" are exempt: they hold the draft's direction,
+// not shipped values. Not covered: a value on a different line from the token name.
+//
+// Ignored as values: markdown links (issue links), `#123`-style issue references (all
+// digits, not 6 or 8 long), acronym versions such as `WCAG 2.2`, and `OPEN-n` ids.
+// A bare number next to a token name still counts (`--k-z-dropdown` is a number).
 const CLAIM = /`(--k-[a-z0-9-]+)`(?: \(([a-z-]+)\))? = `([^`]+)`/g;
-const VALUE_LIKE = /-?\d*\.?\d+(?:px|em|rem)\b|#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|clamp|calc)\(|(?<![\w#.\u2013-])\d+(?:\.\d+)?(?![\w%.-])/i;
-const proseClaims = (body) => {
+const MENTION = /--k-[a-z0-9-]+/g;
+const NOT_VALUES = [
+  /\[[^\]]*\]\([^)]*\)/g, // markdown links, e.g. [#72](https://github.com/.../issues/72)
+  /(?<![\w#])#(?!\d{6}\b|\d{8}\b)\d+\b/g, // issue references like #72
+  /\b[A-Z]{2,}[ -]?\d+(?:\.\d+)*\b/g, // acronym versions like WCAG 2.2
+  /\bOPEN-\d+\b/g,
+];
+const VALUE_LIKE = /-?\d*\.?\d+(?:px|em|rem)\b|#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|clamp|calc)\(|(?<![\w#.–-])\d+(?:\.\d+)?(?![\w%.-])/i;
+const cellsOf = (row) => row.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+const proseClaims = (body, offset) => {
   const problems = [];
   let count = 0;
-  body.split("\n").forEach((line, index) => {
+  const lines = body.split("\n");
+  let header = null;
+  lines.forEach((line, index) => {
+    const at = `line ${index + 1 + offset}`;
     const bare = line.replace(/^\s*(?:>\s*)*/, "");
-    const units = bare.startsWith("|") ? bare.split("|") : [line];
-    for (const unit of units) {
-      for (const match of unit.matchAll(CLAIM)) {
-        count += 1;
-        const [text, prop, scope = "", claimed] = match;
-        const actual = declared.get(`${prop}|${scope}`);
-        if (actual === undefined) problems.push(`line ${index + 1}: ${text}: no such token in that scope`);
-        else if (actual !== claimed) problems.push(`line ${index + 1}: ${text}: tokens/ says \`${actual}\``);
+    let unit = line;
+    if (bare.startsWith("|")) {
+      if (/^\|?[\s:|-]+\|?$/.test(bare.trim())) return; // separator row
+      const next = (lines[index + 1] ?? "").replace(/^\s*(?:>\s*)*/, "").trim();
+      if (/^\|[\s:|-]+$/.test(next) && next.includes("-")) {
+        header = cellsOf(bare);
+        return;
       }
-      const rest = unit.replace(CLAIM, " ");
-      const mention = rest.search(/--k-[a-z0-9-]+/);
-      if (mention === -1) continue;
-      const tail = rest.slice(mention).replace(/--k-[a-z0-9-]+/g, " ");
-      const value = VALUE_LIKE.exec(tail);
-      if (value) problems.push(`line ${index + 1}: "${value[0]}" follows a token mention but is not a checked \`--k-token\` = \`value\` quote: ${unit.trim()}`);
+      const cells = cellsOf(bare);
+      unit = cells.filter((_, column) => !/^draft\b/i.test(header?.[column] ?? "")).join(" | ");
+    } else {
+      header = null;
     }
+    for (const match of unit.matchAll(CLAIM)) {
+      count += 1;
+      const [text, prop, scope = "", claimed] = match;
+      const actual = declared.get(`${prop}|${scope}`);
+      if (actual === undefined) problems.push(`${at}: ${text}: no such token in that scope`);
+      else if (actual !== claimed) problems.push(`${at}: ${text}: tokens/ says \`${actual}\``);
+    }
+    if (!unit.match(MENTION)) return;
+    let rest = unit.replace(CLAIM, " ").replace(MENTION, " ");
+    for (const pattern of NOT_VALUES) rest = rest.replace(pattern, " ");
+    const value = VALUE_LIKE.exec(rest);
+    if (value) problems.push(`${at}: "${value[0]}" sits beside a token name but is not a checked \`--k-token\` = \`value\` quote: ${line.trim()}`);
   });
   return { count, problems };
 };
@@ -336,7 +370,7 @@ if (mode === "--write") {
     console.error("Run `node scripts/generate-design-md.mjs --write` and commit the result; never hand-edit the block.");
     process.exit(1);
   }
-  const { count, problems } = proseClaims(read(DESIGN_FILE).slice(current.length));
+  const { count, problems } = proseClaims(read(DESIGN_FILE).slice(current.length), current.split("\n").length - 1);
   if (problems.length) {
     console.error(`${DESIGN_FILE} body quotes token values that are malformed or no longer match tokens/:`);
     for (const problem of problems) console.error(`  ${problem}`);
