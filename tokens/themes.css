@@ -1,7 +1,21 @@
+/* Product themes. Each theme sets its brand (identity) and, beside it, the
+   action and focus roles. The action contrast role is overridden where needed.
+   The roles
+   hold their own values rather than aliasing the brand, so a later brand
+   override cannot break primary actions or focus.
+
+   Every theme class also redeclares --k-focus-ring: a var()-derived token
+   resolves where it is declared, so without this a theme class below the root
+   would inherit the root's ring (issue 78). .theme-console changes the status
+   hues, so it redeclares the soft fills too. */
+
 .theme-survey {
   --k-bg: #06080b;
   --k-brand: #5ce0c6;
+  --k-action: #5ce0c6;
+  --k-focus: #5ce0c6;
   --k-text-faint: #6f8095;
+  --k-focus-ring: var(--k-focus);
 }
 
 .theme-console {
@@ -13,6 +27,9 @@
   --k-radius-overlay: 0;
   --k-brand: #c9ff4a;
   --k-brand-contrast: #11120f;
+  --k-action: #c9ff4a;
+  --k-action-contrast: #11120f;
+  --k-focus: #c9ff4a;
   --k-bg: #11120f;
   --k-panel: #191b16;
   --k-panel-raised: #20231e;
@@ -25,25 +42,54 @@
   --k-caution: #e8c15f;
   --k-negative: #ee776f;
   --k-active: #84d8c8;
+  --k-status-contrast: #11120f;
+  --k-focus-ring: var(--k-focus);
+  --k-positive-soft: color-mix(in oklab, var(--k-positive) 14%, transparent);
+  --k-caution-soft: color-mix(in oklab, var(--k-caution) 14%, transparent);
+  --k-negative-soft: color-mix(in oklab, var(--k-negative) 14%, transparent);
+  --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
 }
 
 .theme-flow {
   --k-brand: #2f88a6;
+  --k-action: #2f88a6;
+  --k-focus: #2f88a6;
+  --k-focus-ring: var(--k-focus);
 }
 
 .theme-surface {
   --k-brand: #14a37a;
+  --k-action: #14a37a;
+  --k-focus: #14a37a;
+  --k-focus-ring: var(--k-focus);
+}
+
+/* Station: the draft accent, adjusted per mode only where WCAG AA needs it.
+   Dark: the accent carries white text as a fill but is too dark to read as
+   text on the dark panel, so the brand (and the focus ring) is the accent
+   lightened to clear contrast; the action keeps the draft accent. */
+.theme-station {
+  --k-brand: #9364ff;
+  --k-action: #7c3aed;
+  --k-action-contrast: #ffffff;
+  --k-focus: #9364ff;
+  --k-focus-ring: var(--k-focus);
 }
 
 [data-theme="light"].theme-survey,
 [data-theme="light"] .theme-survey {
   --k-brand: #16806f;
+  --k-action: #16806f;
+  --k-focus: #16806f;
 }
 
 [data-theme="light"].theme-console,
 [data-theme="light"] .theme-console {
   --k-brand: #6c9400;
   --k-brand-contrast: #ffffff;
+  --k-action: #6c9400;
+  --k-action-contrast: #11120f;
+  --k-focus: #6c9400;
   --k-bg: #f3f5eb;
   --k-panel: #fbfcf7;
   --k-panel-raised: #eef2e6;
@@ -56,14 +102,27 @@
   --k-caution: #8a6500;
   --k-negative: #b93a36;
   --k-active: #247f75;
+  --k-status-contrast: #ffffff;
 }
 
 [data-theme="light"].theme-flow,
 [data-theme="light"] .theme-flow {
   --k-brand: #1f6f88;
+  --k-action: #1f6f88;
+  --k-focus: #1f6f88;
 }
 
 [data-theme="light"].theme-surface,
 [data-theme="light"] .theme-surface {
   --k-brand: #0f6b52;
+  --k-action: #0f6b52;
+  --k-focus: #0f6b52;
+}
+
+[data-theme="light"].theme-station,
+[data-theme="light"] .theme-station {
+  --k-brand: #7c3aed;
+  --k-action: #7c3aed;
+  --k-action-contrast: #ffffff;
+  --k-focus: #7c3aed;
 }

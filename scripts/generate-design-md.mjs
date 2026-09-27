@@ -36,6 +36,7 @@ const SOURCES = ["tokens/tokens.css", "tokens/themes.css", "react/styles.css"];
 // DESIGN.md represents it. Every bucket reaches the front matter, either as a token or as
 // a value in the trailing comment, so any token value change fails --check.
 const CLASSIFY = [
+  [/^--k-(?:action|action-contrast|focus|status-contrast)$/, "color"],
   [/^--k-space-/, "spacing"],
   [/^--k-radius-/, "rounded"],
   [/^--k-text-(?:xs|sm|md|lg|xl|2xl)$/, "type-size"],

@@ -21,7 +21,7 @@ test("renders the package gallery with tokens, themes, and primitive components"
     const role = component === "Select" ? "combobox" : "textbox";
     await expect(card.getByRole(role, { name: `${component} playground` })).toBeVisible();
   }
-  for (const theme of ["theme-console", "theme-flow", "theme-surface", "theme-survey"])
+  for (const theme of ["theme-console", "theme-flow", "theme-station", "theme-surface", "theme-survey"])
     for (const mode of ["light", "dark"])
       await expect(page.locator(`[data-theme-matrix='${theme}:${mode}']`)).toBeVisible();
   await assertTokenStylesResolved(page);
@@ -43,6 +43,7 @@ test("applies each product theme selector to component behavior and detects a co
     return {
       id: sample.getAttribute("data-theme-matrix"),
       brand: sampleStyle.getPropertyValue("--k-brand").trim(),
+      action: sampleStyle.getPropertyValue("--k-action").trim(),
       background: sampleStyle.getPropertyValue("--k-bg").trim(),
       panelToken: sampleStyle.getPropertyValue("--k-panel").trim(),
       raisedToken: sampleStyle.getPropertyValue("--k-panel-raised").trim(),
@@ -54,33 +55,39 @@ test("applies each product theme selector to component behavior and detects a co
     };
   }));
 
+  // Every shipped theme except Station keeps action equal to its brand, so the
+  // role split renders exactly as the brand-driven buttons did.
   const expected = {
-    "theme-console:dark": { brand: "#c9ff4a", background: "#11120f", panel: "#191b16", raised: "#20231e" },
-    "theme-console:light": { brand: "#6c9400", background: "#f3f5eb", panel: "#fbfcf7", raised: "#eef2e6" },
-    "theme-flow:dark": { brand: "#2f88a6", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
-    "theme-flow:light": { brand: "#1f6f88", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
-    "theme-surface:dark": { brand: "#14a37a", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
-    "theme-surface:light": { brand: "#0f6b52", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
-    "theme-survey:dark": { brand: "#5ce0c6", background: "#06080b", panel: "#111824", raised: "#16202d" },
-    "theme-survey:light": { brand: "#16806f", background: "#06080b", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-console:dark": { brand: "#c9ff4a", action: "#c9ff4a", background: "#11120f", panel: "#191b16", raised: "#20231e" },
+    "theme-console:light": { brand: "#6c9400", action: "#6c9400", background: "#f3f5eb", panel: "#fbfcf7", raised: "#eef2e6" },
+    "theme-flow:dark": { brand: "#2f88a6", action: "#2f88a6", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
+    "theme-flow:light": { brand: "#1f6f88", action: "#1f6f88", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-station:dark": { brand: "#9364ff", action: "#7c3aed", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
+    "theme-station:light": { brand: "#7c3aed", action: "#7c3aed", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-surface:dark": { brand: "#14a37a", action: "#14a37a", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
+    "theme-surface:light": { brand: "#0f6b52", action: "#0f6b52", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-survey:dark": { brand: "#5ce0c6", action: "#5ce0c6", background: "#06080b", panel: "#111824", raised: "#16202d" },
+    "theme-survey:light": { brand: "#16806f", action: "#16806f", background: "#06080b", panel: "#ffffff", raised: "#fbfaf7" },
   };
+  expect(matrix.map((sample) => sample.id).sort()).toEqual(Object.keys(expected).sort());
   for (const sample of matrix) {
     const tokens = expected[sample.id as keyof typeof expected];
     expect(tokens, `missing expected tokens for ${sample.id}`).toBeDefined();
     expect(sample.brand).toBe(tokens.brand);
+    expect(sample.action).toBe(tokens.action);
     expect(sample.background).toBe(tokens.background);
     expect(sample.panelToken).toBe(tokens.panel);
     expect(sample.raisedToken).toBe(tokens.raised);
     expect(sample.panel).toBe(hexToRgb(tokens.panel));
-    expect(sample.button).toBe(hexToRgb(tokens.brand));
+    expect(sample.button).toBe(hexToRgb(tokens.action));
     expect(sample.input).toBe(hexToRgb(tokens.raised));
-    expect(sample.toggle).toBe(hexToRgb(tokens.brand));
+    expect(sample.toggle).toBe(hexToRgb(tokens.action));
   }
 
   const probe = page.locator("[data-theme-matrix='theme-console:dark']");
   const button = probe.locator("k-button button");
   const before = await button.evaluate((node) => getComputedStyle(node).backgroundColor);
-  const originalBrand = await page.evaluate(() => {
+  const originalAction = await page.evaluate(() => {
     const findThemeRule = (stylesheet: CSSStyleSheet): CSSStyleRule | undefined => {
       for (const rule of Array.from(stylesheet.cssRules)) {
         if ("selectorText" in rule && rule.selectorText === ".theme-console") return rule as CSSStyleRule;
@@ -92,13 +99,13 @@ test("applies each product theme selector to component behavior and detects a co
     };
     const rule = Array.from(document.styleSheets).map(findThemeRule).find(Boolean);
     if (!rule) throw new Error("Theme-console CSS rule was not found.");
-    const original = rule.style.getPropertyValue("--k-brand");
-    rule.style.setProperty("--k-brand", "#010203");
+    const original = rule.style.getPropertyValue("--k-action");
+    rule.style.setProperty("--k-action", "#010203");
     return original;
   });
   await expect(button).toHaveCSS("background-color", "rgb(1, 2, 3)");
   expect(await button.evaluate((node) => getComputedStyle(node).backgroundColor)).not.toBe(before);
-  await page.evaluate((brand) => {
+  await page.evaluate((action) => {
     const findThemeRule = (stylesheet: CSSStyleSheet): CSSStyleRule | undefined => {
       for (const rule of Array.from(stylesheet.cssRules)) {
         if ("selectorText" in rule && rule.selectorText === ".theme-console") return rule as CSSStyleRule;
@@ -110,8 +117,8 @@ test("applies each product theme selector to component behavior and detects a co
     };
     const rule = Array.from(document.styleSheets).map(findThemeRule).find(Boolean);
     if (!rule) throw new Error("Theme-console CSS rule was not found while restoring it.");
-    rule.style.setProperty("--k-brand", brand);
-  }, originalBrand);
+    rule.style.setProperty("--k-action", action);
+  }, originalAction);
   await expect(button).toHaveCSS("background-color", before);
 
   expect(consoleErrors).toEqual([]);

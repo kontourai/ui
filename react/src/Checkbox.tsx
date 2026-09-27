@@ -6,7 +6,7 @@ export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement
 }
 
 /**
- * Checkbox built on the native input (accent-colored via `--k-brand`), so
+ * Checkbox built on the native input (accent-colored via the `--k-action` role), so
  * indeterminate state, keyboard, and form semantics come for free.
  */
 export function Checkbox({ label, className, ...props }: CheckboxProps) {

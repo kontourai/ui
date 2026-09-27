@@ -9,10 +9,13 @@
   "themes": [
     "theme-console",
     "theme-flow",
+    "theme-station",
     "theme-surface",
     "theme-survey"
   ],
   "tokens": [
+    "--k-action",
+    "--k-action-contrast",
     "--k-active",
     "--k-active-soft",
     "--k-bg",
@@ -25,6 +28,7 @@
     "--k-dur",
     "--k-ease",
     "--k-elevation-overlay",
+    "--k-focus",
     "--k-focus-ring",
     "--k-focus-ring-offset",
     "--k-focus-ring-width",
@@ -54,6 +58,7 @@
     "--k-space-4",
     "--k-space-5",
     "--k-space-6",
+    "--k-status-contrast",
     "--k-text",
     "--k-text-2xl",
     "--k-text-faint",
@@ -99,7 +104,6 @@
       ],
       "tokens": [
         "--k-active",
-        "--k-brand-contrast",
         "--k-caution",
         "--k-font-mono",
         "--k-line",
@@ -109,6 +113,7 @@
         "--k-radius-sm",
         "--k-space-1",
         "--k-space-2",
+        "--k-status-contrast",
         "--k-text-muted",
         "--k-text-xs"
       ],
@@ -141,11 +146,12 @@
         "btn-negative"
       ],
       "tokens": [
-        "--k-brand",
-        "--k-brand-contrast",
+        "--k-action",
+        "--k-action-contrast",
         "--k-caution",
         "--k-dur",
         "--k-ease",
+        "--k-focus",
         "--k-font-ui",
         "--k-line-strong",
         "--k-negative",
@@ -156,6 +162,7 @@
         "--k-space-2",
         "--k-space-4",
         "--k-space-6",
+        "--k-status-contrast",
         "--k-text"
       ],
       "responsive": "Wraps in the explorer grid without horizontal overflow.",
@@ -181,8 +188,8 @@
         "checkbox-field__label"
       ],
       "tokens": [
-        "--k-brand",
-        "--k-focus-ring",
+        "--k-action",
+        "--k-focus",
         "--k-focus-ring-offset",
         "--k-focus-ring-width",
         "--k-space-2",
@@ -212,11 +219,11 @@
         "control--invalid"
       ],
       "tokens": [
+        "--k-action",
         "--k-border-thin",
-        "--k-brand",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-width",
         "--k-font-ui",
         "--k-leading-normal",
@@ -256,12 +263,12 @@
         "select__chevron"
       ],
       "tokens": [
+        "--k-action",
         "--k-border-thick",
         "--k-border-thin",
-        "--k-brand",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-width",
         "--k-font-ui",
         "--k-leading-normal",
@@ -300,11 +307,11 @@
         "control--textarea"
       ],
       "tokens": [
+        "--k-action",
         "--k-border-thin",
-        "--k-brand",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-width",
         "--k-font-ui",
         "--k-leading-normal",
@@ -342,12 +349,12 @@
         "toggle-field__label"
       ],
       "tokens": [
+        "--k-action",
+        "--k-action-contrast",
         "--k-border-thin",
-        "--k-brand",
-        "--k-brand-contrast",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-offset",
         "--k-focus-ring-width",
         "--k-line-strong",
@@ -390,7 +397,6 @@
       ],
       "tokens": [
         "--k-active",
-        "--k-brand-contrast",
         "--k-caution",
         "--k-font-mono",
         "--k-line",
@@ -400,6 +406,7 @@
         "--k-radius-sm",
         "--k-space-1",
         "--k-space-2",
+        "--k-status-contrast",
         "--k-text-muted",
         "--k-text-xs"
       ],
@@ -432,11 +439,12 @@
         "btn-negative"
       ],
       "tokens": [
-        "--k-brand",
-        "--k-brand-contrast",
+        "--k-action",
+        "--k-action-contrast",
         "--k-caution",
         "--k-dur",
         "--k-ease",
+        "--k-focus",
         "--k-font-ui",
         "--k-line-strong",
         "--k-negative",
@@ -447,6 +455,7 @@
         "--k-space-2",
         "--k-space-4",
         "--k-space-6",
+        "--k-status-contrast",
         "--k-text"
       ],
       "responsive": "Wraps in the explorer grid without horizontal overflow.",
@@ -472,8 +481,8 @@
         "checkbox-field__label"
       ],
       "tokens": [
-        "--k-brand",
-        "--k-focus-ring",
+        "--k-action",
+        "--k-focus",
         "--k-focus-ring-offset",
         "--k-focus-ring-width",
         "--k-space-2",
@@ -503,11 +512,11 @@
         "control--invalid"
       ],
       "tokens": [
+        "--k-action",
         "--k-border-thin",
-        "--k-brand",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-width",
         "--k-font-ui",
         "--k-leading-normal",
@@ -547,12 +556,12 @@
         "select__chevron"
       ],
       "tokens": [
+        "--k-action",
         "--k-border-thick",
         "--k-border-thin",
-        "--k-brand",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-width",
         "--k-font-ui",
         "--k-leading-normal",
@@ -591,11 +600,11 @@
         "control--textarea"
       ],
       "tokens": [
+        "--k-action",
         "--k-border-thin",
-        "--k-brand",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-width",
         "--k-font-ui",
         "--k-leading-normal",
@@ -633,12 +642,12 @@
         "toggle-field__label"
       ],
       "tokens": [
+        "--k-action",
+        "--k-action-contrast",
         "--k-border-thin",
-        "--k-brand",
-        "--k-brand-contrast",
         "--k-dur",
         "--k-ease",
-        "--k-focus-ring",
+        "--k-focus",
         "--k-focus-ring-offset",
         "--k-focus-ring-width",
         "--k-line-strong",

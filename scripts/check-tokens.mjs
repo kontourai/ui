@@ -29,14 +29,48 @@ const requiredTokens = [
   "--k-radius-overlay",
   "--k-elevation-overlay",
   "--k-font-ui",
+  "--k-action",
+  "--k-action-contrast",
+  "--k-focus",
+  "--k-focus-ring",
+  "--k-status-contrast",
 ];
 
 for (const token of requiredTokens) {
   assertIncludes(tokenFiles["tokens/tokens.css"], token, `Missing base token: ${token}`);
 }
 
-for (const theme of [".theme-survey", ".theme-console", ".theme-flow", ".theme-surface"]) {
+for (const theme of [".theme-survey", ".theme-console", ".theme-flow", ".theme-surface", ".theme-station"]) {
   assertIncludes(tokenFiles["tokens/themes.css"], theme, `Missing theme class: ${theme}`);
+}
+
+// Interaction roles (ui#72): every scope that sets the brand sets the roles
+// beside it, and the roles hold literal values. A role aliased to the brand
+// (or a theme that sets only the brand) would let a brand override repaint
+// primary actions and focus rings. Primitives read the roles, never the brand,
+// for interactive state.
+for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
+  for (const block of tokenFiles[file].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    const selector = block[1].trim().replace(/\s+/g, " ");
+    const declared = new Map([...block[2].matchAll(/(--k-[a-z0-9-]+):\s*([^;]+);/g)].map((match) => [match[1], match[2].trim()]));
+    if (declared.has("--k-brand")) {
+      for (const role of ["--k-action", "--k-focus"]) {
+        if (!declared.has(role)) throw new Error(`${file} ${selector}: sets --k-brand but not ${role}.`);
+      }
+    }
+    for (const role of ["--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast"]) {
+      if (declared.has(role) && declared.get(role).includes("var(")) {
+        throw new Error(`${file} ${selector}: ${role} must hold a literal value, not ${declared.get(role)}.`);
+      }
+    }
+  }
+}
+for (const rule of [".btn-primary", ".toggle:checked", ".checkbox", ".control:focus-visible"]) {
+  const body = new RegExp(`(?:^|\\n)${rule.replace(/[.:]/g, (c) => `\\${c}`)} \\{([^}]*)\\}`).exec(tokenFiles["react/styles.css"]);
+  if (!body) throw new Error(`react/styles.css has no ${rule} rule.`);
+  if (/--k-brand|--k-focus-ring\)/.test(body[1])) {
+    throw new Error(`react/styles.css ${rule} must read the --k-action / --k-focus roles, not the brand or the ring alias.`);
+  }
 }
 
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./tokens.css\";", "Token entrypoint must import base tokens.");

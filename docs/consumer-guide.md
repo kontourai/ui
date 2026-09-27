@@ -18,10 +18,21 @@ Available product classes:
 
 - `theme-console`
 - `theme-flow`
+- `theme-station`
 - `theme-survey`
 - `theme-surface`
 
 Use `data-theme="light"` on the same root, or an ancestor, when a product needs the light token skin.
+
+## White-label color
+
+The token layer has palette values assigned to semantic roles and a separate product identity
+slot. Override `--k-brand` to change identity accents without recoloring primary buttons,
+checked controls, or focus. If you use brand as a fill behind text, set a matching
+`--k-brand-contrast` and check the text contrast. Primary actions use the independently checked
+`--k-action` and `--k-action-contrast` pair; focus uses `--k-focus`. Change either interaction
+role only after checking it against the active surfaces in both modes. Existing consumer CSS
+may still read `--k-focus-ring` as an alias of the focus role.
 
 ## React Consumer
 
