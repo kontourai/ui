@@ -24,7 +24,9 @@ Available product classes:
 
 Use `data-theme="light"` on the same root, an ancestor, or a descendant of the theme root when a
 product needs the light token skin; each resolves to the product's light values. Keep one product
-theme per tree: `data-theme="dark"` does not reset a light ancestor.
+theme per tree: `data-theme="dark"` does not reset a light ancestor, and a light element below a
+nested second theme class resolves to the outer theme (or by source order), not the nearest one.
+When themes must nest, put `data-theme` on the theme element itself.
 
 ## White-label color
 

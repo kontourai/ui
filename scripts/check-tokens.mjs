@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import postcss from "postcss";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tokenFiles = {
@@ -104,24 +105,30 @@ for (const theme of themeNames) {
 
 // Interactive state reads the interaction roles, never the brand or the ring
 // alias (which does not follow a local --k-focus override). Every rule whose
-// selector names an interactive primitive or state is scanned, including
-// every rule that mentions .btn-primary, not just the first exact match.
+// selector names an interactive primitive or state is scanned, wherever it
+// sits (inside @media or @supports too), including every rule that mentions
+// .btn-primary. Accepted gaps: state expressed only through attributes
+// ([aria-pressed], [data-selected]) and a custom property that indirectly
+// holds the brand are not recognized.
 const INTERACTIVE = /\.btn\b|\.btn-primary|\.toggle|\.checkbox|\.control|:focus|:hover|:checked|:active/;
-let interactiveRules = 0;
-for (const block of tokenFiles["react/styles.css"].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
-  const selector = block[1].trim().replace(/\s+/g, " ");
-  if (!INTERACTIVE.test(selector)) continue;
-  interactiveRules += 1;
-  if (/--k-brand|--k-focus-ring\)/.test(block[2])) {
-    throw new Error(`react/styles.css ${selector} must read the --k-action / --k-focus roles, not the brand or the ring alias.`);
-  }
-}
+const FORBIDDEN = /--k-brand\b|--k-focus-ring\s*[,)]/;
+const interactiveSelectors = new Set();
+postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
+  const selector = rule.selector.replace(/\s+/g, " ").trim();
+  if (!INTERACTIVE.test(selector)) return;
+  rule.selectors.forEach((part) => interactiveSelectors.add(part.trim()));
+  rule.walkDecls((decl) => {
+    if (FORBIDDEN.test(decl.value)) {
+      const where = rule.parent?.type === "atrule" ? ` (inside @${rule.parent.name} ${rule.parent.params})` : "";
+      throw new Error(`react/styles.css ${selector}${where}: ${decl.prop}: ${decl.value} must read the --k-action / --k-focus roles, not the brand or the ring alias.`);
+    }
+  });
+});
 for (const rule of [".btn-primary", ".btn:hover", ".btn:focus-visible", ".toggle:checked", ".toggle:focus-visible", ".checkbox", ".checkbox:focus-visible", ".control:hover", ".control:focus-visible"]) {
-  if (!new RegExp(`(?:^|\\n|,\\s*)${rule.replace(/[.:]/g, (c) => `\\${c}`)}\\s*[,{]`).test(tokenFiles["react/styles.css"])) {
-    throw new Error(`react/styles.css has no ${rule} rule; the interactive-role scan would not see it.`);
-  }
+  if (!interactiveSelectors.has(rule)) throw new Error(`react/styles.css has no ${rule} rule; the interactive-role scan would not see it.`);
 }
-if (interactiveRules < 9) throw new Error(`react/styles.css: only ${interactiveRules} interactive rules scanned.`);
+const interactiveRules = interactiveSelectors.size;
+if (interactiveRules < 9) throw new Error(`react/styles.css: only ${interactiveRules} interactive selectors scanned.`);
 
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./tokens.css\";", "Token entrypoint must import base tokens.");
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./themes.css\";", "Token entrypoint must import themes.");

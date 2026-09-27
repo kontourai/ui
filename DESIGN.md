@@ -327,11 +327,17 @@ the computed value. So every scope that sets the focus role redeclares the compa
 (`npm run check:tokens` enforces both). Each theme's light block matches the theme class and
 `data-theme="light"` on one element, the class below the attribute, and the attribute below
 the class, so those three placements resolve to the theme's light values. A theme class on a
-light element keeps its own identity under an ancestor carrying another theme. Two things are
-not covered: `data-theme="dark"` does not reset a light ancestor (there is no dark selector),
-and a local inline override of an input (say, the focus role on one panel) does not update the
-alias on that element's descendants. That is why consumer CSS should read `--k-focus` rather
-than the alias.
+light element keeps its own identity under an ancestor carrying another theme. Three things are
+not covered:
+
+- `data-theme="dark"` does not reset a light ancestor (there is no dark selector).
+- `data-theme="light"` on an element below a nested theme class, with no theme class of its
+  own, resolves to the outer theme's light values or to whichever light block comes last in
+  source order, not to the nearest theme. Keep one product theme per tree, or put
+  `data-theme` on the theme element itself.
+- A local inline override of an input (say, the focus role on one panel) does not update the
+  alias on that element's descendants. That is why consumer CSS should read `--k-focus`
+  rather than the alias.
 `primary` is not a CSS token; it is derived from whatever `.btn-primary` paints, so the format's
 required `primary` color stays truthful.
 
