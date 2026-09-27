@@ -100,6 +100,9 @@ const scopeOf = (rule) => {
         if (node.type === "class" && node.value.startsWith("theme-")) theme = node.value.slice("theme-".length);
         else if (node.type === "attribute" && node.attribute === "data-theme" && node.value === "light") light = true;
         else if (node.type === "pseudo" && node.value === ":root") { /* default scope */ }
+        // :where(.theme-x) [data-theme="light"] is the light block's zero-weight
+        // placement; the class inside it is walked like any other.
+        else if (node.type === "pseudo" && node.value === ":where") { /* weight only */ }
         else if (["class", "attribute", "pseudo", "tag", "id"].includes(node.type)) other = true;
       });
       if (other) throw new Error(`Unsupported token selector: ${selector.toString().trim()}`);

@@ -92,6 +92,13 @@ for (const [selector, tokens] of scopes) {
 // variant of .theme-x (a later or more specific block wins). Themes are
 // discovered from tokens/themes.css, so a new theme is checked without editing
 // this file.
+// Every token a pair below rates, except --k-line (a translucent rgba()
+// hairline, rated only where a scope spells it in hex).
+const RATED = new Set([
+  "--k-bg", "--k-panel", "--k-panel-raised", "--k-text", "--k-text-muted",
+  "--k-brand", "--k-brand-contrast", "--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast",
+  "--k-positive", "--k-caution", "--k-negative", "--k-active",
+]);
 const blocks = [];
 for (const block of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
   const selector = block[1].trim();
@@ -99,7 +106,14 @@ for (const block of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^
   const theme = /\.theme-([a-z0-9-]+)/.exec(selector)?.[1] ?? "";
   if (selector !== ":root" && !light && !theme) throw new Error(`Unrecognized token scope: ${selector}`);
   const tokens = {};
-  for (const decl of block[2].matchAll(/(--k-[a-z-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g)) tokens[decl[1]] = decl[2];
+  for (const decl of block[2].matchAll(/(--k-[a-z-]+):\s*([^;]+);/g)) {
+    const value = decl[2].trim();
+    if (/^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/.test(value)) tokens[decl[1]] = value;
+    // This check rates hex only. Any other spelling (rgb(), a keyword,
+    // 8-digit hex with alpha) on a rated token would be skipped, and the
+    // pair would silently rate the inherited value instead.
+    else if (RATED.has(decl[1])) failures.push(`${selector}: ${decl[1]}: ${value} is not a 3- or 6-digit hex color; the contrast check cannot rate it.`);
+  }
   blocks.push({ theme, light, tokens });
 }
 const themes = ["", ...new Set(blocks.map((block) => block.theme).filter(Boolean))];

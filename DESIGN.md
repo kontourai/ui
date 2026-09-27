@@ -94,11 +94,13 @@ colors:
   action-survey-light: "#16806f"
   action-contrast-survey-light: "#ffffff"
   focus-survey-light: "#16806f"
+  focus-ring-survey-light: "{colors.focus-survey-light}"
   brand-console-light: "#6c9400"
   brand-contrast-console-light: "#ffffff"
   action-console-light: "#6c9400"
   action-contrast-console-light: "#11120f"
   focus-console-light: "#6c9400"
+  focus-ring-console-light: "{colors.focus-console-light}"
   bg-console-light: "#f3f5eb"
   panel-console-light: "#fbfcf7"
   panel-raised-console-light: "#eef2e6"
@@ -116,14 +118,17 @@ colors:
   action-flow-light: "#1f6f88"
   action-contrast-flow-light: "#ffffff"
   focus-flow-light: "#1f6f88"
+  focus-ring-flow-light: "{colors.focus-flow-light}"
   brand-surface-light: "#0f6b52"
   action-surface-light: "#0f6b52"
   action-contrast-surface-light: "#ffffff"
   focus-surface-light: "#0f6b52"
+  focus-ring-surface-light: "{colors.focus-surface-light}"
   brand-station-light: "#7c3aed"
   action-station-light: "#7c3aed"
   action-contrast-station-light: "#ffffff"
   focus-station-light: "#7c3aed"
+  focus-ring-station-light: "{colors.focus-station-light}"
 typography:
   text-xs:
     fontSize: "11px"
@@ -225,6 +230,10 @@ components:
 #     --k-caution-soft (console): color-mix(in oklab, var(--k-caution) 14%, transparent)
 #     --k-negative-soft (console): color-mix(in oklab, var(--k-negative) 14%, transparent)
 #     --k-active-soft (console): color-mix(in oklab, var(--k-active) 14%, transparent)
+#     --k-positive-soft (console-light): color-mix(in oklab, var(--k-positive) 14%, transparent)
+#     --k-caution-soft (console-light): color-mix(in oklab, var(--k-caution) 14%, transparent)
+#     --k-negative-soft (console-light): color-mix(in oklab, var(--k-negative) 14%, transparent)
+#     --k-active-soft (console-light): color-mix(in oklab, var(--k-active) 14%, transparent)
 # - font-family stacks; the type levels above resolve the families their selectors use:
 #     --k-font-display: "Fraunces", Georgia, "Times New Roman", serif
 #     --k-font-ui: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif
@@ -313,9 +322,16 @@ The DESIGN.md format has no concept of modes or themes, so the generated keys en
 
 A reference such as `focus-ring: "{colors.focus}"` means "the focus value of the same mode and
 theme". CSS custom properties that use `var()` resolve where declared and descendants inherit
-the computed value. The light and product theme scopes therefore redeclare the compatibility
-`--k-focus-ring` alias and any soft status fills whose inputs change. The role tokens themselves
-hold literal colors in every relevant scope, so nested theme and mode placements resolve there.
+the computed value. So every scope that sets the focus role redeclares the compatibility
+`--k-focus-ring` alias, and every scope that sets a status tone redeclares its soft fill
+(`npm run check:tokens` enforces both). Each theme's light block matches the theme class and
+`data-theme="light"` on one element, the class below the attribute, and the attribute below
+the class, so those three placements resolve to the theme's light values. A theme class on a
+light element keeps its own identity under an ancestor carrying another theme. Two things are
+not covered: `data-theme="dark"` does not reset a light ancestor (there is no dark selector),
+and a local inline override of an input (say, the focus role on one panel) does not update the
+alias on that element's descendants. That is why consumer CSS should read `--k-focus` rather
+than the alias.
 `primary` is not a CSS token; it is derived from whatever `.btn-primary` paints, so the format's
 required `primary` color stays truthful.
 
@@ -439,11 +455,35 @@ Color roles, not values. The values for each mode and theme are in the front mat
 
 Override `--k-brand` to change identity accents such as eyebrows, the topbar edge, progress,
 and the activity spinner. An override of that property alone does not change primary buttons,
-checked controls, or focus because those read the interaction roles. If a brand-filled surface
-uses text, set `--k-brand-contrast` with it and check that pair for text contrast. Status-filled
-surfaces use `--k-status-contrast` instead. Override `--k-action` only with a coordinated
-`--k-action-contrast` value that meets text contrast; check `--k-focus` against both the page
-and panel. The `--k-focus-ring` alias remains available for existing consumer CSS.
+checked controls, or focus because those read the interaction roles.
+
+Where an override goes decides whether it applies:
+
+- Set values per mode. One value cannot serve both modes, so an inline `style` on a
+  single element is only suitable when the mode never changes.
+- Declare them with the same selectors the theme uses, in a stylesheet loaded after the
+  tokens: the `.theme-<theme>` base block, and for light mode all three forms of its light
+  block (`[data-theme="light"].theme-<theme>`, `[data-theme="light"] .theme-<theme>`,
+  `:where(.theme-<theme>) [data-theme="light"]`). A declaration on `:root` loses to the
+  theme's light block whenever a theme class is present, and an inline style on `<html>`
+  does not reach a theme class placed on `<body>`.
+
+Rules for the values:
+
+- Brand used as text (eyebrows, panel counts) must meet AA text contrast on the panel in each
+  mode. If a brand-filled surface carries text, set `--k-brand-contrast` with it and check
+  that pair too.
+- `--k-action` and `--k-action-contrast` are a pair: override both, per mode, never
+  the fill alone. The shipped action text is chosen for the shipped fill, and a new fill
+  without its text can drop below AA.
+- Check `--k-focus` against both the page and the panel (non-text contrast).
+- Status-filled surfaces use `--k-status-contrast`; leave it unless the status tones change.
+- A runtime that applies a theme at run time (rather than a reviewed stylesheet) must reject a
+  pair that fails the thresholds `npm run check:contrast` applies to the roles: AA text
+  contrast for text on a fill, and non-text contrast for the focus ring and checked controls.
+  The package does not export that check yet.
+
+`--k-focus-ring` remains as an alias for existing consumer CSS; new CSS reads `--k-focus`.
 
 ### Product color is identity, not status
 
@@ -488,9 +528,9 @@ Migration to the brand palette is [#74](https://github.com/kontourai/ui/issues/7
 and dark-mode colors are also open.
 
 Station ships the owner's draft accent, adjusted only where contrast requires it. In dark mode,
-the draft accent remains the action fill with white text at 5.70:1; brand text uses a lighter
-same-hue accent on the panel at 4.67:1. In light mode, the draft accent is both brand and action,
-and white action text on it reaches 5.70:1; brand text on the light panel reaches 5.70:1.
+the draft accent remains the action fill with white text; brand text and the focus ring use a
+lighter same-hue accent that reads on the dark panel. In light mode, the draft accent is brand,
+action, and focus. `npm run check:contrast` rates every one of these pairs in both modes.
 
 **OPEN-10 — Console and Survey themes.** The draft does not cover `theme-console` or
 `theme-survey`. They stay as shipped until the palette work decides their relationship to the
@@ -891,6 +931,7 @@ assets and tokens together, in the same change.
 | OPEN-5 | Default mode | dark default, `[data-theme="light"]` opt-in | light Stone/Ink default | — |
 | OPEN-6 | Palette and product accents | per-theme `--k-brand`; `.theme-station` ships with a contrast-adjusted dark brand | Ink, Stone, final Flow and Surface accents | [#74](https://github.com/kontourai/ui/issues/74) |
 | OPEN-7 | Status model | five tones | nine semantic and trust states | [#73](https://github.com/kontourai/ui/issues/73) |
+| OPEN-8 | Primary action and focus | resolved by [#79](https://github.com/kontourai/ui/pull/79): `--k-action` and `--k-focus` roles, independent of the brand slot | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
 | OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "`<Product>` by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
 | OPEN-10 | Console and Survey themes | shipped | not covered by the draft | — |
 | OPEN-11 | Marketing-site palette relationship | — | undecided | — |

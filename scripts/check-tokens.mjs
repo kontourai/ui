@@ -69,15 +69,59 @@ for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
         throw new Error(`${file} ${selector}: ${role} must hold a literal value, not ${declared.get(role)}.`);
       }
     }
+    // Derived tokens (ui#78): a var() token resolves on the element that
+    // declares it, so a scope that changes an input must redeclare what is
+    // derived from it, or descendants keep the ancestor scope's value.
+    if (declared.has("--k-focus") && declared.get("--k-focus-ring") !== "var(--k-focus)") {
+      throw new Error(`${file} ${selector}: sets --k-focus, so it must redeclare --k-focus-ring: var(--k-focus).`);
+    }
+    for (const tone of ["positive", "caution", "negative", "active"]) {
+      const soft = `color-mix(in oklab, var(--k-${tone}) 14%, transparent)`;
+      if (declared.has(`--k-${tone}`) && declared.get(`--k-${tone}-soft`) !== soft) {
+        throw new Error(`${file} ${selector}: sets --k-${tone}, so it must redeclare --k-${tone}-soft: ${soft}.`);
+      }
+    }
   }
 }
-for (const rule of [".btn-primary", ".toggle:checked", ".checkbox", ".control:focus-visible"]) {
-  const body = new RegExp(`(?:^|\\n)${rule.replace(/[.:]/g, (c) => `\\${c}`)} \\{([^}]*)\\}`).exec(tokenFiles["react/styles.css"]);
-  if (!body) throw new Error(`react/styles.css has no ${rule} rule.`);
-  if (/--k-brand|--k-focus-ring\)/.test(body[1])) {
-    throw new Error(`react/styles.css ${rule} must read the --k-action / --k-focus roles, not the brand or the ring alias.`);
+
+// Every theme has a base block and a light block, and the light block covers
+// all three placements of the class and data-theme="light" (same element,
+// class below the attribute, attribute below the class). The third is
+// :where()-wrapped so a theme class on the light element itself outranks it.
+const themeSelectors = [...tokenFiles["tokens/themes.css"].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^}]*\}/g)]
+  .map((block) => block[1].split(",").map((part) => part.trim().replace(/\s+/g, " ")));
+const themeNames = new Set(themeSelectors.flat().flatMap((part) => [...part.matchAll(/\.theme-([a-z0-9-]+)/g)].map((m) => m[1])));
+if (themeNames.size < 5) throw new Error(`tokens/themes.css: found ${themeNames.size} themes; expected at least 5.`);
+for (const theme of themeNames) {
+  if (!themeSelectors.some((list) => list.length === 1 && list[0] === `.theme-${theme}`)) {
+    throw new Error(`tokens/themes.css: .theme-${theme} has no base block.`);
+  }
+  const light = [`[data-theme="light"].theme-${theme}`, `[data-theme="light"] .theme-${theme}`, `:where(.theme-${theme}) [data-theme="light"]`];
+  if (!themeSelectors.some((list) => light.every((form) => list.includes(form)))) {
+    throw new Error(`tokens/themes.css: .theme-${theme} needs a light block matching ${light.join(", ")}.`);
   }
 }
+
+// Interactive state reads the interaction roles, never the brand or the ring
+// alias (which does not follow a local --k-focus override). Every rule whose
+// selector names an interactive primitive or state is scanned, including
+// every rule that mentions .btn-primary, not just the first exact match.
+const INTERACTIVE = /\.btn\b|\.btn-primary|\.toggle|\.checkbox|\.control|:focus|:hover|:checked|:active/;
+let interactiveRules = 0;
+for (const block of tokenFiles["react/styles.css"].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+  const selector = block[1].trim().replace(/\s+/g, " ");
+  if (!INTERACTIVE.test(selector)) continue;
+  interactiveRules += 1;
+  if (/--k-brand|--k-focus-ring\)/.test(block[2])) {
+    throw new Error(`react/styles.css ${selector} must read the --k-action / --k-focus roles, not the brand or the ring alias.`);
+  }
+}
+for (const rule of [".btn-primary", ".btn:hover", ".btn:focus-visible", ".toggle:checked", ".toggle:focus-visible", ".checkbox", ".checkbox:focus-visible", ".control:hover", ".control:focus-visible"]) {
+  if (!new RegExp(`(?:^|\\n|,\\s*)${rule.replace(/[.:]/g, (c) => `\\${c}`)}\\s*[,{]`).test(tokenFiles["react/styles.css"])) {
+    throw new Error(`react/styles.css has no ${rule} rule; the interactive-role scan would not see it.`);
+  }
+}
+if (interactiveRules < 9) throw new Error(`react/styles.css: only ${interactiveRules} interactive rules scanned.`);
 
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./tokens.css\";", "Token entrypoint must import base tokens.");
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./themes.css\";", "Token entrypoint must import themes.");

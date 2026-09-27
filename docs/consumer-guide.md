@@ -22,17 +22,58 @@ Available product classes:
 - `theme-survey`
 - `theme-surface`
 
-Use `data-theme="light"` on the same root, or an ancestor, when a product needs the light token skin.
+Use `data-theme="light"` on the same root, an ancestor, or a descendant of the theme root when a
+product needs the light token skin; each resolves to the product's light values. Keep one product
+theme per tree: `data-theme="dark"` does not reset a light ancestor.
 
 ## White-label color
 
-The token layer has palette values assigned to semantic roles and a separate product identity
-slot. Override `--k-brand` to change identity accents without recoloring primary buttons,
-checked controls, or focus. If you use brand as a fill behind text, set a matching
-`--k-brand-contrast` and check the text contrast. Primary actions use the independently checked
-`--k-action` and `--k-action-contrast` pair; focus uses `--k-focus`. Change either interaction
-role only after checking it against the active surfaces in both modes. Existing consumer CSS
-may still read `--k-focus-ring` as an alias of the focus role.
+The token layer keeps the product identity slot (`--k-brand`) separate from the interaction
+roles. Overriding `--k-brand` changes identity accents (eyebrows, panel counts, topbar edge,
+progress, spinner) without recoloring primary buttons, checked controls, or focus.
+
+Where to put an override:
+
+- Give each mode its own values.
+- Declare them in a stylesheet loaded after the tokens, using the theme's own selectors:
+
+```css
+.theme-flow {
+  --k-brand: #f0a868;
+  --k-action: #f0a868;
+  --k-action-contrast: #06080b;
+  --k-focus: #f0a868;
+}
+[data-theme="light"].theme-flow,
+[data-theme="light"] .theme-flow,
+:where(.theme-flow) [data-theme="light"] {
+  --k-brand: #9a4418;
+  --k-action: #9a4418;
+  --k-action-contrast: #ffffff;
+  --k-focus: #9a4418;
+}
+```
+
+A declaration on `:root` loses to the theme's light block when a theme class is present, and an
+inline style on `<html>` does not reach a theme class on `<body>`.
+
+Rules for the values:
+
+- Brand used as text must meet 4.5:1 on the panel in each mode. If you put text on a brand fill,
+  set `--k-brand-contrast` and check that pair too.
+- Override `--k-action` and `--k-action-contrast` together, per mode. A fill without its matching
+  text can drop below 4.5:1.
+- `--k-focus` must reach 3:1 against both the page and the panel.
+- A runtime that applies themes dynamically must reject a pair that fails these thresholds (the
+  ones `npm run check:contrast` enforces for the shipped themes).
+
+Consumer CSS should read `--k-focus` for focus color. `--k-focus-ring` is kept as an alias for
+existing styles, but it does not follow an inline `--k-focus` override on a descendant element.
+
+**Migration from brand-only retints.** Before this change, overriding `--k-brand` also repainted
+primary buttons, toggles, checkboxes, and focus rings. To keep that behavior (for example, a
+release-channel accent), set `--k-action`, `--k-action-contrast`, and `--k-focus` alongside
+`--k-brand`.
 
 ## React Consumer
 

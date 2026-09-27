@@ -89,6 +89,63 @@ test("a brand-slot override on the root keeps actions, focus, and status text re
     expect(ring.style, `${mode}: focused checkbox shows no ring`).toBe("solid");
     expect(ring.color, `${mode}: focus ring followed the brand`).not.toBe(PALE_RGB);
     expect(ring.color, `${mode}: focus ring is not the --k-focus role`).toBe(ring.role);
+
+    // Button and toggle focus, and button hover, read the roles too.
+    const ghost = page.locator("k-topbar .btn-ghost");
+    await page.keyboard.press("Tab");
+    await ghost.focus();
+    const toggle = page.locator("main k-toggle input.toggle").first();
+    const focused = { button: await focusedState(page, ghost), toggle: undefined as FocusState | undefined };
+    await toggle.focus();
+    focused.toggle = await focusedState(page, toggle);
+    await toggle.blur();
+    for (const [name, state] of Object.entries(focused)) {
+      expect(state!.focusVisible, `${mode}: ${name} is not :focus-visible`).toBe(true);
+      const painted = name === "button" ? state!.border : state!.outline;
+      expect(painted, `${mode}: focused ${name} followed the brand`).not.toBe(PALE_RGB);
+      expect(painted, `${mode}: focused ${name} is not the --k-focus role`).toBe(state!.focus);
+    }
+    await ghost.hover();
+    const hovered = await focusedState(page, ghost);
+    expect(hovered.border, `${mode}: hovered button followed the brand`).not.toBe(PALE_RGB);
+    expect(hovered.border, `${mode}: hovered button is not the --k-action role`).toBe(hovered.action);
+    await page.mouse.move(0, 0);
+  }
+});
+
+// The documented white-label contract: per-mode values, set with the same
+// selectors the theme uses, in a stylesheet loaded after the tokens. A
+// :root override loses to [data-theme="light"].theme-x, and one inline value
+// cannot differ per mode, so neither is the contract.
+const WHITE_LABEL = {
+  dark: { brand: "#f0a868", action: "#f0a868", actionContrast: "#06080b", focus: "#f0a868" },
+  light: { brand: "#9a4418", action: "#9a4418", actionContrast: "#ffffff", focus: "#9a4418" },
+};
+
+test("a white-label override on the theme's selectors applies per mode and keeps actions readable", async ({ page }) => {
+  await loadGallery(page);
+  await page.evaluate((values) => {
+    const decl = (v: typeof values.dark) =>
+      `--k-brand: ${v.brand}; --k-action: ${v.action}; --k-action-contrast: ${v.actionContrast}; --k-focus: ${v.focus};`;
+    const style = document.createElement("style");
+    style.textContent = `.theme-flow { ${decl(values.dark)} }
+[data-theme="light"].theme-flow, [data-theme="light"] .theme-flow, :where(.theme-flow) [data-theme="light"] { ${decl(values.light)} }`;
+    document.head.append(style);
+    document.documentElement.className = "theme-flow";
+  }, WHITE_LABEL);
+
+  for (const mode of ["dark", "light"] as const) {
+    await page.evaluate((mode) => { document.documentElement.dataset.theme = mode; }, mode);
+    await settleTransitions(page);
+    const expected = WHITE_LABEL[mode];
+    await expect(page.locator("k-topbar .eyebrow")).toHaveCSS("color", hexToRgb(expected.brand));
+    const primary = page.locator("k-topbar .btn-primary");
+    const [text, fill] = await primary.evaluate((node) => [getComputedStyle(node).color, getComputedStyle(node).backgroundColor]);
+    expect(fill, `${mode}: primary fill is not the override action`).toBe(hexToRgb(expected.action));
+    expect(text, `${mode}: primary text is not the override action contrast`).toBe(hexToRgb(expected.actionContrast));
+    expect(contrast(text, fill), `${mode}: primary text on fill`).toBeGreaterThanOrEqual(4.5);
+    const ring = await page.locator("main").evaluate((node) => getComputedStyle(node).getPropertyValue("--k-focus-ring").trim());
+    expect(ring, `${mode}: --k-focus-ring does not follow the override focus`).toBe(expected.focus);
   }
 });
 
@@ -122,17 +179,40 @@ test("nested theme scopes keep a readable primary action under every root theme 
 
 // Issue 78: a var()-derived token declared once on :root resolves there and is
 // inherited as a computed value, so it ignored theme and mode scopes placed
-// below <html>. Each placement's derived tokens must match the scope that
-// applies at <body>.
-const PLACEMENTS = [
-  { name: "html[data-theme=light] > body.theme-flow", html: { theme: "light" }, body: { className: "theme-flow" }, focus: "#1f6f88" },
-  { name: "html.theme-flow > body[data-theme=light]", html: { className: "theme-flow" }, body: { theme: "light" }, focus: "#0e7c64" },
-  { name: "html.theme-flow[data-theme=light]", html: { className: "theme-flow", theme: "light" }, body: {}, focus: "#1f6f88" },
-  { name: "html[data-theme=light] > body.theme-console", html: { theme: "light" }, body: { className: "theme-console" }, focus: "#6c9400" },
-  { name: "html.theme-console > body[data-theme=light]", html: { className: "theme-console" }, body: { theme: "light" }, focus: "#0e7c64" },
-] as const;
+// below <html>. Every placement of a theme class and data-theme must resolve
+// to that theme's values for the mode in effect at <body>, including the
+// derived ring and soft fills. Values are pinned here, not read from the CSS.
+const THEME_VALUES = {
+  survey: { dark: ["#5ce0c6", "#5ce0c6", "#06080b", "#5ce0c6"], light: ["#16806f", "#16806f", "#ffffff", "#16806f"] },
+  console: { dark: ["#c9ff4a", "#c9ff4a", "#11120f", "#c9ff4a"], light: ["#6c9400", "#6c9400", "#11120f", "#6c9400"] },
+  flow: { dark: ["#2f88a6", "#2f88a6", "#06080b", "#2f88a6"], light: ["#1f6f88", "#1f6f88", "#ffffff", "#1f6f88"] },
+  surface: { dark: ["#14a37a", "#14a37a", "#06080b", "#14a37a"], light: ["#0f6b52", "#0f6b52", "#ffffff", "#0f6b52"] },
+  station: { dark: ["#9364ff", "#7c3aed", "#ffffff", "#9364ff"], light: ["#7c3aed", "#7c3aed", "#ffffff", "#7c3aed"] },
+} as const; // [brand, action, action-contrast, focus]
 
-for (const placement of PLACEMENTS) {
+type Scope = { className?: string; theme?: string };
+const placementsFor = (theme: string) => [
+  { name: `html > body.theme-${theme}`, html: {}, body: { className: `theme-${theme}` }, mode: "dark" },
+  { name: `html.theme-${theme} > body`, html: { className: `theme-${theme}` }, body: {}, mode: "dark" },
+  { name: `html[data-theme=light] > body.theme-${theme}`, html: { theme: "light" }, body: { className: `theme-${theme}` }, mode: "light" },
+  { name: `html.theme-${theme} > body[data-theme=light]`, html: { className: `theme-${theme}` }, body: { theme: "light" }, mode: "light" },
+  { name: `html.theme-${theme}[data-theme=light]`, html: { className: `theme-${theme}`, theme: "light" }, body: {}, mode: "light" },
+] as { name: string; html: Scope; body: Scope; mode: "dark" | "light" }[];
+
+// A theme class on the light element itself keeps its own identity under an
+// ancestor that carries a different theme.
+const NESTED = [
+  { name: "html.theme-flow > body.theme-console[data-theme=light]", html: { className: "theme-flow" }, body: { className: "theme-console", theme: "light" }, theme: "console", mode: "light" },
+  { name: "html.theme-flow[data-theme=light] > body.theme-station", html: { className: "theme-flow", theme: "light" }, body: { className: "theme-station" }, theme: "station", mode: "light" },
+  { name: "html.theme-console > body.theme-surface", html: { className: "theme-console" }, body: { className: "theme-surface" }, theme: "surface", mode: "dark" },
+] as { name: string; html: Scope; body: Scope; theme: keyof typeof THEME_VALUES; mode: "dark" | "light" }[];
+
+const CASES = [
+  ...Object.keys(THEME_VALUES).flatMap((theme) => placementsFor(theme).map((placement) => ({ ...placement, theme: theme as keyof typeof THEME_VALUES }))),
+  ...NESTED,
+];
+
+for (const placement of CASES) {
   test(`derived tokens follow the scope at ${placement.name}`, async ({ page }) => {
     await loadGallery(page);
 
@@ -160,21 +240,55 @@ for (const placement of PLACEMENTS) {
       });
       return {
         brand: style.getPropertyValue("--k-brand").trim(),
-        focus: style.getPropertyValue("--k-focus").trim(),
         action: style.getPropertyValue("--k-action").trim(),
+        actionContrast: style.getPropertyValue("--k-action-contrast").trim(),
+        focus: style.getPropertyValue("--k-focus").trim(),
         ring: style.getPropertyValue("--k-focus-ring").trim(),
         soft: Object.fromEntries(["positive", "caution", "negative", "active"].map((tone) => [tone, soft(tone)])),
       };
     }, { html: placement.html, body: placement.body });
 
-    expect(resolved.brand).toBe(placement.focus);
-    expect(resolved.ring, "--k-focus-ring must equal the scope's --k-focus").toBe(placement.focus);
-    expect(resolved.focus).toBe(placement.focus);
-    expect(resolved.action).toBe(placement.focus);
+    const [brand, action, actionContrast, focus] = THEME_VALUES[placement.theme][placement.mode];
+    expect(resolved.brand, `--k-brand should be ${placement.theme} ${placement.mode}`).toBe(brand);
+    expect(resolved.action, `--k-action should be ${placement.theme} ${placement.mode}`).toBe(action);
+    expect(resolved.actionContrast, `--k-action-contrast should be ${placement.theme} ${placement.mode}`).toBe(actionContrast);
+    expect(resolved.focus, `--k-focus should be ${placement.theme} ${placement.mode}`).toBe(focus);
+    expect(resolved.ring, "--k-focus-ring must equal the scope's --k-focus").toBe(focus);
     for (const [tone, { token, local }] of Object.entries(resolved.soft)) {
       expect(token, `--k-${tone}-soft must mix the scope's --k-${tone}`).toBe(local);
     }
   });
+}
+
+type FocusState = { focusVisible: boolean; border: string; outline: string; focus: string; action: string };
+
+// Reads a control's painted focus/hover colors beside the role values
+// resolved at the same element, after its transitions settle.
+async function focusedState(page: Page, locator: ReturnType<Page["locator"]>): Promise<FocusState> {
+  await settleTransitions(page);
+  return locator.evaluate((node) => {
+    const role = (name: string) => {
+      const swatch = document.createElement("span");
+      swatch.style.color = `var(${name})`;
+      node.parentElement!.append(swatch);
+      const color = getComputedStyle(swatch).color;
+      swatch.remove();
+      return color;
+    };
+    const style = getComputedStyle(node);
+    return {
+      focusVisible: node.matches(":focus-visible"),
+      border: style.borderTopColor,
+      outline: style.outlineColor,
+      focus: role("--k-focus"),
+      action: role("--k-action"),
+    };
+  });
+}
+
+function hexToRgb(hex: string): string {
+  const [r, g, b] = [1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16));
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 // Waits for every running CSS transition to finish so computed colors are the
