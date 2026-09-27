@@ -101,7 +101,8 @@ try {
   for (const field of ["dependencies", "peerDependencies", "optionalDependencies"]) {
     if (packageJson[field]?.["@kontourai/surface"]) throw new Error(`@kontourai/surface must stay a devDependency, not in ${field}.`);
   }
-  const SURFACE_IMPORT = /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|@import\s+(?:url\()?\s*)["']@kontourai\/surface\b/;
+  // from "…", import "…", import("…"), require("…"), and CSS @import.
+  const SURFACE_IMPORT = /(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*|@import\s+(?:url\()?\s*)["']@kontourai\/surface\b/;
   for (const file of files.filter((name) => /\.(?:m?js|d\.ts|ts|tsx|css|html)$/.test(name))) {
     if (SURFACE_IMPORT.test(await readFile(path.join(root, file), "utf8"))) {
       throw new Error(`${file} imports @kontourai/surface; it is a test-only devDependency.`);
