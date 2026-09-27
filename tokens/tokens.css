@@ -21,9 +21,20 @@
   --k-text-muted: #aebccb;
   --k-text-faint: #72869b;
 
-  /* brand */
+  /* brand — the product identity slot (eyebrows, accents, the progress sweep).
+     A product theme or a white-label deployment may override it; nothing
+     interactive reads it, so a brand that fails contrast cannot break a
+     button or a focus ring. */
   --k-brand: #5ce0c6;
   --k-brand-contrast: #06080b;
+
+  /* interaction roles — primary actions and keyboard focus. They hold their
+     own values instead of var(--k-brand): an alias would make every brand
+     override repaint buttons whether or not the new color can carry text.
+     Each theme and mode sets its action and focus beside its brand. */
+  --k-action: #5ce0c6;
+  --k-action-contrast: #06080b;
+  --k-focus: #5ce0c6;
 
   /* semantic status scale */
   --k-positive: #34d399;
@@ -35,6 +46,9 @@
   --k-caution-soft: color-mix(in oklab, var(--k-caution) 14%, transparent);
   --k-negative-soft: color-mix(in oklab, var(--k-negative) 14%, transparent);
   --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
+  /* Text on a filled status tone (tone badges, status-toned buttons). Its own
+     role so a white-label --k-brand-contrast cannot recolor status text. */
+  --k-status-contrast: #06080b;
 
   /* spacing */
   --k-space-1: 4px;
@@ -85,8 +99,11 @@
   --k-tracking-wide: 0.08em;
 
   /* focus — one ring contract so every interactive primitive (controls,
-     buttons, links) shows the same keyboard-focus affordance. */
-  --k-focus-ring: var(--k-brand);
+     buttons, links) shows the same keyboard-focus affordance. The ring color
+     is the --k-focus role; --k-focus-ring is kept as a compatibility alias for
+     consumer styles. Primitives read --k-focus directly, so an override of
+     --k-focus on any element reaches them. */
+  --k-focus-ring: var(--k-focus);
   --k-focus-ring-width: 2px;
   --k-focus-ring-offset: 2px;
 
@@ -123,9 +140,23 @@
      5.1:1) and as text on --k-bg (4.7:1). */
   --k-brand: #0e7c64;
   --k-brand-contrast: #ffffff;
+  --k-action: #0e7c64;
+  --k-action-contrast: #ffffff;
+  --k-focus: #0e7c64;
   --k-positive: #168257;
   --k-caution: #8a5a00;
   --k-negative: #c83b3b;
   --k-neutral: #5f6975;
   --k-active: #3f6fd6;
+  --k-status-contrast: #ffffff;
+
+  /* Tokens derived with var() resolve on the element that declares them and
+     are inherited as computed values, so each scope that changes an input
+     redeclares them. Without this, data-theme on a descendant of <html> would
+     keep the dark default's ring and soft fills. */
+  --k-focus-ring: var(--k-focus);
+  --k-positive-soft: color-mix(in oklab, var(--k-positive) 14%, transparent);
+  --k-caution-soft: color-mix(in oklab, var(--k-caution) 14%, transparent);
+  --k-negative-soft: color-mix(in oklab, var(--k-negative) 14%, transparent);
+  --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
 }

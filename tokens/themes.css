@@ -1,7 +1,31 @@
+/* Product themes. Each theme sets its brand (identity) and, beside it, the
+   action and focus roles. The roles hold their own values rather than aliasing
+   the brand, so a later brand override cannot break primary actions or focus.
+   Every scope that sets --k-action also sets --k-action-contrast: a theme
+   nested under another theme's scope would otherwise inherit that scope's text
+   color onto its own fill.
+
+   Every scope that sets --k-focus also redeclares --k-focus-ring, and every
+   scope that sets a status hue redeclares its soft fill: a var()-derived token
+   resolves where it is declared, so without this a scope below the root would
+   inherit the root's value (issue 78). check:tokens enforces both.
+
+   Each light block matches three placements of the theme class and
+   data-theme="light": on one element, the theme class below the light
+   attribute, and the light attribute below the theme class. The last is
+   wrapped in :where() so it weighs the same as the bare [data-theme="light"]
+   block in tokens.css (which it follows, so it wins there) and less than a
+   theme class sitting on the light element itself: a nested theme keeps its
+   own identity. */
+
 .theme-survey {
   --k-bg: #06080b;
   --k-brand: #5ce0c6;
+  --k-action: #5ce0c6;
+  --k-action-contrast: #06080b;
+  --k-focus: #5ce0c6;
   --k-text-faint: #6f8095;
+  --k-focus-ring: var(--k-focus);
 }
 
 .theme-console {
@@ -13,6 +37,9 @@
   --k-radius-overlay: 0;
   --k-brand: #c9ff4a;
   --k-brand-contrast: #11120f;
+  --k-action: #c9ff4a;
+  --k-action-contrast: #11120f;
+  --k-focus: #c9ff4a;
   --k-bg: #11120f;
   --k-panel: #191b16;
   --k-panel-raised: #20231e;
@@ -25,25 +52,61 @@
   --k-caution: #e8c15f;
   --k-negative: #ee776f;
   --k-active: #84d8c8;
+  --k-status-contrast: #11120f;
+  --k-focus-ring: var(--k-focus);
+  --k-positive-soft: color-mix(in oklab, var(--k-positive) 14%, transparent);
+  --k-caution-soft: color-mix(in oklab, var(--k-caution) 14%, transparent);
+  --k-negative-soft: color-mix(in oklab, var(--k-negative) 14%, transparent);
+  --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
 }
 
 .theme-flow {
   --k-brand: #2f88a6;
+  --k-action: #2f88a6;
+  --k-action-contrast: #06080b;
+  --k-focus: #2f88a6;
+  --k-focus-ring: var(--k-focus);
 }
 
 .theme-surface {
   --k-brand: #14a37a;
+  --k-action: #14a37a;
+  --k-action-contrast: #06080b;
+  --k-focus: #14a37a;
+  --k-focus-ring: var(--k-focus);
+}
+
+/* Station: the draft accent, adjusted per mode only where WCAG AA needs it.
+   Dark: the accent carries white text as a fill but is too dark to read as
+   text on the dark panel, so the brand (and the focus ring) is the accent
+   lightened to clear contrast; the action keeps the draft accent. */
+.theme-station {
+  --k-brand: #9364ff;
+  --k-action: #7c3aed;
+  --k-action-contrast: #ffffff;
+  --k-focus: #9364ff;
+  --k-focus-ring: var(--k-focus);
 }
 
 [data-theme="light"].theme-survey,
-[data-theme="light"] .theme-survey {
+[data-theme="light"] .theme-survey,
+:where(.theme-survey) [data-theme="light"] {
   --k-brand: #16806f;
+  --k-action: #16806f;
+  --k-action-contrast: #ffffff;
+  --k-focus: #16806f;
+  --k-focus-ring: var(--k-focus);
 }
 
 [data-theme="light"].theme-console,
-[data-theme="light"] .theme-console {
+[data-theme="light"] .theme-console,
+:where(.theme-console) [data-theme="light"] {
   --k-brand: #6c9400;
   --k-brand-contrast: #ffffff;
+  --k-action: #6c9400;
+  --k-action-contrast: #11120f;
+  --k-focus: #6c9400;
+  --k-focus-ring: var(--k-focus);
   --k-bg: #f3f5eb;
   --k-panel: #fbfcf7;
   --k-panel-raised: #eef2e6;
@@ -56,14 +119,39 @@
   --k-caution: #8a6500;
   --k-negative: #b93a36;
   --k-active: #247f75;
+  --k-status-contrast: #ffffff;
+  --k-positive-soft: color-mix(in oklab, var(--k-positive) 14%, transparent);
+  --k-caution-soft: color-mix(in oklab, var(--k-caution) 14%, transparent);
+  --k-negative-soft: color-mix(in oklab, var(--k-negative) 14%, transparent);
+  --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
 }
 
 [data-theme="light"].theme-flow,
-[data-theme="light"] .theme-flow {
+[data-theme="light"] .theme-flow,
+:where(.theme-flow) [data-theme="light"] {
   --k-brand: #1f6f88;
+  --k-action: #1f6f88;
+  --k-action-contrast: #ffffff;
+  --k-focus: #1f6f88;
+  --k-focus-ring: var(--k-focus);
 }
 
 [data-theme="light"].theme-surface,
-[data-theme="light"] .theme-surface {
+[data-theme="light"] .theme-surface,
+:where(.theme-surface) [data-theme="light"] {
   --k-brand: #0f6b52;
+  --k-action: #0f6b52;
+  --k-action-contrast: #ffffff;
+  --k-focus: #0f6b52;
+  --k-focus-ring: var(--k-focus);
+}
+
+[data-theme="light"].theme-station,
+[data-theme="light"] .theme-station,
+:where(.theme-station) [data-theme="light"] {
+  --k-brand: #7c3aed;
+  --k-action: #7c3aed;
+  --k-action-contrast: #ffffff;
+  --k-focus: #7c3aed;
+  --k-focus-ring: var(--k-focus);
 }

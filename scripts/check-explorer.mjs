@@ -14,7 +14,7 @@ const generated = execFileSync(process.execPath, ["scripts/generate-explorer-man
 assert.equal(readFileSync(manifestFile, "utf8"), generated, "Explorer manifest drifted; run node scripts/generate-explorer-manifest.mjs --write.");
 const manifest = JSON.parse(generated);
 assert.ok(manifest.exports.length > 0 && manifest.elements.length > 0, "Explorer must cover real React and custom-element public contracts.");
-assert.deepEqual(manifest.themes, ["theme-console", "theme-flow", "theme-surface", "theme-survey"], "Explorer must cover every product theme.");
+assert.deepEqual(manifest.themes, ["theme-console", "theme-flow", "theme-station", "theme-surface", "theme-survey"], "Explorer must cover every product theme.");
 const covered = new Set([...manifest.exports, ...manifest.exclusions].map((entry) => entry.id));
 const classesInSelector = (selector) => {
   const names = [];
