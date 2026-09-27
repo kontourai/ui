@@ -47,6 +47,9 @@ const CLASSIFY = [
   [/^--k-(?:ease|dur)$/, "omit:motion has no token group in the format; see Motion"],
   [/^--k-(?:border-|focus-ring-(?:width|offset)$)/, "omit:stroke widths have no token group in the format"],
   [/^--k-z-/, "omit:stacking order has no token group in the format"],
+  // Trust-state line styles are border-style keywords (the non-color cue), not colors
+  // or dimensions; the inks and fills beside them are ordinary colors.
+  [/^--k-trust-[a-z-]+-line$/, "omit:trust-state line styles are border-style keywords (the non-color cue); the format has no token group for them"],
 ];
 const COLOR_VALUE = /^(?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i;
 

@@ -945,3 +945,147 @@
   right: 0;
   margin-bottom: var(--k-space-2);
 }
+
+/* Trust state (DESIGN.md "Trust UX"): a chip naming a Surface claim status,
+   plus an optional visible detail. Meaning never rests on color: every state
+   has its own label text, its own glyph shape, and a line style that groups
+   states (solid: a current, definite outcome; dashed: asserted but not
+   established; dotted: no current support; double: contested). Trust-state
+   rules read only --k-trust-* and neutral structure tokens, never the brand,
+   action, or focus roles (check:tokens enforces it). */
+.trust-state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--k-space-1) var(--k-space-2);
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.trust-state__chip {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k-space-1);
+  min-height: var(--k-space-5);
+  padding: 0 var(--k-space-2);
+  color: var(--k-text-muted);
+  background: var(--k-panel-raised);
+  border-color: var(--k-line-strong);
+  /* Dotted, not solid: solid means a definite outcome, and an unrecognized
+     state asserts none. Every recognized state sets its own line style. */
+  border-style: dotted;
+  border-width: var(--k-border-thick);
+  border-radius: var(--k-radius-sm);
+  font-family: var(--k-font-mono);
+  font-size: var(--k-text-xs);
+  font-weight: 800;
+  letter-spacing: var(--k-tracking-wide);
+  line-height: var(--k-leading-tight);
+  text-transform: uppercase;
+  /* A long label wraps inside a narrow container rather than overflowing
+     it; the label is never truncated, since it carries the meaning. */
+  max-width: 100%;
+}
+
+.trust-state__glyph {
+  flex: 0 0 auto;
+  width: var(--k-text-sm);
+  height: var(--k-text-sm);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The default label, read by assistive tech when an override replaced it. */
+.trust-state__hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.trust-state__detail {
+  min-width: 0;
+  color: var(--k-text-muted);
+  font-size: var(--k-text-sm);
+  line-height: var(--k-leading-normal);
+  overflow-wrap: anywhere;
+}
+
+.trust-state--unknown .trust-state__chip {
+  color: var(--k-trust-unknown);
+  background: var(--k-trust-unknown-fill);
+  border-color: var(--k-trust-unknown);
+  border-style: var(--k-trust-unknown-line);
+}
+
+.trust-state--proposed .trust-state__chip {
+  color: var(--k-trust-proposed);
+  background: var(--k-trust-proposed-fill);
+  border-color: var(--k-trust-proposed);
+  border-style: var(--k-trust-proposed-line);
+}
+
+.trust-state--assumed .trust-state__chip {
+  color: var(--k-trust-assumed);
+  background: var(--k-trust-assumed-fill);
+  border-color: var(--k-trust-assumed);
+  border-style: var(--k-trust-assumed-line);
+}
+
+.trust-state--verified .trust-state__chip {
+  color: var(--k-trust-verified);
+  background: var(--k-trust-verified-fill);
+  border-color: var(--k-trust-verified);
+  border-style: var(--k-trust-verified-line);
+}
+
+.trust-state--stale .trust-state__chip {
+  color: var(--k-trust-stale);
+  background: var(--k-trust-stale-fill);
+  border-color: var(--k-trust-stale);
+  border-style: var(--k-trust-stale-line);
+}
+
+.trust-state--disputed .trust-state__chip {
+  color: var(--k-trust-disputed);
+  background: var(--k-trust-disputed-fill);
+  border-color: var(--k-trust-disputed);
+  border-style: var(--k-trust-disputed-line);
+}
+
+.trust-state--superseded .trust-state__chip {
+  color: var(--k-trust-superseded);
+  background: var(--k-trust-superseded-fill);
+  border-color: var(--k-trust-superseded);
+  border-style: var(--k-trust-superseded-line);
+}
+
+.trust-state--rejected .trust-state__chip {
+  color: var(--k-trust-rejected);
+  background: var(--k-trust-rejected-fill);
+  border-color: var(--k-trust-rejected);
+  border-style: var(--k-trust-rejected-line);
+}
+
+.trust-state--revoked .trust-state__chip {
+  color: var(--k-trust-revoked);
+  background: var(--k-trust-revoked-fill);
+  border-color: var(--k-trust-revoked);
+  border-style: var(--k-trust-revoked-line);
+}
+
+/* A double line needs room for two strokes and a gap; at the shared thick
+   width it would render as one solid line. The chip is border-box with a
+   min-height, so the wider border keeps the chip's height. */
+.trust-state--disputed .trust-state__chip {
+  border-width: calc(var(--k-border-thin) + var(--k-border-thick));
+}

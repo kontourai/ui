@@ -28,6 +28,24 @@ colors:
   neutral: "#6f8095"
   active: "#7aa2ff"
   status-contrast: "#06080b"
+  trust-unknown: "#a2acb7"
+  trust-unknown-fill: "#252d39"
+  trust-proposed: "#87b1fd"
+  trust-proposed-fill: "#222d42"
+  trust-assumed: "#c4a4fe"
+  trust-assumed-fill: "#2a2c43"
+  trust-verified: "#50d492"
+  trust-verified-fill: "#1a3233"
+  trust-stale: "#f6b84d"
+  trust-stale-fill: "#312e2a"
+  trust-disputed: "#ec81c0"
+  trust-disputed-fill: "#30273a"
+  trust-superseded: "#6bc8d3"
+  trust-superseded-fill: "#1e313d"
+  trust-rejected: "#f66d67"
+  trust-rejected-fill: "#31242d"
+  trust-revoked: "#fdc2a2"
+  trust-revoked-fill: "#323036"
   focus-ring: "{colors.focus}"
   bg-light: "#f5f4ef"
   panel-light: "#ffffff"
@@ -48,6 +66,24 @@ colors:
   neutral-light: "#5f6975"
   active-light: "#3f6fd6"
   status-contrast-light: "#ffffff"
+  trust-unknown-light: "#535c66"
+  trust-unknown-fill-light: "#eeeff0"
+  trust-proposed-light: "#2855ad"
+  trust-proposed-fill-light: "#eaeef7"
+  trust-assumed-light: "#6938a7"
+  trust-assumed-fill-light: "#f0ebf6"
+  trust-verified-light: "#006d42"
+  trust-verified-fill-light: "#e6f0ec"
+  trust-stale-light: "#855a00"
+  trust-stale-fill-light: "#f3efe6"
+  trust-disputed-light: "#94296f"
+  trust-disputed-fill-light: "#f4eaf1"
+  trust-superseded-light: "#016770"
+  trust-superseded-fill-light: "#e6f0f1"
+  trust-rejected-light: "#a12628"
+  trust-rejected-fill-light: "#f6e9ea"
+  trust-revoked-light: "#713408"
+  trust-revoked-fill-light: "#f1ebe6"
   focus-ring-light: "{colors.focus-light}"
   bg-survey: "#06080b"
   brand-survey: "#5ce0c6"
@@ -234,6 +270,16 @@ components:
 #     --k-caution-soft (console-light): color-mix(in oklab, var(--k-caution) 14%, transparent)
 #     --k-negative-soft (console-light): color-mix(in oklab, var(--k-negative) 14%, transparent)
 #     --k-active-soft (console-light): color-mix(in oklab, var(--k-active) 14%, transparent)
+# - trust-state line styles are border-style keywords (the non-color cue); the format has no token group for them:
+#     --k-trust-unknown-line: dotted
+#     --k-trust-proposed-line: dashed
+#     --k-trust-assumed-line: dashed
+#     --k-trust-verified-line: solid
+#     --k-trust-stale-line: dotted
+#     --k-trust-disputed-line: double
+#     --k-trust-superseded-line: dotted
+#     --k-trust-rejected-line: solid
+#     --k-trust-revoked-line: dotted
 # - font-family stacks; the type levels above resolve the families their selectors use:
 #     --k-font-display: "Fraunces", Georgia, "Times New Roman", serif
 #     --k-font-ui: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif
@@ -346,7 +392,7 @@ the shipped selectors that use them, and `text-*` levels are the bare size steps
 read from their classes in `react/styles.css`; properties that are shorthands or `calc()`
 expressions, and rules inside `@media`, are left out rather than approximated. Tokens the format
 cannot carry (font-family stacks, shadows, soft status fills, motion, stroke widths,
-line-height and letter-spacing scales, stacking order) are listed with their values in a
+line-height and letter-spacing scales, stacking order, trust-state line styles) are listed with their values in a
 comment at the end of the front matter, so the drift check covers every token.
 
 The generator buckets each `--k-*` token by name pattern; an alias (`var(--k-other)`) takes its
@@ -356,9 +402,10 @@ makes the generator fail until someone decides how this file represents it.
 
 `npx @google/design.md lint DESIGN.md` reports every color that no generated component
 references as an `orphaned-tokens` warning: default structure tokens such as `bg`, `line`,
-`line-strong`, and `text-faint`, the status tones, and every light and theme variant. That is
-expected: only five components are generated, for the dark default, and status tones are
-consumed by tone classes rather than a component entry.
+`line-strong`, and `text-faint`, the status tones, the trust-state inks and fills, and every
+light and theme variant. That is expected: only five components are generated, for the dark
+default, and status tones and trust states are consumed by their classes rather than a component
+entry.
 
 ### Token architecture
 
@@ -369,7 +416,8 @@ maps onto it only partly:
 - **Primitive** (not shipped): there is no separate palette layer; `tokens/tokens.css` assigns
   literal values straight to semantic names. A named brand palette (Ink, Stone, product
   accents) is [#74](https://github.com/kontourai/ui/issues/74).
-- **Semantic** (shipped, partly): the `--k-*` structure, text, status, action, and focus roles.
+- **Semantic** (shipped, partly): the `--k-*` structure, text, status, trust-state, action, and
+  focus roles.
   `--k-action` and `--k-action-contrast` form the primary action pair; `--k-focus` supplies
   keyboard focus. They are independent of the product brand slot.
 - **Component** (not shipped as tokens): primitives in `react/styles.css` read semantic tokens
@@ -456,6 +504,9 @@ Color roles, not values. The values for each mode and theme are in the front mat
 | `--k-positive`, `--k-caution`, `--k-negative`, `--k-active`, `--k-neutral` | Shared status tones (see below). |
 | `--k-*-soft` | Low-alpha tone fills behind status text; derived at runtime from the active tone. |
 | `--k-focus-ring` | Compatibility alias of `--k-focus`; redeclared in scopes that change focus. New primitives read the focus role directly. |
+| `--k-trust-<state>` | Trust-state ink: the label, glyph, and border of that state's chip (see [Trust UX](#trust-ux)). One per state, never shared. |
+| `--k-trust-<state>-fill` | The chip's own background, so its label pair does not depend on the surface it sits on. |
+| `--k-trust-<state>-line` | The state's line style, a border-style keyword: the non-color cue for chip borders; charts translate it to a stroke (see [Data Visualization](#data-visualization)). |
 
 ### White-label overrides
 
@@ -500,13 +551,12 @@ The shared status scale maps product words to five tones: `positive`, `caution`,
 `active`, `neutral` (see `docs/adr/0001-console-kit-token-contract.md`). Never encode critical
 state through color alone; status always carries text, and icon or color reinforces it.
 
-**OPEN-7 — status model.** Shipped: the five tones above. Draft direction: distinct semantic
-tokens for success, warning, danger, information, verified, uncertain, pending, unavailable,
-and neutral, and a trust-state vocabulary (known, verified, inferred, estimated, uncertain,
-conflicting, failed, unavailable, not checked) that must never collapse into one generic
-confidence state. Tracked in [#73](https://github.com/kontourai/ui/issues/73). Until it ships,
-map trust states onto the five tones *and* always name the state in text; never let two
-different trust states render identically.
+**OPEN-7 — status model.** Shipped: the five tones above, and, separately, the trust states
+(Surface's claim statuses, decided in OPEN-12) as their own tokens, `TrustState`, and
+`k-trust-state` (see [Trust UX](#trust-ux)). Still draft: distinct semantic tokens for success,
+warning, danger, information, pending, and neutral that would replace or extend the five tones.
+The remaining semantic-token work is tracked in [#88](https://github.com/kontourai/ui/issues/88). Use a trust state, not a tone, for
+the status of a claim; never let two different trust states render identically.
 
 ### Product themes
 
@@ -699,6 +749,8 @@ The shipped primitives (`@kontourai/ui/react`, `@kontourai/ui/elements`) impleme
 - **Dialogs** (`Dialog`). Reserve interruption for actions that need focus or confirmation.
 - **Status** (`Badge`, `StatusBadge`, `StatusBar`). Always include text; icon and color
   reinforce it.
+- **Trust state** (`TrustState`, `k-trust-state`). A chip naming one of Surface's nine claim
+  statuses, with an optional visible detail that says what was checked. See [Trust UX](#trust-ux).
 - **Loading** (`Skeleton`, `Spinner`, `Progress`). Communicate useful state without fake
   precision. Never imply completion while work is pending.
 - **Empty states** (`Empty`). Explain purpose and the next action.
@@ -848,9 +900,52 @@ what was checked, against what, by what mechanism, and with what limitations. Pr
 Where relevant, expose source, actor, model, tool, timestamp, transformation, validation step,
 human approval, artifact or result, version, and lineage.
 
-Distinguish **known, verified, inferred, estimated, uncertain, conflicting, failed,
-unavailable, and not checked**. Never collapse these into one generic confidence state
-(tokens: OPEN-7).
+Distinguish the trust states: **unknown, proposed, assumed, verified, stale, disputed,
+superseded, rejected, and revoked**. Never collapse these into one generic confidence state.
+
+### Trust states
+
+**OPEN-12 — trust-state vocabulary. Decided (owner, 2026-09-27): Surface's vocabulary.** The
+trust states are Surface's claim statuses (`TRUST_STATUSES`, the same set the open trust format
+derives), in Surface's order, and their default labels are Surface's display names. Kontour UI
+does not redefine them. An earlier draft list (known, inferred, estimated, uncertain,
+conflicting, failed, unavailable, not checked) described how a value was produced; it is not a
+set of component states. `@kontourai/surface` is an exact-pinned development dependency, used
+only by `npm run check:surface-parity`, which fails when the states, their order, or their
+default labels differ from Surface's; bumping it is how a Surface vocabulary change reaches this
+package. Nothing shipped imports Surface (`npm run check:pack` enforces it).
+
+Shipped: tokens in `tokens/tokens.css`, the `TrustState` React primitive, and the
+`k-trust-state` element. Each state has its own ink and fill in both modes, resolved the same in
+every product theme, and never reads a product accent, the action role, or the focus role
+(`npm run check:tokens`). `npm run check:contrast` rates every label on its fill and every
+border against the panel, in every theme and mode, and fails when two states' inks are too
+close to tell apart.
+
+Meaning never rests on color. Every chip always shows a text label, an SVG glyph whose shape is
+unique to the state, and a line style that groups states:
+
+| State | Default label | Glyph | Line | Surface meaning |
+| --- | --- | --- | --- | --- |
+| unknown | No evidence | empty circle | dotted | No evidence has been recorded. |
+| proposed | Pending review | clock | dashed | Asserted, not yet reviewed or verified. |
+| assumed | Assumed | wave | dashed | Treated as true without evidence. |
+| verified | Verified | check mark | solid | Current evidence supports the claim under its policy. |
+| stale | Needs refresh | refresh arrow | dotted | Was verified; the verification aged out or the subject changed. |
+| disputed | Disputed | not equal | double | Producers or reviewers disagree. |
+| superseded | Superseded | arrow to a bar | dotted | A newer claim replaces this one. |
+| rejected | Rejected | cross | solid | Checked and found not to hold. |
+| revoked | Revoked | circle with slash | dotted | The producer withdrew the claim. |
+
+Solid means a current, definite outcome; dashed means asserted but not established; dotted
+means no current support (nothing recorded, expired, replaced, or withdrawn); double means
+contested. Assumed is never styled like verified: it has no evidence behind it.
+
+A product may pass its own label; an empty one falls back to the default, and an override keeps
+the default label as visually hidden text so assistive technology still hears the status. The
+detail slot is where evidence goes: prefer a chip with a detail such as "12 source records
+matched" to a bare chip. An input the component does not recognize renders as its own text with
+no state styling or glyph; it is never coerced into a state.
 
 Human review is first-class provenance. Failures state what failed, the impact,
 recoverability, retained partial work, and the next action.
@@ -869,8 +964,19 @@ downward.
 Charts prioritize comparison and interpretation over decoration, and every chart answers a
 user question. Never use product identity colors as an implicit status scale. Represent
 uncertainty and completeness with multiple cues (labels, line style, shape, opacity, pattern,
-and color). Broken/continuous contour logic is allowed only when semantically appropriate.
-Provide textual equivalents where needed.
+and color). A series that carries a trust state reuses that state's ink (`--k-trust-<state>`)
+and the line style its `--k-trust-<state>-line` token names. That token is a CSS border-style
+keyword, not a stroke value, so a chart translates it:
+
+| Line keyword | SVG stroke |
+| --- | --- |
+| solid | no dash array |
+| dashed | a dash pattern, such as `stroke-dasharray: 4 3` |
+| dotted | round caps on a near-zero dash, such as `stroke-dasharray: 0.1 3` with `stroke-linecap: round` |
+| double | no stroke equivalent: draw two parallel strokes, or use the state's glyph as the marker |
+
+Broken/continuous contour logic is allowed only when semantically appropriate. Provide textual
+equivalents where needed.
 
 ## Voice & Writing
 
@@ -936,11 +1042,12 @@ assets and tokens together, in the same change.
 | OPEN-4 | Typefaces | Fraunces / Hanken Grotesk / IBM Plex Mono | humanist or restrained neo-grotesk; undecided | — |
 | OPEN-5 | Default mode | dark default, `[data-theme="light"]` opt-in | light Stone/Ink default | — |
 | OPEN-6 | Palette and product accents | per-theme `--k-brand`; `.theme-station` ships with a contrast-adjusted dark brand | Ink, Stone, final Flow and Surface accents | [#74](https://github.com/kontourai/ui/issues/74) |
-| OPEN-7 | Status model | five tones | nine semantic and trust states | [#73](https://github.com/kontourai/ui/issues/73) |
+| OPEN-7 | Status model | five tones; the nine trust states (Surface's statuses) as separate tokens and a primitive | semantic status tokens beyond the five tones | [#88](https://github.com/kontourai/ui/issues/88) |
 | OPEN-8 | Primary action and focus | resolved by [#79](https://github.com/kontourai/ui/pull/79): `--k-action` and `--k-focus` roles, independent of the brand slot | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
 | OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "`<Product>` by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
 | OPEN-10 | Console and Survey themes | shipped | not covered by the draft | — |
 | OPEN-11 | Marketing-site palette relationship | — | undecided | — |
+| OPEN-12 | Trust-state vocabulary | resolved (owner, 2026-09-27): Surface's claim statuses and display names, checked against `@kontourai/surface` | — | [#73](https://github.com/kontourai/ui/issues/73) |
 
 ### Brand decisions still open
 

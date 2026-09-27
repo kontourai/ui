@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { trustStatesFromSource } from "./trust-states-source.mjs";
 
 // WCAG contrast conformance for the kit's own palette, in both themes.
 //
@@ -43,6 +44,28 @@ function relativeLuminance(hex) {
     return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   };
   return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+}
+
+function oklab(hex) {
+  let value = hex.slice(1);
+  if (value.length === 3) value = [...value].map((c) => c + c).join("");
+  const [r, g, b] = [0, 2, 4].map((offset) => {
+    const c = Number.parseInt(value.slice(offset, offset + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
+function deltaE(a, b) {
+  const [x, y] = [oklab(a), oklab(b)];
+  return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
 }
 
 function contrastRatio(a, b) {
@@ -94,10 +117,21 @@ for (const [selector, tokens] of scopes) {
 // this file.
 // Every token a pair below rates, except --k-line (a translucent rgba()
 // hairline, rated only where a scope spells it in hex).
+// Trust states (ui#73): Surface's TRUST_STATUSES, pinned here rather than read
+// from the source so a state dropped from the tokens and the component
+// together still fails.
+const TRUST_STATES = ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"];
+{
+  const fromSource = trustStatesFromSource(root);
+  if (JSON.stringify(fromSource) !== JSON.stringify(TRUST_STATES)) {
+    throw new Error(`${path.basename(fileURLToPath(import.meta.url))}: pinned TRUST_STATES ${JSON.stringify(TRUST_STATES)} differs from trustStates in react/src/trust-states.ts ${JSON.stringify(fromSource)}. Update the pin, and give every state its tokens and chip rule.`);
+  }
+}
 const RATED = new Set([
   "--k-bg", "--k-panel", "--k-panel-raised", "--k-text", "--k-text-muted",
   "--k-brand", "--k-brand-contrast", "--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast",
   "--k-positive", "--k-caution", "--k-negative", "--k-active",
+  ...TRUST_STATES.flatMap((state) => [`--k-trust-${state}`, `--k-trust-${state}-fill`]),
 ]);
 const blocks = [];
 for (const block of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
@@ -138,6 +172,12 @@ const ROLE_PAIRS = [
   ["--k-brand", "--k-panel", 4.5, "brand as text (eyebrows, panel counts) on panels"],
   ["--k-brand-contrast", "--k-brand", 4.5, "the brand slot's own text-on-brand pair"],
   ...STATUS.map((tone) => ["--k-status-contrast", tone, 4.5, "text on a filled status tone"]),
+  // A trust chip carries its own fill, so its label, glyph, and border are rated
+  // against that fill; the border's outer edge is rated against the panel.
+  ...TRUST_STATES.flatMap((state) => [
+    [`--k-trust-${state}`, `--k-trust-${state}-fill`, 4.5, `${state} trust label on its fill`],
+    [`--k-trust-${state}`, "--k-panel", 3.0, `${state} trust border and glyph against the panel`],
+  ]),
 ];
 
 // Shipped values that already fail a role pair. Recorded, not fixed, because
@@ -171,6 +211,36 @@ for (const theme of themes) {
     }
   }
 }
+// Trust states must never collapse into one generic confidence color: in each
+// resolved theme and mode, no two states share an ink or a fill, and no two
+// inks sit closer than TRUST_INK_MIN_DELTA_E in OKLab (distinct values that
+// look alike, like two near-identical grays, fail too). The floor is about
+// three times OKLab's just-noticeable difference (~0.02).
+const TRUST_INK_MIN_DELTA_E = 0.06;
+for (const theme of themes) {
+  for (const light of [false, true]) {
+    const scope = `${theme || "default"}:${light ? "light" : "dark"}`;
+    const tokens = resolve(theme, light);
+    for (const part of ["", "-fill"]) {
+      const seen = new Map();
+      for (const state of TRUST_STATES) {
+        const value = tokens[`--k-trust-${state}${part}`]?.toLowerCase();
+        if (value && seen.has(value)) failures.push(`${scope}: --k-trust-${state}${part} repeats --k-trust-${seen.get(value)}${part} (${value}); each trust state needs its own color.`);
+        seen.set(value, state);
+      }
+    }
+    for (const [index, a] of TRUST_STATES.entries()) {
+      for (const b of TRUST_STATES.slice(index + 1)) {
+        const [inkA, inkB] = [tokens[`--k-trust-${a}`], tokens[`--k-trust-${b}`]];
+        if (!inkA || !inkB) continue;
+        checked += 1;
+        const distance = deltaE(inkA, inkB);
+        if (distance < TRUST_INK_MIN_DELTA_E) failures.push(`${scope}: --k-trust-${a} and --k-trust-${b} are ${distance.toFixed(3)} apart in OKLab (needs ${TRUST_INK_MIN_DELTA_E}); the two states would look alike.`);
+      }
+    }
+  }
+}
+
 for (const id of KNOWN_ROLE_FAILURES.keys()) {
   if (!seenKnown.has(id)) failures.push(`KNOWN_ROLE_FAILURES entry ${id} matched no resolved pair; remove it.`);
 }

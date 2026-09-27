@@ -37,6 +37,7 @@ const elementFiles = [
   "dist/elements/elements/src/k-progress.js",
   "dist/elements/elements/src/k-status-badge.js",
   "dist/elements/elements/src/k-topbar.js",
+  "dist/elements/elements/src/k-trust-state.js",
 ];
 
 assertIncludes(reactIndex, "Badge", "React index should export Badge.");
@@ -66,6 +67,38 @@ assert.equal(badge.type, "span");
 assert.equal(badge.props.className, "badge tone-positive");
 assert.equal(badge.props.children, "verified");
 
+// TrustState always renders a visible label and names its state in an
+// attribute; an override keeps the default label as hidden text; an
+// unrecognized word keeps its text and claims no state.
+const { TrustState, trustStateFor, trustStates } = await import("@kontourai/ui/react");
+const reactIndexExports = await import("@kontourai/ui/react");
+assert.equal("trustStatePresentation" in reactIndexExports, false, "trustStatePresentation is internal; do not export it.");
+assert.deepEqual([...trustStates], ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"]);
+const chipParts = (element) => element.props.children[0].props.children.filter(Boolean);
+const part = (element, className) => chipParts(element).find((child) => child.props.className === className);
+const verified = TrustState({ state: "verified", detail: "12 source records matched" });
+assert.equal(verified.type, "span");
+assert.equal(verified.props.className, "trust-state trust-state--verified");
+assert.equal(verified.props["data-trust-state"], "verified");
+assert.equal(part(verified, "trust-state__label").props.children, "Verified");
+assert.equal(part(verified, "trust-state__glyph").type, "svg");
+assert.equal(part(verified, "trust-state__glyph").props["aria-hidden"], "true");
+assert.equal(part(verified, "trust-state__hidden"), undefined);
+assert.equal(verified.props.children[1].props.children, "12 source records matched");
+assert.equal(TrustState({ state: "verified", detail: 0 }).props.children[1]?.props.children, 0, "detail={0} must render.");
+assert.equal(part(TrustState({ state: "unknown", label: " " }), "trust-state__label").props.children, "No evidence");
+const overridden = TrustState({ state: "stale", label: "Expired" });
+assert.equal(part(overridden, "trust-state__label").props.children, "Expired");
+assert.deepEqual(part(overridden, "trust-state__hidden").props.children, [" (", "Needs refresh", ")"]);
+assert.equal(part(TrustState({ state: "verified", label: "verified" }), "trust-state__hidden"), undefined, "A case-only override adds no hidden label.");
+const unrecognized = TrustState({ state: "pending" });
+assert.equal(unrecognized.props.className, "trust-state");
+assert.equal(unrecognized.props["data-trust-state"], undefined);
+assert.equal(part(unrecognized, "trust-state__label").props.children, "pending");
+assert.equal(part(unrecognized, "trust-state__glyph"), undefined, "An unrecognized state renders no glyph box.");
+assert.equal(trustStateFor(" Verified "), "verified");
+assert.equal(trustStateFor("not checked"), null);
+
 const registry = new Map();
 globalThis.HTMLElement = class HTMLElement {};
 globalThis.customElements = {
@@ -77,7 +110,7 @@ globalThis.customElements = {
   }
 };
 await import("@kontourai/ui/elements");
-for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon"]) {
+for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon", "k-trust-state"]) {
   assert.ok(registry.has(tag), `${tag} should be registered.`);
 }
 

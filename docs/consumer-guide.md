@@ -252,6 +252,37 @@ Rules:
 - Keep the product identity in a theme class, not in copied primitive CSS.
 - Use `--k-*` tokens for local styles and derive product-specific aliases from `--k-*`.
 
+## Trust States
+
+Use a trust state, not a status tone, for the status of a claim. The states are Surface's claim
+statuses, in Surface's order, with Surface's display names as default labels: `unknown` (No
+evidence), `proposed` (Pending review), `assumed`, `verified`, `stale` (Needs refresh),
+`disputed`, `superseded`, `rejected`, `revoked`. Each renders a text label, an SVG glyph, and a
+line style, so the meaning survives without color; put the evidence in the detail.
+
+```tsx
+import { TrustState } from "@kontourai/ui/react";
+
+<TrustState state="verified" detail="12 source records matched" />
+<TrustState state="stale" label="Expired" detail="Verification expired 3 days ago" />
+```
+
+```html
+<k-trust-state state="disputed" detail="Invoice and contract disagree on the amount"></k-trust-state>
+<k-trust-state state="verified"><a href="#evidence">12 source records</a></k-trust-state>
+```
+
+- `label` replaces the visible wording; the default label stays available to assistive
+  technology as visually hidden text, and an empty label falls back to the default.
+- The element takes its detail from the `detail` attribute, or else from its children. Children
+  are read once, on the first render; children added later are not picked up.
+- `trustStateFor(value)` accepts any casing and surrounding space and returns `null` for
+  anything else. An unrecognized state renders as its own text with no state styling or glyph.
+- Chart series can reuse the ink `--k-trust-<state>`. The line token `--k-trust-<state>-line` is a
+  CSS border-style keyword, not a stroke value, so translate it (DESIGN.md, "Data
+  Visualization"): solid is no dash array, dashed and dotted become a `stroke-dasharray`
+  pattern, and double has no stroke equivalent (draw two strokes or use the glyph as a marker).
+
 ## Tone Mapping
 
 Product-specific domain words should map to the shared semantic scale:
