@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0](https://github.com/kontourai/ui/compare/v1.14.0...v1.15.0) (2026-09-27)
+
+
+### Features
+
+* **trust:** trust-state tokens and TrustState using Surface's claim-status vocabulary ([#86](https://github.com/kontourai/ui/issues/86)) ([92e9334](https://github.com/kontourai/ui/commit/92e933415cc2500e6a4a6fb5229f82d76968c436))
+
 ## [1.14.0](https://github.com/kontourai/ui/compare/v1.13.0...v1.14.0) (2026-09-27)
 
 
