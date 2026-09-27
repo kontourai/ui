@@ -37,6 +37,7 @@ const elementFiles = [
   "dist/elements/elements/src/k-progress.js",
   "dist/elements/elements/src/k-status-badge.js",
   "dist/elements/elements/src/k-topbar.js",
+  "dist/elements/elements/src/k-trust-state.js",
 ];
 
 assertIncludes(reactIndex, "Badge", "React index should export Badge.");
@@ -66,6 +67,25 @@ assert.equal(badge.type, "span");
 assert.equal(badge.props.className, "badge tone-positive");
 assert.equal(badge.props.children, "verified");
 
+// TrustState always renders a visible label and names its state in an
+// attribute; an unrecognized word keeps its text and claims no state.
+const { TrustState, trustStateFor } = await import("@kontourai/ui/react");
+const labelOf = (element) => element.props.children[0].props.children[1].props.children;
+const verified = TrustState({ state: "verified", detail: "Verified against 12 source records" });
+assert.equal(verified.type, "span");
+assert.equal(verified.props.className, "trust-state trust-state--verified");
+assert.equal(verified.props["data-trust-state"], "verified");
+assert.equal(labelOf(verified), "Verified");
+assert.equal(verified.props.children[1].props.children, "Verified against 12 source records");
+assert.equal(labelOf(TrustState({ state: "not-checked", label: " " })), "Not checked");
+assert.equal(labelOf(TrustState({ state: "uncertain", label: "Needs refresh" })), "Needs refresh");
+const unrecognized = TrustState({ state: "stale" });
+assert.equal(unrecognized.props.className, "trust-state");
+assert.equal(unrecognized.props["data-trust-state"], undefined);
+assert.equal(labelOf(unrecognized), "stale");
+assert.equal(trustStateFor("Not Checked"), "not-checked");
+assert.equal(trustStateFor("disputed"), null);
+
 const registry = new Map();
 globalThis.HTMLElement = class HTMLElement {};
 globalThis.customElements = {
@@ -77,7 +97,7 @@ globalThis.customElements = {
   }
 };
 await import("@kontourai/ui/elements");
-for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon"]) {
+for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon", "k-trust-state"]) {
   assert.ok(registry.has(tag), `${tag} should be registered.`);
 }
 

@@ -19,6 +19,7 @@ import { KTextarea } from "./k-textarea.js";
 import { KToastHost } from "./k-toast-host.js";
 import { KToggle } from "./k-toggle.js";
 import { KTooltip } from "./k-tooltip.js";
+import { KTrustState } from "./k-trust-state.js";
 import { KTopbar } from "./k-topbar.js";
 
 defineElement("k-badge", KBadge);
@@ -41,6 +42,7 @@ defineElement("k-textarea", KTextarea);
 defineElement("k-toast-host", KToastHost);
 defineElement("k-toggle", KToggle);
 defineElement("k-tooltip", KTooltip);
+defineElement("k-trust-state", KTrustState);
 defineElement("k-topbar", KTopbar);
 
 export { KBadge } from "./k-badge.js";
@@ -63,6 +65,7 @@ export { KTextarea } from "./k-textarea.js";
 export { KToastHost } from "./k-toast-host.js";
 export { KToggle } from "./k-toggle.js";
 export { KTooltip } from "./k-tooltip.js";
+export { KTrustState } from "./k-trust-state.js";
 export { KTopbar } from "./k-topbar.js";
 export {
   normalizedClassSuffix,
@@ -72,3 +75,11 @@ export {
   type SemanticTone,
   type ToneMatcher,
 } from "../react/tones.js";
+export {
+  trustStateFor,
+  trustStateLabels,
+  trustStatePresentation,
+  trustStates,
+  type TrustStateName,
+  type TrustStatePresentation,
+} from "../react/trust-states.js";

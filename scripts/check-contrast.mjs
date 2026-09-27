@@ -94,10 +94,14 @@ for (const [selector, tokens] of scopes) {
 // this file.
 // Every token a pair below rates, except --k-line (a translucent rgba()
 // hairline, rated only where a scope spells it in hex).
+// Trust states (ui#73), pinned here rather than read from the source so a
+// state dropped from the tokens and the component together still fails.
+const TRUST_STATES = ["verified", "known", "inferred", "estimated", "uncertain", "conflicting", "failed", "unavailable", "not-checked"];
 const RATED = new Set([
   "--k-bg", "--k-panel", "--k-panel-raised", "--k-text", "--k-text-muted",
   "--k-brand", "--k-brand-contrast", "--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast",
   "--k-positive", "--k-caution", "--k-negative", "--k-active",
+  ...TRUST_STATES.flatMap((state) => [`--k-trust-${state}`, `--k-trust-${state}-fill`]),
 ]);
 const blocks = [];
 for (const block of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
@@ -138,6 +142,12 @@ const ROLE_PAIRS = [
   ["--k-brand", "--k-panel", 4.5, "brand as text (eyebrows, panel counts) on panels"],
   ["--k-brand-contrast", "--k-brand", 4.5, "the brand slot's own text-on-brand pair"],
   ...STATUS.map((tone) => ["--k-status-contrast", tone, 4.5, "text on a filled status tone"]),
+  // A trust chip carries its own fill, so its label, glyph, and border are rated
+  // against that fill; the border's outer edge is rated against the panel.
+  ...TRUST_STATES.flatMap((state) => [
+    [`--k-trust-${state}`, `--k-trust-${state}-fill`, 4.5, `${state} trust label on its fill`],
+    [`--k-trust-${state}`, "--k-panel", 3.0, `${state} trust border and glyph against the panel`],
+  ]),
 ];
 
 // Shipped values that already fail a role pair. Recorded, not fixed, because
@@ -168,6 +178,21 @@ for (const theme of themes) {
         continue;
       }
       if (ratio < minimum) failures.push(`${id} = ${ratio.toFixed(2)}:1 (needs ${minimum}:1 — ${why})`);
+    }
+  }
+}
+// Trust states must never collapse into one generic confidence color: in each
+// resolved theme and mode, no two states share an ink or a fill.
+for (const theme of themes) {
+  for (const light of [false, true]) {
+    const tokens = resolve(theme, light);
+    for (const part of ["", "-fill"]) {
+      const seen = new Map();
+      for (const state of TRUST_STATES) {
+        const value = tokens[`--k-trust-${state}${part}`]?.toLowerCase();
+        if (value && seen.has(value)) failures.push(`${theme || "default"}:${light ? "light" : "dark"}: --k-trust-${state}${part} repeats --k-trust-${seen.get(value)}${part} (${value}); each trust state needs its own color.`);
+        seen.set(value, state);
+      }
     }
   }
 }

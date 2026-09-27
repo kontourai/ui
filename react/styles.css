@@ -945,3 +945,162 @@
   right: 0;
   margin-bottom: var(--k-space-2);
 }
+
+/* Trust state (DESIGN.md "Trust UX"): a chip that names what Kontour can
+   establish about a value, plus an optional visible detail. Meaning never rests
+   on color: every state has its own label text, its own glyph shape, and a
+   line style that groups states by how established they are (solid: a check
+   produced a definite result; dashed: derived without direct confirmation;
+   dotted: evidence insufficient or absent; double: evidence disagrees).
+   Trust-state rules read only --k-trust-* and neutral structure tokens, never
+   the brand or the action role (check:tokens enforces it). */
+.trust-state {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--k-space-1) var(--k-space-2);
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.trust-state__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--k-space-1);
+  min-height: var(--k-space-5);
+  padding: 0 var(--k-space-2);
+  color: var(--k-text-muted);
+  background: var(--k-panel-raised);
+  border-color: var(--k-line-strong);
+  border-style: solid;
+  border-width: var(--k-border-thick);
+  border-radius: var(--k-radius-sm);
+  font-family: var(--k-font-mono);
+  font-size: var(--k-text-xs);
+  font-weight: 800;
+  letter-spacing: var(--k-tracking-wide);
+  line-height: var(--k-leading-tight);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.trust-state__glyph {
+  display: inline-block;
+  min-width: 1em;
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.trust-state__detail {
+  min-width: 0;
+  color: var(--k-text-muted);
+  font-size: var(--k-text-sm);
+  line-height: var(--k-leading-normal);
+  overflow-wrap: anywhere;
+}
+
+.trust-state--verified .trust-state__chip {
+  color: var(--k-trust-verified);
+  background: var(--k-trust-verified-fill);
+  border-color: var(--k-trust-verified);
+  border-style: var(--k-trust-verified-line);
+}
+
+.trust-state--verified .trust-state__glyph::before {
+  content: "\2713"; /* check mark */
+}
+
+.trust-state--known .trust-state__chip {
+  color: var(--k-trust-known);
+  background: var(--k-trust-known-fill);
+  border-color: var(--k-trust-known);
+  border-style: var(--k-trust-known-line);
+}
+
+.trust-state--known .trust-state__glyph::before {
+  content: "\25CF"; /* filled circle */
+}
+
+.trust-state--inferred .trust-state__chip {
+  color: var(--k-trust-inferred);
+  background: var(--k-trust-inferred-fill);
+  border-color: var(--k-trust-inferred);
+  border-style: var(--k-trust-inferred-line);
+}
+
+.trust-state--inferred .trust-state__glyph::before {
+  content: "\25D0"; /* half-filled circle */
+}
+
+.trust-state--estimated .trust-state__chip {
+  color: var(--k-trust-estimated);
+  background: var(--k-trust-estimated-fill);
+  border-color: var(--k-trust-estimated);
+  border-style: var(--k-trust-estimated-line);
+}
+
+.trust-state--estimated .trust-state__glyph::before {
+  content: "\2248"; /* approximately equal */
+}
+
+.trust-state--uncertain .trust-state__chip {
+  color: var(--k-trust-uncertain);
+  background: var(--k-trust-uncertain-fill);
+  border-color: var(--k-trust-uncertain);
+  border-style: var(--k-trust-uncertain-line);
+}
+
+.trust-state--uncertain .trust-state__glyph::before {
+  content: "?"; /* question mark */
+}
+
+.trust-state--conflicting .trust-state__chip {
+  color: var(--k-trust-conflicting);
+  background: var(--k-trust-conflicting-fill);
+  border-color: var(--k-trust-conflicting);
+  border-style: var(--k-trust-conflicting-line);
+}
+
+.trust-state--conflicting .trust-state__glyph::before {
+  content: "\2260"; /* not equal */
+}
+
+.trust-state--failed .trust-state__chip {
+  color: var(--k-trust-failed);
+  background: var(--k-trust-failed-fill);
+  border-color: var(--k-trust-failed);
+  border-style: var(--k-trust-failed-line);
+}
+
+.trust-state--failed .trust-state__glyph::before {
+  content: "\2715"; /* cross */
+}
+
+.trust-state--unavailable .trust-state__chip {
+  color: var(--k-trust-unavailable);
+  background: var(--k-trust-unavailable-fill);
+  border-color: var(--k-trust-unavailable);
+  border-style: var(--k-trust-unavailable-line);
+}
+
+.trust-state--unavailable .trust-state__glyph::before {
+  content: "\2298"; /* circled slash */
+}
+
+.trust-state--not-checked .trust-state__chip {
+  color: var(--k-trust-not-checked);
+  background: var(--k-trust-not-checked-fill);
+  border-color: var(--k-trust-not-checked);
+  border-style: var(--k-trust-not-checked-line);
+}
+
+.trust-state--not-checked .trust-state__glyph::before {
+  content: "\25CB"; /* empty circle */
+}
+
+/* A double line needs room for two strokes and a gap; at the shared thick
+   width it would render as one solid line. */
+.trust-state--conflicting .trust-state__chip {
+  border-width: calc(var(--k-border-thin) + var(--k-border-thick));
+}

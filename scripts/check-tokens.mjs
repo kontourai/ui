@@ -130,6 +130,63 @@ for (const rule of [".btn-primary", ".btn:hover", ".btn:focus-visible", ".toggle
 const interactiveRules = interactiveSelectors.size;
 if (interactiveRules < 9) throw new Error(`react/styles.css: only ${interactiveRules} interactive selectors scanned.`);
 
+// Trust states (ui#73). Pinned independently of the component source so a
+// state removed from both the tokens and the component still fails here.
+const TRUST_STATES = ["verified", "known", "inferred", "estimated", "uncertain", "conflicting", "failed", "unavailable", "not-checked"];
+const LINE_STYLES = new Set(["solid", "dashed", "dotted", "double"]);
+const tokenBlock = (selector) => {
+  for (const block of tokenFiles["tokens/tokens.css"].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+    if (block[1].trim() === selector) return new Map([...block[2].matchAll(/(--k-[a-z0-9-]+):\s*([^;]+);/g)].map((match) => [match[1], match[2].trim()]));
+  }
+  throw new Error(`tokens/tokens.css has no ${selector} block.`);
+};
+for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-theme="light"]', ["", "-fill"]]]) {
+  const declared = tokenBlock(selector);
+  for (const state of TRUST_STATES) {
+    for (const part of parts) {
+      const token = `--k-trust-${state}${part}`;
+      const value = declared.get(token);
+      if (value === undefined) throw new Error(`tokens/tokens.css ${selector}: missing ${token}.`);
+      // Literal, never an alias: a var() resolves where it is declared, so a
+      // light or themed scope would inherit this scope's hue (ui#78).
+      if (part === "-line" ? !LINE_STYLES.has(value) : !/^#[0-9a-f]{6}$/i.test(value)) {
+        throw new Error(`tokens/tokens.css ${selector}: ${token}: ${value} must be ${part === "-line" ? `one of ${[...LINE_STYLES].join(", ")}` : "a literal 6-digit hex color"}.`);
+      }
+    }
+  }
+}
+
+// Trust-state rules never read the product identity or the action role: a
+// trust state is not a brand accent, and a white-label brand must not recolor
+// what Kontour can establish. Each state's rules read only its own trust
+// tokens, so one state cannot borrow another's color or line style.
+const TRUST_FORBIDDEN = /--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring)\b(?!-)/;
+const trustRules = new Map(TRUST_STATES.map((state) => [state, 0]));
+postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
+  if (!/\.trust-state\b/.test(rule.selector)) return;
+  const owner = TRUST_STATES.find((state) => new RegExp(`\\.trust-state--${state}(?![a-z-])`).test(rule.selector));
+  rule.walkDecls((decl) => {
+    if (TRUST_FORBIDDEN.test(decl.value)) {
+      throw new Error(`react/styles.css ${rule.selector}: ${decl.prop}: ${decl.value} must not read the brand, action, or focus roles; trust states use --k-trust-* tokens.`);
+    }
+    for (const match of decl.value.matchAll(/--k-trust-([a-z-]+?)(?:-fill|-line)?\b(?![a-z-])/g)) {
+      if (match[1] !== owner) throw new Error(`react/styles.css ${rule.selector}: ${decl.prop} reads --k-trust-${match[1]}*, which belongs to another state.`);
+    }
+  });
+  // The rule that paints the state's chip (it sets the text color) must read
+  // all three of the state's tokens.
+  if (owner && /\.trust-state__chip\b/.test(rule.selector) && rule.some((node) => node.type === "decl" && node.prop === "color")) {
+    const values = rule.nodes.filter((node) => node.type === "decl").map((decl) => decl.value).join(" ");
+    for (const part of ["", "-fill", "-line"]) {
+      if (!values.includes(`var(--k-trust-${owner}${part})`)) throw new Error(`react/styles.css ${rule.selector} must read var(--k-trust-${owner}${part}).`);
+    }
+    trustRules.set(owner, trustRules.get(owner) + 1);
+  }
+});
+for (const [state, count] of trustRules) {
+  if (count === 0) throw new Error(`react/styles.css has no .trust-state--${state} .trust-state__chip rule reading the ${state} tokens.`);
+}
+
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./tokens.css\";", "Token entrypoint must import base tokens.");
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./themes.css\";", "Token entrypoint must import themes.");
 assertIncludes(

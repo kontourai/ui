@@ -252,6 +252,34 @@ Rules:
 - Keep the product identity in a theme class, not in copied primitive CSS.
 - Use `--k-*` tokens for local styles and derive product-specific aliases from `--k-*`.
 
+## Trust States
+
+Use a trust state, not a status tone, to say what your product can establish about a value:
+`verified`, `known`, `inferred`, `estimated`, `uncertain`, `conflicting`, `failed`,
+`unavailable`, or `not-checked`. Each renders a text label, a glyph, and a line style, so the
+meaning survives without color; put the evidence in the detail.
+
+```tsx
+import { TrustState } from "@kontourai/ui/react";
+
+<TrustState state="verified" detail="Verified against 12 source records" />
+<TrustState state="uncertain" label="Needs refresh" detail="Verification expired 3 days ago" />
+```
+
+```html
+<k-trust-state state="conflicting" detail="Invoice and contract disagree on the amount"></k-trust-state>
+<k-trust-state state="verified"><a href="#evidence">12 source records</a></k-trust-state>
+```
+
+- `label` replaces the default wording (keep your product's vocabulary); an empty label falls
+  back to the default, so the chip always has text.
+- The element takes its detail from the `detail` attribute, or else from its children.
+- `trustStateFor(value)` parses spellings such as `"Not checked"` and returns `null` for
+  anything else. An unrecognized state renders as its own text with no state styling.
+- These are not Surface claim statuses. Choose the state deliberately and pass Surface's label
+  (see DESIGN.md, "Trust states and Surface statuses").
+- Chart series can reuse `--k-trust-<state>` and `--k-trust-<state>-line`.
+
 ## Tone Mapping
 
 Product-specific domain words should map to the shared semantic scale:

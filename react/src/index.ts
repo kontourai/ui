@@ -32,6 +32,7 @@ export { Toast, type ToastProps } from "./Toast.js";
 export { ToastHost, type ToastHostProps, type ToastPlacement } from "./ToastHost.js";
 export { Toggle, type ToggleProps } from "./Toggle.js";
 export { Tooltip, type TooltipPlacement, type TooltipProps } from "./Tooltip.js";
+export { TrustState, type TrustStateProps } from "./TrustState.js";
 export { Topbar, type TopbarMetaItem, type TopbarProps } from "./Topbar.js";
 export {
   normalizedClassSuffix,
@@ -41,3 +42,11 @@ export {
   type SemanticTone,
   type ToneMatcher,
 } from "./tones.js";
+export {
+  trustStateFor,
+  trustStateLabels,
+  trustStatePresentation,
+  trustStates,
+  type TrustStateName,
+  type TrustStatePresentation,
+} from "./trust-states.js";
