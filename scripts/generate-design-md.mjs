@@ -298,25 +298,31 @@ const splitDesign = (text) => {
 // `--k-token` (scope) = `value`, where scope is a front-matter suffix such as light,
 // flow, or flow-light. Every such quote must still match the token contract.
 //
-// Any unit that mentions a token (a prose line, or a table row) must carry no other
-// value-looking text anywhere in it (before or after the mention, and after a valid
-// quote), so a malformed or contradicting quote cannot pass unchecked. In a table, cells
-// under a header that starts with "Draft" are exempt: they hold the draft's direction,
-// not shipped values. Not covered: a value on a different line from the token name.
+// Every quote anywhere in the body is verified, table cells and header rows included.
+// Separately, any unit that mentions a token (a prose line, or a table row, header rows
+// included) must carry no other value-looking text anywhere in it (before or after the
+// mention, and after a valid quote), so a malformed or contradicting quote cannot pass
+// unchecked. For that loose scan only, table cells under a header that starts with
+// "Draft" are exempt: they hold the draft's direction, not shipped values. Not covered: a
+// value on a different line from the token name.
 //
-// Ignored as values: markdown links (issue links), `#123`-style issue references (all
-// digits, not 6 or 8 long), acronym versions such as `WCAG 2.2`, and `OPEN-n` ids.
-// A bare number next to a token name still counts (`--k-z-dropdown` is a number).
+// Ignored by the loose scan: link targets (the `(url)` part; link text is still scanned),
+// `#n` issue references whose digit count is not 3, 4, 6 or 8 (those read as hex colors,
+// so write such an issue as a link), acronym versions such as `WCAG 2.2`, and `OPEN-n`
+// ids. A bare number next to a token name still counts (`--k-z-dropdown` is a number).
 const CLAIM = /`(--k-[a-z0-9-]+)`(?: \(([a-z-]+)\))? = `([^`]+)`/g;
 const MENTION = /--k-[a-z0-9-]+/g;
 const NOT_VALUES = [
-  /\[[^\]]*\]\([^)]*\)/g, // markdown links, e.g. [#72](https://github.com/.../issues/72)
-  /(?<![\w#])#(?!\d{6}\b|\d{8}\b)\d+\b/g, // issue references like #72
-  /\b[A-Z]{2,}[ -]?\d+(?:\.\d+)*\b/g, // acronym versions like WCAG 2.2
-  /\bOPEN-\d+\b/g,
+  [/\]\([^)]*\)/g, "]"], // link targets, e.g. [#72](https://github.com/.../issues/72)
+  [/(?<![\w#])#(?!(?:\d{3}|\d{4}|\d{6}|\d{8})\b)\d+\b/g, " "], // issue references like #72
+  [/\b[A-Z]{2,}[ -]?\d+(?:\.\d+)*\b/g, " "], // acronym versions like WCAG 2.2
+  [/\bOPEN-\d+\b/g, " "],
 ];
 const VALUE_LIKE = /-?\d*\.?\d+(?:px|em|rem)\b|#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|clamp|calc)\(|(?<![\w#.–-])\d+(?:\.\d+)?(?![\w%.-])/i;
-const cellsOf = (row) => row.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((cell) => cell.trim());
+const stripQuote = (line) => line.replace(/^\s*(?:>\s*)*/, "");
+// Split on unescaped pipes only.
+const cellsOf = (row) => row.trim().replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((cell) => cell.trim());
+const isSeparator = (row) => /^\|?[\s:|-]+\|?$/.test(row.trim()) && row.includes("-");
 const proseClaims = (body, offset) => {
   const problems = [];
   let count = 0;
@@ -324,30 +330,29 @@ const proseClaims = (body, offset) => {
   let header = null;
   lines.forEach((line, index) => {
     const at = `line ${index + 1 + offset}`;
-    const bare = line.replace(/^\s*(?:>\s*)*/, "");
-    let unit = line;
+    const bare = stripQuote(line);
+    let scanned = line;
     if (bare.startsWith("|")) {
-      if (/^\|?[\s:|-]+\|?$/.test(bare.trim())) return; // separator row
-      const next = (lines[index + 1] ?? "").replace(/^\s*(?:>\s*)*/, "").trim();
-      if (/^\|[\s:|-]+$/.test(next) && next.includes("-")) {
-        header = cellsOf(bare);
-        return;
-      }
+      if (isSeparator(bare)) return;
       const cells = cellsOf(bare);
-      unit = cells.filter((_, column) => !/^draft\b/i.test(header?.[column] ?? "")).join(" | ");
+      if (isSeparator(stripQuote(lines[index + 1] ?? ""))) {
+        header = cells; // a header row is still checked below, with no exemption
+      } else {
+        scanned = cells.filter((_, column) => !/^draft\b/i.test(header?.[column] ?? "")).join(" | ");
+      }
     } else {
       header = null;
     }
-    for (const match of unit.matchAll(CLAIM)) {
+    for (const match of line.matchAll(CLAIM)) {
       count += 1;
       const [text, prop, scope = "", claimed] = match;
       const actual = declared.get(`${prop}|${scope}`);
       if (actual === undefined) problems.push(`${at}: ${text}: no such token in that scope`);
       else if (actual !== claimed) problems.push(`${at}: ${text}: tokens/ says \`${actual}\``);
     }
-    if (!unit.match(MENTION)) return;
-    let rest = unit.replace(CLAIM, " ").replace(MENTION, " ");
-    for (const pattern of NOT_VALUES) rest = rest.replace(pattern, " ");
+    if (!line.match(MENTION)) return;
+    let rest = scanned.replace(CLAIM, " ").replace(MENTION, " ");
+    for (const [pattern, replacement] of NOT_VALUES) rest = rest.replace(pattern, replacement);
     const value = VALUE_LIKE.exec(rest);
     if (value) problems.push(`${at}: "${value[0]}" sits beside a token name but is not a checked \`--k-token\` = \`value\` quote: ${line.trim()}`);
   });

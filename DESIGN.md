@@ -217,12 +217,15 @@ from `tokens/tokens.css`, `tokens/themes.css`, and `react/styles.css` by
 `tokens/`, then run `node scripts/generate-design-md.mjs --write`. Never hand-edit the front
 matter. Prose restates a shipped value only as a backticked token name, an equals sign, and a
 backticked value (optionally with a scope such as `(light)` or `(flow)` after the name). The
-same check verifies every such quote against `tokens/`, and fails when any other value-looking
-text (a px/em/rem size, hex or `rgb()`-style color, or bare number) appears anywhere on a prose
-line, or anywhere in a table row, that names a token. Table columns whose header starts with
-"Draft" are exempt, since they hold the draft's direction rather than shipped values. Issue
-links and references (`#72`), acronym versions (WCAG 2.2), and `OPEN-n` ids are ignored. Not
-covered: a value placed on a different line from the token name.
+same check verifies every such quote against `tokens/`, wherever it appears (table header rows
+and "Draft" columns included). It also fails when any other value-looking text (a px/em/rem
+size, a hex or `rgb()`-style color, or a bare number) appears anywhere on a prose line, or
+anywhere in a table row (header rows included), that names a token. For that second rule only,
+table columns whose header starts with "Draft" are exempt, since they hold the draft's
+direction rather than shipped values. It ignores link targets (link text is still scanned),
+`#n` issue references except 3-, 4-, 6- or 8-digit ones (those read as hex colors, so such an
+issue beside a token must be written as a link), acronym versions such as WCAG 2.2, and
+`OPEN-n` ids. Not covered: a value placed on a different line from the token name.
 
 Reading the packaged copy under `node_modules/@kontourai/ui/`: the generator script is not in
 the package. The `tokens/*.css` files next to this file are the source of every value; the
@@ -257,7 +260,7 @@ theme", with a caveat from CSS: `--k-focus-ring` is declared once, on `:root`, a
 `var(--k-brand)`, and custom properties inherit their computed value. It therefore follows a
 theme's or light mode's brand only when the theme class and `data-theme` sit on the root
 (`<html>`) element itself; with the theme class on a descendant, focus rings keep the brand
-resolved on `<html>` (the default brand for that mode).
+resolved on `<html>` (the default brand for its mode unless `<html>` carries a theme class).
 `primary` is not a CSS token; it is derived from whatever `.btn-primary` paints, so the format's
 required `primary` color stays truthful (see OPEN-8).
 
@@ -355,7 +358,7 @@ by Kontour AI
 presented as "Flow" or "Flow Agents", and how other products are tiered, is open.
 
 Don't invent compound names that stack the company name, a product name, and "AI" or
-"Platform" (e.g. "Kontour <Product> AI"); use the endorsement form above, or the approved one
+"Platform" (e.g. "Kontour `<Product>` AI"); use the endorsement form above, or the approved one
 once an open entry is decided.
 
 ## Colors
@@ -500,7 +503,12 @@ Use a 4px base rhythm, and only the spacing tokens.
 > | `--k-space-4` = `16px` | `space-4`: 16px |
 > | **`--k-space-5` = `24px`** | **`space-5`: 20px** |
 > | **`--k-space-6` = `32px`** | **`space-6`: 24px** |
-> | not shipped | `space-8` to `space-24`: 32, 40, 48, 64, 80, 96px |
+> | not shipped | `space-8`: 32px |
+> | not shipped | `space-10`: 40px |
+> | not shipped | `space-12`: 48px |
+> | not shipped | `space-16`: 64px |
+> | not shipped | `space-20`: 80px |
+> | not shipped | `space-24`: 96px |
 >
 > A layout written against the draft's `space-5` or `space-6` renders larger than intended on
 > the shipped tokens. Always read the step's value from the front matter, never from its number.
@@ -546,8 +554,8 @@ rounded. `.theme-console` sets `--k-radius-sm` (console) = `0`, `--k-radius-md` 
 
 **OPEN-2 — radius scale.** Shipped: `--k-radius-sm` = `9px`, `--k-radius-md` = `14px`,
 `--k-radius-control` = `4px`, `--k-radius-overlay` = `10px`.
-Draft direction: 6 / 10 / 16 / 24px as `radius-sm` / `md` / `lg` / `xl`. The names overlap and the values do not; do not add
-`--radius-*` properties.
+Draft direction: 6 / 10 / 16 / 24px as `radius-sm` / `md` / `lg` / `xl`.
+The names overlap and the values do not; do not add `--radius-*` properties.
 
 ## Components
 
@@ -813,7 +821,7 @@ assets and tokens together, in the same change.
 | OPEN-6 | Palette and product accents | per-theme `--k-brand`; no `theme-station` | Ink, Stone, Station, Flow, Surface accents | [#72](https://github.com/kontourai/ui/issues/72), [#74](https://github.com/kontourai/ui/issues/74) |
 | OPEN-7 | Status model | five tones | nine semantic and trust states | [#73](https://github.com/kontourai/ui/issues/73) |
 | OPEN-8 | Primary action and focus | driven by `--k-brand` | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
-| OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "<Product> by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
+| OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "`<Product>` by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
 | OPEN-10 | Console and Survey themes | shipped | not covered by the draft | — |
 | OPEN-11 | Marketing-site palette relationship | — | undecided | — |
 
