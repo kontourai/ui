@@ -1,0 +1,470 @@
+{
+  "_about": "Trust basis views produced by @kontourai/surface 3.3.0: claimBasisView(claim, evidence) for claim cases, missingClaimBasisView(missing) for host-detected missing states. The browser tests and the gallery render these views; check:surface-parity recomputes them with the installed @kontourai/surface once it is 3.3.0 or later and fails on any difference. Inputs carry only the fields claimBasisView reads.",
+  "cases": [
+    {
+      "name": "extracted",
+      "exampleStatus": "verified",
+      "claim": {
+        "id": "c-invoice-total"
+      },
+      "evidence": [
+        {
+          "id": "e1",
+          "claimId": "c-invoice-total",
+          "sourceRef": "src-e1",
+          "method": "extraction",
+          "evidenceType": "source_excerpt",
+          "supportStrength": "entails",
+          "passing": true
+        },
+        {
+          "id": "e2",
+          "claimId": "c-invoice-total",
+          "sourceRef": "src-e2",
+          "method": "extraction",
+          "evidenceType": "source_excerpt",
+          "supportStrength": "entails",
+          "passing": true
+        },
+        {
+          "id": "e3",
+          "claimId": "c-invoice-total",
+          "sourceRef": "src-e3",
+          "method": "extraction",
+          "evidenceType": "document_citation",
+          "supportStrength": "cited",
+          "passing": true
+        }
+      ],
+      "view": {
+        "state": "recorded",
+        "facets": [
+          {
+            "field": "supportStrength",
+            "code": "cited",
+            "label": "1 cited only",
+            "caveat": true
+          },
+          {
+            "field": "method",
+            "code": "extraction",
+            "label": "Extracted from a source",
+            "caveat": false
+          },
+          {
+            "field": "supportStrength",
+            "code": "entails",
+            "label": "2 entail the claim",
+            "caveat": false
+          }
+        ],
+        "detail": [
+          {
+            "label": "How",
+            "value": "Extracted from a source (3)"
+          },
+          {
+            "label": "Support",
+            "value": "2 entail the claim · 1 cited only"
+          },
+          {
+            "label": "Results",
+            "value": "3 passed"
+          },
+          {
+            "label": "Sources",
+            "value": "3 distinct sources"
+          }
+        ]
+      }
+    },
+    {
+      "name": "linked-check-only",
+      "exampleStatus": "verified",
+      "claim": {
+        "id": "c-tests-pass"
+      },
+      "evidence": [
+        {
+          "id": "e-check",
+          "claimId": "c-tests-pass",
+          "sourceRef": "src-e-check",
+          "method": "validation",
+          "evidenceType": "test_output",
+          "supportStrength": "entails",
+          "passing": true
+        },
+        {
+          "id": "e-trail",
+          "claimId": "execution-trail",
+          "sourceRef": "src-e-trail",
+          "method": "observation",
+          "evidenceType": "runtime_observation",
+          "passing": false,
+          "blocking": true,
+          "execution": {
+            "isError": true,
+            "exitCode": 1
+          }
+        }
+      ],
+      "view": {
+        "state": "recorded",
+        "facets": [
+          {
+            "field": "method",
+            "code": "validation",
+            "label": "Checked against expectations",
+            "caveat": false
+          },
+          {
+            "field": "supportStrength",
+            "code": "entails",
+            "label": "1 entails the claim",
+            "caveat": false
+          }
+        ],
+        "detail": [
+          {
+            "label": "How",
+            "value": "Checked against expectations (1)"
+          },
+          {
+            "label": "Support",
+            "value": "1 entails the claim"
+          },
+          {
+            "label": "Results",
+            "value": "1 passed"
+          },
+          {
+            "label": "Sources",
+            "value": "1 distinct source"
+          }
+        ]
+      }
+    },
+    {
+      "name": "model-derived",
+      "exampleStatus": "proposed",
+      "claim": {
+        "id": "c-summary",
+        "derivationEdges": [
+          {
+            "inputClaimId": "c-invoice-total",
+            "method": "model"
+          }
+        ]
+      },
+      "evidence": [
+        {
+          "id": "e4",
+          "claimId": "c-summary",
+          "sourceRef": "src-e4",
+          "method": "extraction",
+          "evidenceType": "source_excerpt",
+          "supportStrength": "entails"
+        }
+      ],
+      "view": {
+        "state": "recorded",
+        "facets": [
+          {
+            "field": "derivationMethod",
+            "code": "model",
+            "label": "Model-derived",
+            "caveat": true
+          },
+          {
+            "field": "result",
+            "code": "not-evaluated",
+            "label": "1 not evaluated",
+            "caveat": true
+          },
+          {
+            "field": "method",
+            "code": "extraction",
+            "label": "Extracted from a source",
+            "caveat": false
+          }
+        ],
+        "detail": [
+          {
+            "label": "How",
+            "value": "Extracted from a source (1)"
+          },
+          {
+            "label": "Support",
+            "value": "1 entails the claim"
+          },
+          {
+            "label": "Results",
+            "value": "1 not evaluated"
+          },
+          {
+            "label": "Derived",
+            "value": "Model-derived (1 input)"
+          },
+          {
+            "label": "Sources",
+            "value": "1 distinct source"
+          }
+        ]
+      }
+    },
+    {
+      "name": "caveat-heavy",
+      "exampleStatus": "disputed",
+      "claim": {
+        "id": "c-amount",
+        "derivationEdges": [
+          {
+            "inputClaimId": "c-invoice-total",
+            "method": "model"
+          }
+        ]
+      },
+      "evidence": [
+        {
+          "id": "e5",
+          "claimId": "c-amount",
+          "sourceRef": "src-e5",
+          "method": "extraction",
+          "supportStrength": "entails"
+        },
+        {
+          "id": "e6",
+          "claimId": "c-amount",
+          "sourceRef": "src-e6",
+          "method": "corroboration",
+          "supportStrength": "cited",
+          "passing": true
+        },
+        {
+          "id": "e7",
+          "claimId": "c-amount",
+          "sourceRef": "src-e7",
+          "method": "validation",
+          "supportStrength": "entails",
+          "passing": false
+        },
+        {
+          "id": "e8",
+          "claimId": "c-amount",
+          "sourceRef": "src-e8",
+          "method": "validation",
+          "supportStrength": "entails",
+          "passing": false,
+          "blocking": false
+        }
+      ],
+      "view": {
+        "state": "recorded",
+        "facets": [
+          {
+            "field": "derivationMethod",
+            "code": "model",
+            "label": "Model-derived",
+            "caveat": true
+          },
+          {
+            "field": "result",
+            "code": "not-evaluated",
+            "label": "1 not evaluated",
+            "caveat": true
+          },
+          {
+            "field": "supportStrength",
+            "code": "cited",
+            "label": "1 cited only",
+            "caveat": true
+          },
+          {
+            "field": "counterevidence",
+            "code": "counterevidence",
+            "label": "1 contradicts the claim",
+            "caveat": true
+          },
+          {
+            "field": "result",
+            "code": "failed-not-blocking",
+            "label": "1 failed (not blocking)",
+            "caveat": true
+          }
+        ],
+        "detail": [
+          {
+            "label": "How",
+            "value": "Extracted from a source (1) · Checked against expectations (2) · Corroborated independently (1)"
+          },
+          {
+            "label": "Support",
+            "value": "3 entail the claim · 1 cited only · 1 contradicts the claim"
+          },
+          {
+            "label": "Results",
+            "value": "1 passed · 2 failed · 1 not evaluated"
+          },
+          {
+            "label": "Derived",
+            "value": "Model-derived (1 input)"
+          },
+          {
+            "label": "Sources",
+            "value": "4 distinct sources"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reviewed",
+      "exampleStatus": "verified",
+      "claim": {
+        "id": "c-policy",
+        "confidenceBasis": {
+          "reviewerAuthority": "operator",
+          "evidenceStrength": "strong"
+        },
+        "conclusionConfidence": {
+          "value": 0.82,
+          "interval": {
+            "low": 0.74,
+            "high": 0.88
+          },
+          "method": "isotonic"
+        }
+      },
+      "evidence": [
+        {
+          "id": "e9",
+          "claimId": "c-policy",
+          "sourceRef": "src-e9",
+          "method": "validation",
+          "supportStrength": "entails",
+          "passing": true
+        },
+        {
+          "id": "e10",
+          "claimId": "c-policy",
+          "sourceRef": "src-e10",
+          "method": "attestation",
+          "supportStrength": "entails",
+          "passing": true
+        }
+      ],
+      "view": {
+        "state": "recorded",
+        "facets": [
+          {
+            "field": "method",
+            "code": "validation",
+            "label": "Checked against expectations + 1 more method",
+            "caveat": false
+          },
+          {
+            "field": "supportStrength",
+            "code": "entails",
+            "label": "2 entail the claim",
+            "caveat": false
+          },
+          {
+            "field": "reviewerAuthority",
+            "code": "operator",
+            "label": "Operator reviewed",
+            "caveat": false
+          }
+        ],
+        "detail": [
+          {
+            "label": "How",
+            "value": "Checked against expectations (1) · Vouched for (1)"
+          },
+          {
+            "label": "Support",
+            "value": "2 entail the claim"
+          },
+          {
+            "label": "Results",
+            "value": "2 passed"
+          },
+          {
+            "label": "Review",
+            "value": "Operator reviewed"
+          },
+          {
+            "label": "Producer rating",
+            "value": "Strong support (producer-rated)"
+          },
+          {
+            "label": "Calibrated confidence (producer-supplied)",
+            "value": "0.82 probability the conclusion is correct, interval 0.74–0.88 · isotonic"
+          },
+          {
+            "label": "Sources",
+            "value": "2 distinct sources"
+          }
+        ]
+      }
+    },
+    {
+      "name": "not-recorded",
+      "exampleStatus": "unknown",
+      "claim": {
+        "id": "c-empty"
+      },
+      "evidence": [],
+      "view": {
+        "state": "not-recorded",
+        "label": "Basis not recorded"
+      }
+    },
+    {
+      "name": "not-recorded-with-rating",
+      "exampleStatus": "assumed",
+      "claim": {
+        "id": "c-rated",
+        "confidenceBasis": {
+          "evidenceStrength": "weak"
+        }
+      },
+      "evidence": [],
+      "view": {
+        "state": "not-recorded",
+        "label": "Basis not recorded",
+        "detail": [
+          {
+            "label": "Producer rating",
+            "value": "Weak support (producer-rated)"
+          }
+        ]
+      }
+    },
+    {
+      "name": "restricted",
+      "exampleStatus": null,
+      "missing": "restricted",
+      "view": {
+        "state": "restricted",
+        "label": "Basis restricted"
+      }
+    },
+    {
+      "name": "unavailable",
+      "exampleStatus": null,
+      "missing": "unavailable",
+      "view": {
+        "state": "unavailable",
+        "label": "Basis unavailable"
+      }
+    },
+    {
+      "name": "not-available",
+      "exampleStatus": null,
+      "missing": "not-available",
+      "view": {
+        "state": "not-available",
+        "label": "Basis not available"
+      }
+    }
+  ]
+}

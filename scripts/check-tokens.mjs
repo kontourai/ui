@@ -196,6 +196,59 @@ for (const [state, count] of trustRules) {
   if (count === 0) throw new Error(`react/styles.css has no .trust-state--${state} .trust-state__chip rule reading the ${state} tokens.`);
 }
 
+// Trust basis (ui#87): a muted text line after the trust-state chip. It must
+// never read as a second status, so its rules read only neutral text, line,
+// and layout tokens: no brand, action, or focus role, no status tone, and no
+// trust-state ink. Caveats are marked by one line-style token, a dashed
+// underline that names no color (it inherits the muted text), and only the
+// caveat rule may read it.
+const BASIS_DECORATION = "--k-basis-caveat-decoration";
+const BASIS_DECORATION_VALUE = /^underline dashed(?: [0-9.]+px)?$/;
+{
+  let declarations = 0;
+  for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
+    postcss.parse(tokenFiles[file]).walkDecls(BASIS_DECORATION, (decl) => {
+      declarations += 1;
+      if (!BASIS_DECORATION_VALUE.test(decl.value.trim())) {
+        throw new Error(`${file} ${decl.parent.selector}: ${BASIS_DECORATION}: ${decl.value} must be "underline dashed" with an optional px thickness and no color; the caveat cue is a line style, never a hue.`);
+      }
+    });
+  }
+  if (!tokenBlock(":root").has(BASIS_DECORATION)) throw new Error(`tokens/tokens.css :root: missing ${BASIS_DECORATION}.`);
+  if (declarations === 0) throw new Error(`No ${BASIS_DECORATION} declaration found.`);
+}
+const BASIS_ALLOWED = /^--k-(?:text|text-muted|line|space-[0-9]+|text-(?:xs|sm|md)|leading-[a-z]+|font-(?:ui|mono)|border-thin|basis-caveat-decoration)$/;
+const BASIS_FORBIDDEN = /^--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring|status-contrast|positive|caution|negative|active|neutral)(?:-soft)?$|^--k-trust-/;
+const BASIS_CAVEAT_SELECTOR = '.trust-basis__facet[data-caveat="true"]';
+let basisRules = 0;
+let caveatRules = 0;
+postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
+  if (!/\.trust-basis(?:\b|__)/.test(rule.selector)) return;
+  basisRules += 1;
+  const selector = rule.selector.replace(/\s+/g, " ").trim();
+  rule.walkDecls((decl) => {
+    for (const match of decl.value.matchAll(/var\(\s*(--k-[a-z0-9-]+)/g)) {
+      const token = match[1];
+      if (BASIS_FORBIDDEN.test(token)) throw new Error(`react/styles.css ${selector}: ${decl.prop} reads ${token}; trust-basis rules must not read brand, action, focus, status-tone, or trust-state tokens.`);
+      if (!BASIS_ALLOWED.test(token)) throw new Error(`react/styles.css ${selector}: ${decl.prop} reads ${token}, which is not a neutral text, line, or layout token allowed in trust-basis rules.`);
+      if (token === BASIS_DECORATION && selector !== BASIS_CAVEAT_SELECTOR) throw new Error(`react/styles.css ${selector}: only ${BASIS_CAVEAT_SELECTOR} may read ${BASIS_DECORATION}.`);
+    }
+    if (/^(?:color|background(?:-color)?|border(?:-[a-z]+)*-color|text-decoration-color|outline-color|fill|stroke)$/.test(decl.prop) && !/^var\(--k-(?:text|text-muted|line)\)$|^(?:inherit|currentColor)$/.test(decl.value.trim())) {
+      throw new Error(`react/styles.css ${selector}: ${decl.prop}: ${decl.value} must be --k-text-muted, --k-text, --k-line, or inherited.`);
+    }
+    if (/^text-decoration(?:-line|-style)?$/.test(decl.prop) && selector !== BASIS_CAVEAT_SELECTOR) {
+      throw new Error(`react/styles.css ${selector}: sets ${decl.prop}; only caveat facets are decorated, through ${BASIS_CAVEAT_SELECTOR}.`);
+    }
+  });
+  if (selector === BASIS_CAVEAT_SELECTOR) {
+    caveatRules += 1;
+    const decoration = rule.nodes.find((node) => node.type === "decl" && node.prop === "text-decoration");
+    if (decoration?.value !== `var(${BASIS_DECORATION})`) throw new Error(`react/styles.css ${BASIS_CAVEAT_SELECTOR} must set text-decoration: var(${BASIS_DECORATION}).`);
+  }
+});
+if (basisRules < 5) throw new Error(`react/styles.css: only ${basisRules} trust-basis rules scanned.`);
+if (caveatRules !== 1) throw new Error(`react/styles.css must have exactly one ${BASIS_CAVEAT_SELECTOR} rule; found ${caveatRules}.`);
+
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./tokens.css\";", "Token entrypoint must import base tokens.");
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./themes.css\";", "Token entrypoint must import themes.");
 assertIncludes(

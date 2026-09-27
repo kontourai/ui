@@ -50,6 +50,8 @@ const CLASSIFY = [
   // Trust-state line styles are border-style keywords (the non-color cue), not colors
   // or dimensions; the inks and fills beside them are ordinary colors.
   [/^--k-trust-[a-z-]+-line$/, "omit:trust-state line styles are border-style keywords (the non-color cue); the format has no token group for them"],
+  // The trust-basis caveat cue is a text-decoration shorthand (line and style, no color).
+  [/^--k-basis-caveat-decoration$/, "omit:the trust-basis caveat cue is a text-decoration value (a dashed underline in the text's own color); the format has no token group for it"],
 ];
 const COLOR_VALUE = /^(?:#[0-9a-f]{3,8}|rgba?\([^)]*\))$/i;
 

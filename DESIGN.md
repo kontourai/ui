@@ -280,6 +280,8 @@ components:
 #     --k-trust-superseded-line: dotted
 #     --k-trust-rejected-line: solid
 #     --k-trust-revoked-line: dotted
+# - the trust-basis caveat cue is a text-decoration value (a dashed underline in the text's own color); the format has no token group for it:
+#     --k-basis-caveat-decoration: underline dashed 1px
 # - font-family stacks; the type levels above resolve the families their selectors use:
 #     --k-font-display: "Fraunces", Georgia, "Times New Roman", serif
 #     --k-font-ui: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif
@@ -507,6 +509,7 @@ Color roles, not values. The values for each mode and theme are in the front mat
 | `--k-trust-<state>` | Trust-state ink: the label, glyph, and border of that state's chip (see [Trust UX](#trust-ux)). One per state, never shared. |
 | `--k-trust-<state>-fill` | The chip's own background, so its label pair does not depend on the surface it sits on. |
 | `--k-trust-<state>-line` | The state's line style, a border-style keyword: the non-color cue for chip borders; charts translate it to a stroke (see [Data Visualization](#data-visualization)). |
+| `--k-basis-caveat-decoration` | The trust-basis caveat cue: a dashed underline, a `text-decoration` value that names no color, so it takes the muted text's color (see [Trust basis](#trust-basis)). |
 
 ### White-label overrides
 
@@ -751,6 +754,9 @@ The shipped primitives (`@kontourai/ui/react`, `@kontourai/ui/elements`) impleme
   reinforce it.
 - **Trust state** (`TrustState`, `k-trust-state`). A chip naming one of Surface's nine claim
   statuses, with an optional visible detail that says what was checked. See [Trust UX](#trust-ux).
+- **Trust basis** (`TrustBasis`, `k-trust-basis`). The muted line after a trust-state chip that
+  says how the status was established, rendered from Surface's `claimBasisView`. See
+  [Trust basis](#trust-basis).
 - **Loading** (`Skeleton`, `Spinner`, `Progress`). Communicate useful state without fake
   precision. Never imply completion while work is pending.
 - **Empty states** (`Empty`). Explain purpose and the next action.
@@ -903,6 +909,20 @@ human approval, artifact or result, version, and lineage.
 Distinguish the trust states: **unknown, proposed, assumed, verified, stale, disputed,
 superseded, rejected, and revoked**. Never collapse these into one generic confidence state.
 
+A claim is shown on **two axes**, and neither stands in for the other:
+
+- **Status**: what state the claim is in. The trust-state chip, one of Surface's claim statuses
+  (see [Trust states](#trust-states)).
+- **Basis**: how that status was established. The trust-basis line after the chip: the
+  mechanism, how much evidence backs it, and its caveats (see [Trust basis](#trust-basis)).
+
+Only evidence linked to the claim bears on it: evidence that supports or cites the claim, or
+counts against it. Most tool calls in an agent session are exploration, retries, or corrected
+mistakes; the execution trail is not evidence. A tool call or its result that is not linked to
+the claim never changes the status or the basis line, whether it succeeded, failed, or was
+retried. It stays inspectable at the raw-execution layer. A declared check that is linked to the
+claim is evidence, so its failure does count.
+
 ### Trust states
 
 **OPEN-12 — trust-state vocabulary. Decided (owner, 2026-09-27): Surface's vocabulary.** The
@@ -946,6 +966,52 @@ the default label as visually hidden text so assistive technology still hears th
 detail slot is where evidence goes: prefer a chip with a detail such as "12 source records
 matched" to a bare chip. An input the component does not recognize renders as its own text with
 no state styling or glyph; it is never coerced into a state.
+
+### Trust basis
+
+**Decided (owner, 2026-09-27; ui#87).** The basis is a plain text line after the status chip,
+never a second chip:
+
+```text
+[VERIFIED]  Extracted from a source · 2 entail the claim · 1 cited only
+[PENDING REVIEW]  Model-derived · 1 not evaluated · Extracted from a source
+[NO EVIDENCE]  Basis not recorded
+```
+
+Surface owns the summary. `claimBasisView(claim, evidence)` from `@kontourai/surface/display`
+chooses the facets, their order, their words, which ones are caveats, and the wording of every
+missing state. `TrustBasis` and `k-trust-basis` render that view as given: they never add, drop,
+reorder, relabel, or truncate a facet, and they do not import Surface. Kontour UI keeps a
+structural copy of the `TrustBasisView` type; `npm run check:surface-parity` compares it with
+Surface's in both directions and checks that the views the tests and gallery render are what
+Surface produces for their inputs.
+
+The rules, applied by Surface and rendered here:
+
+- **At most three facets on the line, caveats first, and a caveat is never dropped.** The caveats
+  are Model-derived, not evaluated, cited only, contradicts the claim, and failed checks. When
+  there are more than three caveats, the line shows every caveat and nothing else. After the
+  caveats come the method, then support counts, then review.
+- **Caveats get a dashed underline, never a color.** `--k-basis-caveat-decoration` is a line
+  style in the text's own color. The whole line is muted text (`--k-text-muted`), so it never
+  outranks the status. There is no tone prop, and basis rules read no brand, action, focus,
+  status-tone, or trust-state token (`npm run check:tokens`).
+- **Never blank.** A claim with nothing to summarize shows a labelled missing state:
+  *Basis not recorded*, *Basis restricted* (not visible to this viewer), *Basis unavailable*
+  (the read failed), or *Basis not available* (the host cannot or should not say which). Input
+  the component cannot use renders *Basis not available* and warns in the console.
+- **Producer ratings stay in the inspector.** A producer's own evidence-strength rating and a
+  calibrated confidence appear only as inspector rows labelled as producer-supplied, never on
+  the line.
+- **Voice.** Write "Model-derived", never "AI thinks" or "AI inferred". "Verified" belongs to the
+  status only; basis copy avoids "Confirmed", "Trusted", and "Certain".
+
+Two densities. **Inline** is the line alone. **Inspector** adds a definition list below it with
+one labelled row per detail Surface reports (How, Support, Results, Derived, Review, Producer
+rating, Calibrated confidence, Sources). Both render a visually hidden "Basis:" prefix, and the
+visible `·` separators are hidden from assistive technology, so a screen reader hears "Basis:
+Extracted from a source, 2 entail the claim, 1 cited only". Each facet carries `data-field`,
+`data-code`, and `data-caveat` for hosts and tests.
 
 Human review is first-class provenance. Failures state what failed, the impact,
 recoverability, retained partial work, and the next action.
