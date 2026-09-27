@@ -32,6 +32,8 @@ try {
   const requiredFiles = [
     "LICENSE",
     "README.md",
+    // Adopters' agents read the design constitution from node_modules/@kontourai/ui/DESIGN.md.
+    "DESIGN.md",
     "docs/consumer-guide.md",
     "docs/gallery.html",
     "docs/release-readiness.md",
@@ -82,6 +84,8 @@ try {
     /^\.npm-pack-cache\//,
     /^scripts\//,
     /^plans\//,
+    // Brand reference artwork (e.g. generated concepts) is never a package asset.
+    /^docs\/brand\//,
     /^react\/src\//,
     /^tsconfig/,
     /node_modules/,

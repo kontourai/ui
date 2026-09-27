@@ -9,6 +9,7 @@ across every product surface.
 ## Source Of Truth
 
 - Product/domain context: `CONTEXT.md`.
+- Design roles and rules (brand, color, type, layout, trust UX, agent MUST/MUST NOT, OPEN decisions): `DESIGN.md`. Its token front matter is generated — change `tokens/`, then `node scripts/generate-design-md.mjs --write`; never resolve an OPEN item silently.
 - Agent-facing repo instructions: `AGENTS.md`.
 - Broad verification: `npm run verify`.
 - Token contract: `tokens/` (CSS custom properties; per-product accents live in `themes.css`).
@@ -17,7 +18,7 @@ across every product surface.
 
 ## Match Checks To Change Type
 
-- Token changes: `npm run check:tokens` — and remember downstream vendored copies (e.g. flow's `src/console-ui/vendor/ui/`) sync via those repos' own scripts.
+- Token changes: `npm run check:tokens` and `npm run check:design` (regenerate `DESIGN.md`'s front matter) — and remember downstream vendored copies (e.g. flow's `src/console-ui/vendor/ui/`) sync via those repos' own scripts.
 - Export/package changes: `npm run check:exports` and `npm run check:pack`.
 - Visual/browser changes: `npm run test:browser`.
 - Before push: `npm run verify`.

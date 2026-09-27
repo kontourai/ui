@@ -27,6 +27,7 @@ Downstream adopters may import package exports or vendor copied assets, but they
 ## Source Map
 
 - `AGENTS.md` - agent-facing repo instructions and verification commands.
+- `DESIGN.md` - design constitution: roles, rules, and OPEN decisions; front matter generated from `tokens/` (ships in the package).
 - `README.md` - package overview, installation shape, theme list, and consumer examples.
 - `docs/consumer-guide.md` - adopter guidance for React, custom elements, static HTML, theme classes, and vendored assets.
 - `docs/release-readiness.md` - package and adopter verification matrix.
