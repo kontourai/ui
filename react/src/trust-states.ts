@@ -46,7 +46,7 @@ const glyphs: Readonly<Record<TrustStateName, string>> = {
 };
 
 /**
- * Parses a state name, accepting casing and separator variants ("Unknown",
+ * Parses a state name, ignoring case and surrounding whitespace ("Unknown",
  * " VERIFIED "). Returns null for anything else: an unrecognized word is not
  * coerced into a state it does not name.
  */
@@ -77,7 +77,8 @@ export function trustStatePresentation(value: string | null | undefined, label?:
   return {
     state,
     label: shown,
-    hiddenState: state && shown !== trustStateLabels[state] ? trustStateLabels[state] : null,
+    // Case-only differences are the same words (and the chip uppercases them).
+    hiddenState: state && shown.toLowerCase() !== trustStateLabels[state].toLowerCase() ? trustStateLabels[state] : null,
     glyph: state ? glyphs[state] : null,
     className: ["trust-state", state && `trust-state--${state}`, className].filter(Boolean).join(" "),
   };

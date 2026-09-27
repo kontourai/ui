@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { trustStatesFromSource } from "./trust-states-source.mjs";
 
 // WCAG contrast conformance for the kit's own palette, in both themes.
 //
@@ -120,6 +121,12 @@ for (const [selector, tokens] of scopes) {
 // from the source so a state dropped from the tokens and the component
 // together still fails.
 const TRUST_STATES = ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"];
+{
+  const fromSource = trustStatesFromSource(root);
+  if (JSON.stringify(fromSource) !== JSON.stringify(TRUST_STATES)) {
+    throw new Error(`${path.basename(fileURLToPath(import.meta.url))}: pinned TRUST_STATES ${JSON.stringify(TRUST_STATES)} differs from trustStates in react/src/trust-states.ts ${JSON.stringify(fromSource)}. Update the pin, and give every state its tokens and chip rule.`);
+  }
+}
 const RATED = new Set([
   "--k-bg", "--k-panel", "--k-panel-raised", "--k-text", "--k-text-muted",
   "--k-brand", "--k-brand-contrast", "--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast",

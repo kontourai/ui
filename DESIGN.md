@@ -506,7 +506,7 @@ Color roles, not values. The values for each mode and theme are in the front mat
 | `--k-focus-ring` | Compatibility alias of `--k-focus`; redeclared in scopes that change focus. New primitives read the focus role directly. |
 | `--k-trust-<state>` | Trust-state ink: the label, glyph, and border of that state's chip (see [Trust UX](#trust-ux)). One per state, never shared. |
 | `--k-trust-<state>-fill` | The chip's own background, so its label pair does not depend on the surface it sits on. |
-| `--k-trust-<state>-line` | The state's line style, a border-style keyword: the non-color cue for chip borders and chart strokes. |
+| `--k-trust-<state>-line` | The state's line style, a border-style keyword: the non-color cue for chip borders; charts translate it to a stroke (see [Data Visualization](#data-visualization)). |
 
 ### White-label overrides
 
@@ -555,7 +555,7 @@ state through color alone; status always carries text, and icon or color reinfor
 (Surface's claim statuses, decided in OPEN-12) as their own tokens, `TrustState`, and
 `k-trust-state` (see [Trust UX](#trust-ux)). Still draft: distinct semantic tokens for success,
 warning, danger, information, pending, and neutral that would replace or extend the five tones.
-Tracked in [#73](https://github.com/kontourai/ui/issues/73). Use a trust state, not a tone, for
+The remaining semantic-token work is tracked in [#88](https://github.com/kontourai/ui/issues/88). Use a trust state, not a tone, for
 the status of a claim; never let two different trust states render identically.
 
 ### Product themes
@@ -964,9 +964,19 @@ downward.
 Charts prioritize comparison and interpretation over decoration, and every chart answers a
 user question. Never use product identity colors as an implicit status scale. Represent
 uncertainty and completeness with multiple cues (labels, line style, shape, opacity, pattern,
-and color). A series that carries a trust state reuses that state's ink and line style
-(`--k-trust-<state>`, `--k-trust-<state>-line`). Broken/continuous contour logic is allowed only when semantically appropriate.
-Provide textual equivalents where needed.
+and color). A series that carries a trust state reuses that state's ink (`--k-trust-<state>`)
+and the line style its `--k-trust-<state>-line` token names. That token is a CSS border-style
+keyword, not a stroke value, so a chart translates it:
+
+| Line keyword | SVG stroke |
+| --- | --- |
+| solid | no dash array |
+| dashed | a dash pattern, such as `stroke-dasharray: 4 3` |
+| dotted | round caps on a near-zero dash, such as `stroke-dasharray: 0.1 3` with `stroke-linecap: round` |
+| double | no stroke equivalent: draw two parallel strokes, or use the state's glyph as the marker |
+
+Broken/continuous contour logic is allowed only when semantically appropriate. Provide textual
+equivalents where needed.
 
 ## Voice & Writing
 
@@ -1032,7 +1042,7 @@ assets and tokens together, in the same change.
 | OPEN-4 | Typefaces | Fraunces / Hanken Grotesk / IBM Plex Mono | humanist or restrained neo-grotesk; undecided | — |
 | OPEN-5 | Default mode | dark default, `[data-theme="light"]` opt-in | light Stone/Ink default | — |
 | OPEN-6 | Palette and product accents | per-theme `--k-brand`; `.theme-station` ships with a contrast-adjusted dark brand | Ink, Stone, final Flow and Surface accents | [#74](https://github.com/kontourai/ui/issues/74) |
-| OPEN-7 | Status model | five tones; the nine trust states (Surface's statuses) as separate tokens and a primitive | semantic status tokens beyond the five tones | [#73](https://github.com/kontourai/ui/issues/73) |
+| OPEN-7 | Status model | five tones; the nine trust states (Surface's statuses) as separate tokens and a primitive | semantic status tokens beyond the five tones | [#88](https://github.com/kontourai/ui/issues/88) |
 | OPEN-8 | Primary action and focus | resolved by [#79](https://github.com/kontourai/ui/pull/79): `--k-action` and `--k-focus` roles, independent of the brand slot | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
 | OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "`<Product>` by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
 | OPEN-10 | Console and Survey themes | shipped | not covered by the draft | — |

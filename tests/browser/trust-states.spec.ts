@@ -146,6 +146,7 @@ test("k-trust-state keeps a text label, keeps the state audible, and does not in
       '<k-trust-state id="empty-label" state="verified" label="  "></k-trust-state>',
       '<k-trust-state id="custom" state="stale" label="Expired" detail="Verification expired 3 days ago"></k-trust-state>',
       '<k-trust-state id="same" state="stale" label="Needs refresh"></k-trust-state>',
+      '<k-trust-state id="case-only" state="verified" label="VERIFIED"></k-trust-state>',
       '<k-trust-state id="cased" state=" VERIFIED "></k-trust-state>',
       '<k-trust-state id="unrecognized" state="pending"></k-trust-state>',
       '<k-trust-state id="linked" state="verified"><a href="#evidence">12 source records</a></k-trust-state>',
@@ -164,6 +165,7 @@ test("k-trust-state keeps a text label, keeps the state audible, and does not in
         hidden: hidden?.textContent ?? null,
         hiddenWidth: hidden ? hidden.getBoundingClientRect().width : null,
         glyphs: root.querySelectorAll("svg").length,
+        borderStyle: getComputedStyle(root.querySelector(".trust-state__chip")!).borderTopStyle,
         detail: root.querySelector(".trust-state__detail")?.innerHTML ?? null,
       };
     };
@@ -171,6 +173,7 @@ test("k-trust-state keeps a text label, keeps the state audible, and does not in
       empty: read("empty-label"),
       custom: read("custom"),
       same: read("same"),
+      caseOnly: read("case-only"),
       cased: read("cased"),
       unrecognized: read("unrecognized"),
       linked: read("linked"),
@@ -182,9 +185,12 @@ test("k-trust-state keeps a text label, keeps the state audible, and does not in
   expect(result.custom).toMatchObject({ state: "stale", label: "Expired", hidden: " (Needs refresh)", detail: "Verification expired 3 days ago" });
   expect(result.custom.hiddenWidth).toBeLessThanOrEqual(1);
   expect(result.same).toMatchObject({ label: "Needs refresh", hidden: null });
+  // A case-only override is the same words: no duplicate hidden label.
+  expect(result.caseOnly).toMatchObject({ label: "VERIFIED", hidden: null });
   expect(result.cased).toMatchObject({ state: "verified", label: "Verified" });
   // An unrecognized word shows as itself: no state class, attribute, or glyph box.
-  expect(result.unrecognized).toMatchObject({ className: "trust-state", state: null, label: "pending", hidden: null, glyphs: 0 });
+  // Its border is dotted, not solid: solid means a definite outcome.
+  expect(result.unrecognized).toMatchObject({ className: "trust-state", state: null, label: "pending", hidden: null, glyphs: 0, borderStyle: "dotted" });
   // Child content is the detail, and survives a re-render.
   expect(result.linked).toMatchObject({ state: "rejected", label: "Rejected", detail: '<a href="#evidence">12 source records</a>' });
   // The accessible text carries the default label; the glyph is not announced.

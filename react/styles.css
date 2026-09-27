@@ -972,7 +972,9 @@
   color: var(--k-text-muted);
   background: var(--k-panel-raised);
   border-color: var(--k-line-strong);
-  border-style: solid;
+  /* Dotted, not solid: solid means a definite outcome, and an unrecognized
+     state asserts none. Every recognized state sets its own line style. */
+  border-style: dotted;
   border-width: var(--k-border-thick);
   border-radius: var(--k-radius-sm);
   font-family: var(--k-font-mono);

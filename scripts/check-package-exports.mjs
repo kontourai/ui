@@ -90,6 +90,7 @@ assert.equal(part(TrustState({ state: "unknown", label: " " }), "trust-state__la
 const overridden = TrustState({ state: "stale", label: "Expired" });
 assert.equal(part(overridden, "trust-state__label").props.children, "Expired");
 assert.deepEqual(part(overridden, "trust-state__hidden").props.children, [" (", "Needs refresh", ")"]);
+assert.equal(part(TrustState({ state: "verified", label: "verified" }), "trust-state__hidden"), undefined, "A case-only override adds no hidden label.");
 const unrecognized = TrustState({ state: "pending" });
 assert.equal(unrecognized.props.className, "trust-state");
 assert.equal(unrecognized.props["data-trust-state"], undefined);

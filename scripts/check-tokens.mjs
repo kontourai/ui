@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { trustStatesFromSource } from "./trust-states-source.mjs";
 import postcss from "postcss";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -135,6 +136,12 @@ if (interactiveRules < 9) throw new Error(`react/styles.css: only ${interactiveR
 // tokens and the component still fails here; check:surface-parity ties the
 // component's list to the published @kontourai/surface.
 const TRUST_STATES = ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"];
+{
+  const fromSource = trustStatesFromSource(root);
+  if (JSON.stringify(fromSource) !== JSON.stringify(TRUST_STATES)) {
+    throw new Error(`${path.basename(fileURLToPath(import.meta.url))}: pinned TRUST_STATES ${JSON.stringify(TRUST_STATES)} differs from trustStates in react/src/trust-states.ts ${JSON.stringify(fromSource)}. Update the pin, and give every state its tokens and chip rule.`);
+  }
+}
 const LINE_STYLES = new Set(["solid", "dashed", "dotted", "double"]);
 const tokenBlock = (selector) => {
   for (const block of tokenFiles["tokens/tokens.css"].replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^}]*)\}/g)) {

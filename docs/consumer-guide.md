@@ -278,7 +278,10 @@ import { TrustState } from "@kontourai/ui/react";
   are read once, on the first render; children added later are not picked up.
 - `trustStateFor(value)` accepts any casing and surrounding space and returns `null` for
   anything else. An unrecognized state renders as its own text with no state styling or glyph.
-- Chart series can reuse `--k-trust-<state>` and `--k-trust-<state>-line`.
+- Chart series can reuse the ink `--k-trust-<state>`. The line token `--k-trust-<state>-line` is a
+  CSS border-style keyword, not a stroke value, so translate it (DESIGN.md, "Data
+  Visualization"): solid is no dash array, dashed and dotted become a `stroke-dasharray`
+  pattern, and double has no stroke equivalent (draw two strokes or use the glyph as a marker).
 
 ## Tone Mapping
 
