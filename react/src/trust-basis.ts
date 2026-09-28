@@ -84,23 +84,18 @@ function warn(message: string) {
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 const nonEmpty = (value: unknown): value is string => typeof value === "string" && value.trim() !== "";
 
-function detailRows(value: unknown): TrustBasisDetailRow[] {
-  if (value === undefined) return [];
-  if (!Array.isArray(value)) {
-    warn("`detail` is not an array; inspector rows were skipped.");
-    return [];
-  }
-  const rows = value.filter((row): row is TrustBasisDetailRow => isRecord(row) && nonEmpty(row.label) && nonEmpty(row.value));
-  if (rows.length !== value.length) warn("Skipped detail rows without a non-empty label and value.");
-  return rows;
-}
+const isFacet = (facet: unknown): facet is TrustBasisFacet =>
+  isRecord(facet) && nonEmpty(facet.label) && typeof facet.field === "string" && typeof facet.code === "string" && typeof facet.caveat === "boolean";
+const isDetailRow = (row: unknown): row is TrustBasisDetailRow => isRecord(row) && nonEmpty(row.label) && nonEmpty(row.value);
 
 /**
  * Normalizes whatever the host passed into something that always renders
  * text. It validates the view's shape and nothing else: facets are kept in the
- * view's order with the view's labels. An unusable input (not an object, an
- * unknown state, no renderable facet, an empty missing label) renders
- * "Basis not available" and warns, never an empty line.
+ * view's order with the view's labels. Validation is all or nothing: if any
+ * facet or detail row is malformed, the whole view is unusable and renders
+ * "Basis not available" (and warns), because rendering the rest could
+ * silently drop a caveat. The same applies to a non-object, an unknown state,
+ * an empty facet list, or an empty missing label. Never an empty line.
  */
 export function trustBasisPresentation(basis: unknown, density?: string | null, className?: string | null): TrustBasisPresentation {
   const shownDensity: TrustBasisDensity = density === "inspector" ? "inspector" : "inline";
@@ -111,15 +106,14 @@ export function trustBasisPresentation(basis: unknown, density?: string | null, 
   };
 
   if (!isRecord(basis)) return fallback("No basis view was given (expected a TrustBasisView from claimBasisView).");
-  const detail = detailRows(basis.detail);
+  if (basis.detail !== undefined && !(Array.isArray(basis.detail) && basis.detail.every(isDetailRow))) {
+    return fallback("`detail` must be an array of rows with a non-empty label and value.");
+  }
+  const detail = (basis.detail ?? []) as TrustBasisDetailRow[];
   if (basis.state === "recorded") {
-    if (!Array.isArray(basis.facets)) return fallback("A recorded basis view has no `facets` array.");
-    const facets = basis.facets.filter(
-      (facet): facet is TrustBasisFacet => isRecord(facet) && nonEmpty(facet.label) && typeof facet.field === "string" && typeof facet.code === "string" && typeof facet.caveat === "boolean",
-    );
-    if (facets.length !== basis.facets.length) warn("Skipped facets without a field, code, non-empty label, and boolean caveat.");
-    if (facets.length === 0) return fallback("A recorded basis view has no renderable facets.");
-    return { state: "recorded", facets, label: null, detail, density: shownDensity, className: classes };
+    if (!Array.isArray(basis.facets) || basis.facets.length === 0) return fallback("A recorded basis view needs a non-empty `facets` array.");
+    if (!basis.facets.every(isFacet)) return fallback("Every facet needs a string field and code, a non-empty label, and a boolean caveat.");
+    return { state: "recorded", facets: basis.facets, label: null, detail, density: shownDensity, className: classes };
   }
   if (typeof basis.state === "string" && MISSING_STATES.includes(basis.state)) {
     if (!nonEmpty(basis.label)) return fallback(`The "${basis.state}" basis view has no label.`);

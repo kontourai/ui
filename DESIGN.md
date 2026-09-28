@@ -973,7 +973,7 @@ no state styling or glyph; it is never coerced into a state.
 never a second chip:
 
 ```text
-[VERIFIED]  Extracted from a source · 2 entail the claim · 1 cited only
+[VERIFIED]  1 cited only · Extracted from a source · 2 entail the claim
 [PENDING REVIEW]  Model-derived · 1 not evaluated · Extracted from a source
 [NO EVIDENCE]  Basis not recorded
 ```
@@ -999,19 +999,30 @@ The rules, applied by Surface and rendered here:
 - **Never blank.** A claim with nothing to summarize shows a labelled missing state:
   *Basis not recorded*, *Basis restricted* (not visible to this viewer), *Basis unavailable*
   (the read failed), or *Basis not available* (the host cannot or should not say which). Input
-  the component cannot use renders *Basis not available* and warns in the console.
+  the component cannot use renders *Basis not available* and warns in the console. Validation
+  is all or nothing: one malformed facet or detail row makes the whole view unusable, because
+  rendering the rest could silently drop a caveat.
 - **Producer ratings stay in the inspector.** A producer's own evidence-strength rating and a
   calibrated confidence appear only as inspector rows labelled as producer-supplied, never on
   the line.
 - **Voice.** Write "Model-derived", never "AI thinks" or "AI inferred". "Verified" belongs to the
   status only; basis copy avoids "Confirmed", "Trusted", and "Certain".
 
-Two densities. **Inline** is the line alone. **Inspector** adds a definition list below it with
-one labelled row per detail Surface reports (How, Support, Results, Derived, Review, Producer
-rating, Calibrated confidence, Sources). Both render a visually hidden "Basis:" prefix, and the
-visible `·` separators are hidden from assistive technology, so a screen reader hears "Basis:
-Extracted from a source, 2 entail the claim, 1 cited only". Each facet carries `data-field`,
-`data-code`, and `data-caveat` for hosts and tests.
+Two densities. **Inline** is the line alone. **Inspector** shows the same line and adds a
+definition list below it with one labelled row per detail Surface reports (How, Support,
+Results, Derived, Review, Producer rating, Calibrated confidence, Sources). The inspector keeps
+the line (decided, 2026-09-27) because the rows carry no caveat marking: without the line, the
+caveats would lose their underline and their caveats-first position. Both densities render a
+visually hidden "Basis:" prefix, and the visible `·` separators are hidden from assistive
+technology, so a screen reader hears "Basis: 1 cited only, Extracted from a source, 2 entail the
+claim". Each facet carries `data-field`, `data-code`, and `data-caveat` for hosts and tests.
+
+Caveats are announced by their wording and their position, not by the underline. The underline
+is a visual cue only; the words themselves ("Model-derived", "1 not evaluated", "1 cited only",
+"1 contradicts the claim") already say that they limit the status, and caveats always come
+first. Kontour UI does not add its own spoken copy such as "caveat:", since that would be basis
+wording outside Surface. If an explicit announcement is wanted, Surface owns it, in the view's
+labels.
 
 Human review is first-class provenance. Failures state what failed, the impact,
 recoverability, retained partial work, and the next action.

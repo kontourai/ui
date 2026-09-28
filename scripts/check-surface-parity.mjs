@@ -52,18 +52,27 @@ console.log(`Surface parity check passed: ${ui.trustStates.length} trust states 
 //    claimBasisView returns for the fixture inputs, so no test renders a view
 //    Surface would not produce.
 // PENDING: the repo's pnpm policy (minimumReleaseAge, 24 hours) cannot resolve
-// Surface 3.3.0 until 2026-09-28T23:00Z. Until the devDependency is bumped to
-// 3.3.0 or later these checks are reported as pending, not passed; once the
-// installed Surface is 3.3.0 or later they are mandatory, and a missing export
-// fails instead of skipping.
+// Surface 3.3.0 until about 2026-09-28T23:00Z. Until the devDependency is
+// bumped to 3.3.0 or later these checks are reported as pending, not passed;
+// once the installed Surface is 3.3.0 or later they are mandatory, and a
+// missing export fails instead of skipping. Pending has a hard deadline
+// (PENDING_DEADLINE): after it, the old Surface fails this check, so the bump
+// cannot be forgotten. The bump commit deletes the pending branch entirely.
+const PENDING_DEADLINE = Date.parse("2026-09-29T12:00:00Z");
 const require = createRequire(import.meta.url);
 // The package's exports map hides package.json, so read the installed copy.
 const installed = JSON.parse(readFileSync(path.join(root, "node_modules/@kontourai/surface/package.json"), "utf8")).version;
 const [major, minor] = installed.split(".").map(Number);
 if (major < 3 || (major === 3 && minor < 3)) {
+  if (Date.now() > PENDING_DEADLINE) {
+    throw new Error(
+      `Trust-basis Surface parity has been pending past ${new Date(PENDING_DEADLINE).toISOString()}: installed @kontourai/surface ${installed} predates claimBasisView. ` +
+        "Bump the @kontourai/surface devDependency to exactly 3.3.0 (pnpm add -D -E @kontourai/surface@3.3.0) and delete this pending branch (ui#87).",
+    );
+  }
   console.log(
     `Surface parity PENDING for the trust basis: installed @kontourai/surface ${installed} predates claimBasisView (3.3.0). ` +
-      "Type parity, the fallback label, and the fixture views are not checked until the devDependency is bumped (ui#87).",
+      `Type parity, the fallback label, and the fixture views are not checked until the devDependency is bumped; this fails after ${new Date(PENDING_DEADLINE).toISOString()} (ui#87).`,
   );
 } else {
   const tsc = require.resolve("typescript/bin/tsc");

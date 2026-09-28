@@ -286,7 +286,7 @@ import { TrustState } from "@kontourai/ui/react";
 ## Trust Basis
 
 The trust-basis line follows a trust-state chip and says how the claim's status was established:
-`Extracted from a source · 2 entail the claim · 1 cited only`. Surface computes it: pass the
+`1 cited only · Extracted from a source · 2 entail the claim` (caveats first). Surface computes it: pass the
 view from `claimBasisView` in `@kontourai/surface/display` as-is. Kontour UI does not depend on
 Surface; your app does.
 
@@ -321,11 +321,12 @@ const basis = claimBasisView(claim, bundle.evidence);
   `missingClaimBasisView("restricted")` or `missingClaimBasisView("unavailable")`, or
   `missingClaimBasisView("not-available")` when you cannot or should not say which.
 - The line is never blank. A missing or malformed view renders "Basis not available" and logs a
-  console warning.
+  console warning. One malformed facet or detail row is enough: the component never renders a
+  partial line, since that could drop a caveat.
 - `density="inspector"` adds one labelled row per detail (How, Support, Results, Derived, Review,
   Producer rating, Sources) below the line.
-- The `basis` property takes precedence over `basis-json`; setting it to `undefined` falls back to
-  the attribute. A `basis` set before the element is defined is kept.
+- The `basis` property takes precedence over `basis-json`; setting it to `null` or `undefined` falls
+  back to the attribute. A `basis` set before the element is defined is kept.
 - Caveat facets are underlined with a dashed line in the text's own color
   (`--k-basis-caveat-decoration`). Style the line with neutral tokens only; do not color it by
   status or caveat.

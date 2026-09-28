@@ -201,6 +201,27 @@ test("the line is never blank: unusable input renders \"Basis not available\" an
     { id: "blank-facets", basis: { state: "recorded", facets: [{ field: "method", code: "x", label: "  ", caveat: false }] } },
     { id: "empty-label", basis: { state: "not-recorded", label: "" } },
     { id: "unknown-state", basis: { state: "pending", label: "Pending" } },
+    // One malformed facet makes the whole line unusable: rendering the rest
+    // would silently drop the caveat (here Model-derived).
+    {
+      id: "blank-caveat-beside-valid",
+      basis: { state: "recorded", facets: [
+        { field: "derivationMethod", code: "model", label: "", caveat: true },
+        { field: "method", code: "extraction", label: "Extracted from a source", caveat: false },
+      ] },
+    },
+    {
+      id: "string-caveat-beside-valid",
+      basis: { state: "recorded", facets: [
+        { field: "derivationMethod", code: "model", label: "Model-derived", caveat: "true" },
+        { field: "method", code: "extraction", label: "Extracted from a source", caveat: false },
+      ] },
+    },
+    {
+      id: "bad-detail-row",
+      basis: { state: "recorded", facets: [{ field: "method", code: "extraction", label: "Extracted from a source", caveat: false }], detail: [{ label: "How", value: "Extracted (1)" }, { label: "Support", value: "" }] },
+    },
+    { id: "detail-not-array", basis: { state: "not-recorded", label: "Basis not recorded", detail: { label: "How", value: "x" } } },
     { id: "bad-json", json: "{not json" },
     { id: "empty-json", json: "" },
   ];
@@ -211,7 +232,8 @@ test("the line is never blank: unusable input renders \"Basis not available\" an
     expect(rendered.missing, `${entry.id}: text`).toBe(FALLBACK);
     expect(rendered.visible, `${entry.id}: visible`).toBe(true);
   }
-  expect(messages.warnings.length, "each unusable input warns").toBeGreaterThan(0);
+  // Warnings are de-duplicated by message, so there are fewer than inputs.
+  expect(messages.warnings.length, "unusable input warns").toBeGreaterThan(0);
   expect(messages.warnings.every((message) => message.startsWith("[@kontourai/ui TrustBasis]"))).toBe(true);
   expect(messages.errors).toEqual([]);
 });
@@ -244,6 +266,12 @@ test("k-trust-basis: basis-json from the parser, property before upgrade, proper
     both.basis = undefined;
     await tick();
     const attributeText = text(both);
+    // null clears the property the same way.
+    both.basis = extracted;
+    await tick();
+    both.basis = null;
+    await tick();
+    const nullText = text(both);
     both.setAttribute("density", "inspector");
     both.basis = extracted;
     await tick();
@@ -262,6 +290,7 @@ test("k-trust-basis: basis-json from the parser, property before upgrade, proper
       earlyText,
       propertyText,
       attributeText,
+      nullText,
       rows,
       defined,
       upgraded: parsed instanceof customElements.get("k-trust-basis")!,
@@ -273,6 +302,7 @@ test("k-trust-basis: basis-json from the parser, property before upgrade, proper
   expect(result.earlyText).toBe(extractedLine);
   expect(result.propertyText).toBe(extractedLine);
   expect(result.attributeText).toBe(restricted.label);
+  expect(result.nullText).toBe(restricted.label);
   expect(result.rows).toBe(extracted.detail!.length);
   expect(result.defined).toBe(true);
   expect(result.upgraded).toBe(true);
@@ -291,6 +321,25 @@ test("assistive tech hears \"Basis:\" and the facets, not the separators", async
   // hidden (absolutely positioned) comma; the words and the pauses are what count.
   expect(snapshot.replace(/\s+,/g, ",")).toContain(`Basis: ${labels.join(", ")}`);
   expect(snapshot).not.toContain("·");
+});
+
+test("inspector density: assistive tech hears the line, then each labelled row", async ({ page }) => {
+  await load(page);
+  const view = cases.get("reviewed")!;
+  await mount(page, [{ id: "spoken-inspector", basis: view, density: "inspector" }]);
+  const snapshot = await page.locator("#spoken-inspector").ariaSnapshot();
+  const labels = view.facets!.map((facet) => facet.label);
+  const line = snapshot.split("\n").find((entry) => entry.includes("Basis:")) ?? "";
+  expect(line.replace(/\s+,/g, ",")).toContain(`Basis: ${labels.join(", ")}`);
+  // The line's separators are hidden; a "·" inside a detail value is Surface's own wording.
+  expect(line).not.toContain("·");
+  // Every detail row is exposed as a term and its definition, in order.
+  const rows = await page.locator("#spoken-inspector dl").evaluate((list) => Array.from(list.querySelectorAll("dt")).map((term) => [term.textContent, term.nextElementSibling?.tagName, term.nextElementSibling?.textContent]));
+  expect(rows).toEqual(view.detail!.map((row) => [row.label, "DD", row.value]));
+  for (const row of view.detail!) {
+    expect(snapshot).toContain(`term: ${row.label}`);
+    expect(snapshot).toContain(`definition: ${row.value}`);
+  }
 });
 
 async function mount(page: Page, entries: Array<{ id: string; basis?: unknown; json?: string; density?: string }>) {

@@ -14,14 +14,15 @@ export class KTrustBasis extends HTMLElement {
   private connected = false;
   private renderQueued = false;
 
-  /** A TrustBasisView from Surface's claimBasisView. Takes precedence over `basis-json`. */
+  /** A TrustBasisView from Surface's claimBasisView. Takes precedence over `basis-json`; null or undefined clears it. */
   get basis(): TrustBasisView | undefined {
     return this.hasView ? (this.view as TrustBasisView) : undefined;
   }
 
-  set basis(value: TrustBasisView | undefined) {
-    this.view = value;
-    this.hasView = value !== undefined;
+  set basis(value: TrustBasisView | null | undefined) {
+    // null and undefined both clear the property, so basis-json applies again.
+    this.view = value ?? undefined;
+    this.hasView = value != null;
     if (this.connected) this.queueRender();
   }
 

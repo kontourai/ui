@@ -222,8 +222,12 @@ const BASIS_FORBIDDEN = /^--k-(?:brand|brand-contrast|action|action-contrast|foc
 const BASIS_CAVEAT_SELECTOR = '.trust-basis__facet[data-caveat="true"]';
 let basisRules = 0;
 let caveatRules = 0;
+// Any rule that can reach the basis line is scanned: one naming a trust-basis
+// class in any form (.trust-basis*, [class~="trust-basis__facet"]), the
+// k-trust-basis element, or the data-caveat / data-field attributes it sets.
+const BASIS_SELECTOR = /trust-basis|data-caveat|data-field/;
 postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
-  if (!/\.trust-basis(?:\b|__)/.test(rule.selector)) return;
+  if (!BASIS_SELECTOR.test(rule.selector)) return;
   basisRules += 1;
   const selector = rule.selector.replace(/\s+/g, " ").trim();
   rule.walkDecls((decl) => {
@@ -242,6 +246,13 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
   });
   if (selector === BASIS_CAVEAT_SELECTOR) {
     caveatRules += 1;
+    // The caveat rule only draws the underline: no color, weight, or other
+    // styling that would turn the caveat into a second visual channel.
+    rule.walkDecls((decl) => {
+      if (!["text-decoration", "text-underline-offset"].includes(decl.prop)) {
+        throw new Error(`react/styles.css ${BASIS_CAVEAT_SELECTOR}: ${decl.prop} is not allowed; the caveat rule sets only text-decoration (the token) and text-underline-offset.`);
+      }
+    });
     const decoration = rule.nodes.find((node) => node.type === "decl" && node.prop === "text-decoration");
     if (decoration?.value !== `var(${BASIS_DECORATION})`) throw new Error(`react/styles.css ${BASIS_CAVEAT_SELECTOR} must set text-decoration: var(${BASIS_DECORATION}).`);
   }

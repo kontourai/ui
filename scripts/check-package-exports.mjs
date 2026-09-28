@@ -146,7 +146,11 @@ try {
   assert.equal(inspector.type, "div");
   const rows = hostNodes(inspector).filter((node) => node.props.className === "trust-basis__row");
   assert.deepEqual(rows.map((row) => hostNodes(row.props.children).map(textOf)), [["How", "Extracted from a source (1)"]]);
-  for (const bad of [undefined, null, {}, { state: "recorded", facets: [] }, { state: "not-recorded", label: "" }, { state: "pending", label: "Pending" }]) {
+  for (const bad of [undefined, null, {}, { state: "recorded", facets: [] }, { state: "not-recorded", label: "" }, { state: "pending", label: "Pending" },
+    // All or nothing: one malformed facet or row must not leave a partial line.
+    { state: "recorded", facets: [{ field: "derivationMethod", code: "model", label: "", caveat: true }, view.facets[1]] },
+    { state: "recorded", facets: [{ ...view.facets[0], caveat: "true" }, view.facets[1]] },
+    { ...view, detail: [...view.detail, { label: "Support", value: "" }] }]) {
     const fallback = TrustBasis({ basis: bad });
     assert.equal(fallback.props["data-basis-state"], "not-available", `${JSON.stringify(bad)} must fall back.`);
     assert.equal(textOf(fallback), "Basis not available", `${JSON.stringify(bad)} must render "Basis not available".`);
