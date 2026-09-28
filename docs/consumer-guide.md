@@ -6,6 +6,9 @@
 - React primitives: `@kontourai/ui/react`
 - Light-DOM custom elements: `@kontourai/ui/elements`
 
+and a white-label contrast validator, `@kontourai/ui/contrast` (see
+[Validating a white-label theme](#validating-a-white-label-theme)).
+
 ## Theme Boundary
 
 Apply exactly one product theme class on a stable root:
@@ -67,7 +70,65 @@ Rules for the values:
   text can drop below 4.5:1.
 - `--k-focus` must reach 3:1 against both the page and the panel.
 - A runtime that applies themes dynamically must reject a pair that fails these thresholds (the
-  ones `npm run check:contrast` enforces for the shipped themes).
+  ones `npm run check:contrast` enforces for the shipped themes). See
+  [Validating a white-label theme](#validating-a-white-label-theme).
+
+### Validating a white-label theme
+
+`@kontourai/ui/contrast` is for a runtime that applies an override from data (a config file, an
+API) instead of a reviewed stylesheet. It is plain ESM with no imports, so the same module runs in
+the browser and on a Node server, and `npm run check:contrast` rates the shipped themes through
+the same functions and thresholds, so the package and a runtime cannot disagree.
+
+```js
+import { validateBrandOverride } from "@kontourai/ui/contrast";
+
+const { violations, accepted } = validateBrandOverride({
+  base: "flow", // the shipped theme the override is applied over
+  overrides: JSON.parse(themeJson), // pass the parsed object itself
+  // e.g. {"dark":  {"--k-brand": "#f0a868", "--k-action": "#f0a868", "--k-action-contrast": "#06080b", "--k-focus": "#f0a868"},
+  //       "light": {"--k-brand": "#9a4418", "--k-action": "#9a4418", "--k-action-contrast": "#ffffff", "--k-focus": "#9a4418"}}
+});
+if (violations.length > 0) {
+  // Messages echo caller data (cut to 64 characters): escape before rendering.
+  for (const violation of violations) console.warn(violation.message);
+  // Fall back to the shipped theme; never apply part of a rejected override.
+} else {
+  applyTheme(accepted); // your code: write accepted.dark / accepted.light to the theme's selectors
+}
+```
+
+What it checks:
+
+- **Shape.** Pass the object `JSON.parse` returned. Only plain objects are read: a `Map`, a class
+  instance, an object from another realm (an iframe), or a non-object input is an
+  `invalid-shape` violation, so an unusual input fails closed. An unknown `base` throws.
+- **Keys.** Only `--k-brand`, `--k-brand-contrast`, `--k-action`, `--k-action-contrast`, and
+  `--k-focus` (`BRAND_SLOT_PROPERTIES`), under a `dark` or `light` key. Anything else is a
+  `disallowed-property` or `invalid-shape` violation.
+- **Values.** `#rgb` or `#rrggbb` only (`isHexColor`). Alpha hex, keywords, `rgb()`, `var()`,
+  and surrounding whitespace are `invalid-value`: they are rejected, not interpreted.
+- **The action pair.** `--k-action` without `--k-action-contrast` (or the reverse) in a mode is
+  `unpaired-action`, even when the ratio would pass.
+- **Contrast** (`BRAND_SLOT_PAIRS`): action text on the action fill 4.5:1; the action fill on the
+  panel 3:1; brand as text on the panel 4.5:1; brand as a UI accent on the page 3:1;
+  brand-contrast text on the brand 4.5:1; focus on the page and on the panel 3:1. A mode's
+  override is laid over the base theme's shipped values for that mode, and only pairs that
+  include an overridden property are rated, so an override is judged on what it changes.
+
+`accepted` is all or nothing. When `violations` is empty it holds fresh, frozen, null-prototype
+copies of the validated values for each mode sent; otherwise it is empty, so applying it can never
+land half an override (light applied while dark was rejected). Apply `accepted` rather than the
+input: each input value is read once, so what lands is exactly what was rated. A getter or Proxy
+trap on the input that throws propagates the exception; `JSON.parse` output has neither, so pass
+that.
+
+The surfaces come from the package rather than the caller: an override cannot change `--k-bg` or
+`--k-panel`, so the only surfaces it can land on are the shipped ones. `SHIPPED_THEMES` exposes
+them for information; `check:contrast` fails if it drifts from the token files. Validate with the
+same `@kontourai/ui` version whose CSS you serve, since a different version's surfaces may differ.
+`contrastRatio(a, b)` and `relativeLuminance(hex)` are exported too and throw a `TypeError` for
+anything but `#rgb` / `#rrggbb`.
 
 Consumer CSS should read `--k-focus` for focus color. `--k-focus-ring` is kept as an alias for
 existing styles, but it does not follow an inline `--k-focus` override on a descendant element.

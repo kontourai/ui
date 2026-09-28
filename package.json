@@ -16,11 +16,12 @@
     "test:browser": "playwright test",
     "check:explorer": "node scripts/check-explorer.mjs",
     "check:design": "node scripts/generate-design-md.mjs --check",
-    "check": "npm run check:tokens && npm run check:contrast && npm run check:design && npm run check:exports && npm run check:surface-parity && npm run check:readiness && npm run check:explorer",
+    "check": "npm run check:tokens && npm run check:contrast && npm run test:unit && npm run check:design && npm run check:exports && npm run check:surface-parity && npm run check:readiness && npm run check:explorer",
     "verify": "npm run check && npm run check:pack && npm run test:browser",
     "workflow:sidecar": "flow-agents-workflow-sidecar",
     "workflow:validate-artifacts": "flow-agents-validate-artifacts",
-    "check:contrast": "node scripts/check-contrast.mjs"
+    "check:contrast": "node scripts/check-contrast.mjs",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\""
   },
   "peerDependencies": {
     "react": "^19.0.0"
@@ -49,9 +50,14 @@
     "./elements": {
       "types": "./dist/elements/elements/src/index.d.ts",
       "import": "./dist/elements/elements/src/index.js"
+    },
+    "./contrast": {
+      "types": "./contrast/index.d.ts",
+      "import": "./contrast/index.js"
     }
   },
   "files": [
+    "contrast/",
     "dist/",
     "docs/",
     "elements/",
