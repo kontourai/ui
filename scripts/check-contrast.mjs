@@ -2,6 +2,10 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { trustStatesFromSource } from "./trust-states-source.mjs";
+// The exported module runtimes validate white-label themes with (ui#83). This
+// check rates the shipped themes through the same functions and pairs, so the
+// package and a runtime cannot disagree about what passes.
+import { BRAND_SLOT_PAIRS, SHIPPED_THEMES, contrastRatio } from "../contrast/index.js";
 
 // WCAG contrast conformance for the kit's own palette, in both themes.
 //
@@ -36,16 +40,6 @@ for (const block of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
   }
 }
 
-function relativeLuminance(hex) {
-  let value = hex.slice(1);
-  if (value.length === 3) value = [...value].map((c) => c + c).join("");
-  const channel = (offset) => {
-    const c = Number.parseInt(value.slice(offset, offset + 2), 16) / 255;
-    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
-}
-
 function oklab(hex) {
   let value = hex.slice(1);
   if (value.length === 3) value = [...value].map((c) => c + c).join("");
@@ -66,13 +60,6 @@ function oklab(hex) {
 function deltaE(a, b) {
   const [x, y] = [oklab(a), oklab(b)];
   return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
-}
-
-function contrastRatio(a, b) {
-  const la = relativeLuminance(a);
-  const lb = relativeLuminance(b);
-  const [hi, lo] = la > lb ? [la, lb] : [lb, la];
-  return (hi + 0.05) / (lo + 0.05);
 }
 
 // Declared pairs: foreground token, background token, minimum ratio, why.
@@ -161,16 +148,59 @@ const resolve = (theme, light) => {
   return Object.assign({}, ...layers.flatMap((layer) => blocks.filter(layer).map((block) => block.tokens)));
 };
 
+// SHIPPED_THEMES in the exported module is what a runtime rates an override
+// against; it must be exactly what the cascade resolves from the token files.
+{
+  const shippedName = (theme) => theme || "default";
+  const resolvedNames = themes.map(shippedName).sort();
+  const exportedNames = Object.keys(SHIPPED_THEMES).sort();
+  if (JSON.stringify(resolvedNames) !== JSON.stringify(exportedNames)) {
+    failures.push(`contrast/index.js SHIPPED_THEMES covers ${exportedNames.join(", ")}; the token files resolve ${resolvedNames.join(", ")}.`);
+  }
+  for (const theme of themes) {
+    for (const light of [false, true]) {
+      const mode = light ? "light" : "dark";
+      const exported = SHIPPED_THEMES[shippedName(theme)]?.[mode] ?? {};
+      const tokens = resolve(theme, light);
+      for (const property of new Set([...Object.keys(exported), "--k-bg", "--k-panel", ...BRAND_SLOT_PAIRS.flatMap((pair) => [pair.foreground, pair.background])])) {
+        if (exported[property]?.toLowerCase() !== tokens[property]?.toLowerCase()) {
+          failures.push(`contrast/index.js SHIPPED_THEMES.${shippedName(theme)}.${mode}["${property}"] is ${exported[property]}; the token files resolve ${tokens[property]}.`);
+        }
+      }
+    }
+  }
+}
+
 // Pairs for the roles. Non-text UI (a focus ring, a checked control) needs 3:1
 // against what it sits on; text needs 4.5:1.
 const STATUS = ["--k-positive", "--k-caution", "--k-negative", "--k-active"];
+
+// The brand-slot pairs come from @kontourai/ui/contrast, and are pinned here as
+// literals too: the pin is what makes a weakened threshold in the exported
+// module fail this check instead of quietly lowering the bar for both.
+const PINNED_BRAND_SLOT_PAIRS = [
+  ["--k-action-contrast", "--k-action", 4.5],
+  ["--k-action", "--k-panel", 3.0],
+  ["--k-focus", "--k-bg", 3.0],
+  ["--k-focus", "--k-panel", 3.0],
+  ["--k-brand", "--k-panel", 4.5],
+  ["--k-brand-contrast", "--k-brand", 4.5],
+];
+{
+  const exported = BRAND_SLOT_PAIRS.map(({ foreground, background, minimum }) => [foreground, background, minimum]);
+  if (JSON.stringify(exported) !== JSON.stringify(PINNED_BRAND_SLOT_PAIRS)) {
+    throw new Error(`contrast/index.js BRAND_SLOT_PAIRS ${JSON.stringify(exported)} differs from the pairs this check pins ${JSON.stringify(PINNED_BRAND_SLOT_PAIRS)}. A threshold change is a decision for both: update the pin and the module together.`);
+  }
+  // Published reference ratios (the extremes, and the two grays either side of
+  // AA on white), so a changed formula in the exported module fails here rather
+  // than re-rating everything consistently wrong.
+  for (const [a, b, expected] of [["#000000", "#ffffff", 21], ["#fff", "#fff", 1], ["#767676", "#ffffff", 4.54], ["#777777", "#ffffff", 4.48]]) {
+    const ratio = contrastRatio(a, b);
+    if (Math.abs(ratio - expected) > 0.005) throw new Error(`contrastRatio(${a}, ${b}) = ${ratio}; the WCAG definition gives ${expected}.`);
+  }
+}
 const ROLE_PAIRS = [
-  ["--k-action-contrast", "--k-action", 4.5, "primary-action text on its fill"],
-  ["--k-action", "--k-panel", 3.0, "checked controls and primary fills as UI components"],
-  ["--k-focus", "--k-bg", 3.0, "focus ring on the page"],
-  ["--k-focus", "--k-panel", 3.0, "focus ring on panels"],
-  ["--k-brand", "--k-panel", 4.5, "brand as text (eyebrows, panel counts) on panels"],
-  ["--k-brand-contrast", "--k-brand", 4.5, "the brand slot's own text-on-brand pair"],
+  ...BRAND_SLOT_PAIRS.map(({ foreground, background, minimum, purpose }) => [foreground, background, minimum, purpose]),
   ...STATUS.map((tone) => ["--k-status-contrast", tone, 4.5, "text on a filled status tone"]),
   // A trust chip carries its own fill, so its label, glyph, and border are rated
   // against that fill; the border's outer edge is rated against the panel.
