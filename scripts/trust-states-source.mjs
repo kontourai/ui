@@ -14,7 +14,12 @@ export function trustStatesFromSource(root) {
     for (const declaration of statement.declarationList.declarations) {
       if (!ts.isIdentifier(declaration.name) || declaration.name.text !== "trustStates") continue;
       let init = declaration.initializer;
-      while (init && (ts.isAsExpression(init) || ts.isSatisfiesExpression?.(init))) init = init.expression;
+      // Unwrap `Object.freeze([...] as const)` and `as` / `satisfies` casts.
+      for (;;) {
+        if (init && (ts.isAsExpression(init) || ts.isSatisfiesExpression?.(init))) init = init.expression;
+        else if (init && ts.isCallExpression(init) && init.expression.getText(source) === "Object.freeze" && init.arguments.length === 1) init = init.arguments[0];
+        else break;
+      }
       if (!init || !ts.isArrayLiteralExpression(init) || !init.elements.every(ts.isStringLiteral)) {
         throw new Error(`${file}: trustStates must be an array literal of strings.`);
       }

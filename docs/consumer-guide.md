@@ -305,6 +305,8 @@ Required assets:
 
 - `tokens/` — including `tokens/fonts/`, which holds the woff2 faces `fonts.css` points at
 - `react/styles.css` if using primitives or custom elements
+- `react/trust-state.css` instead, if the only primitive is a string-rendered trust-state chip
+- `dist/react/trust-states.js` if the page renders trust-state chips as strings in the browser
 - `dist/elements/elements/src/` if using custom elements
 
 Rules:
@@ -343,6 +345,42 @@ import { TrustState } from "@kontourai/ui/react";
   CSS border-style keyword, not a stroke value, so translate it (DESIGN.md, "Data
   Visualization"): solid is no dash array, dashed and dotted become a `stroke-dasharray`
   pattern, and double has no stroke equivalent (draw two strokes or use the glyph as a marker).
+
+### Trust states as HTML strings
+
+Renderers that build markup as template strings (a server page, a shadow-DOM panel, a console
+built without a framework) import `@kontourai/ui/trust-state`. It imports nothing, so it pulls in
+neither React nor the custom elements, and it runs in Node or a browser.
+
+```ts
+import { renderTrustStateHtml } from "@kontourai/ui/trust-state";
+
+panel.innerHTML = renderTrustStateHtml(claim.status, {
+  label: claim.statusLabel, // optional; blank falls back to the default label
+  detail: "12 source records matched", // optional, plain text
+});
+```
+
+- The output is the markup `<k-trust-state>` renders for the same `state`, `label`, `detail`,
+  and `class-name` (a browser test compares them for every state). Every value written into the
+  markup is HTML-escaped: the label, detail, class name, and an unrecognized state's text, and
+  also the state name and glyph path. Pass plain text, not markup.
+- An unrecognized state renders exactly as the element renders it: its own text, with no state
+  class, `data-trust-state`, or glyph. It is never coerced into a state.
+- The module also exports the data the three renderers share. The tables are frozen, so they
+  cannot be changed at runtime: `trustStates`, `trustStateLabels`, `trustStateGlyphs` (the SVG
+  path per state). It also exports `trustStateFor` and
+  `trustStatePresentation(state, label, className)` (the classes, visible and hidden labels,
+  and glyph for one chip).
+
+A string consumer must put two things on the page:
+
+1. The token layer: `@kontourai/ui/tokens` (or `tokens.css` and `themes.css`, plus `fonts.css`
+   for the faces). The chip reads the trust, neutral, space, type, and radius tokens.
+2. The chip rules: `@kontourai/ui/trust-state.css`. It holds only the trust-state rules and no
+   tokens, so it can be inlined at build time. It is generated from `react/styles.css`
+   (`npm run check:trust-state-css` fails when they differ), so do not load both; a page that
+   already loads `react/styles.css` has these rules.
 
 ## Trust Basis
 

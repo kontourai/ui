@@ -76,7 +76,7 @@ assert.equal(badge.props.children, "verified");
 // unrecognized word keeps its text and claims no state.
 const { TrustState, trustStateFor, trustStates } = await import("@kontourai/ui/react");
 const reactIndexExports = await import("@kontourai/ui/react");
-assert.equal("trustStatePresentation" in reactIndexExports, false, "trustStatePresentation is internal; do not export it.");
+assert.equal("trustStatePresentation" in reactIndexExports, false, "trustStatePresentation ships from @kontourai/ui/trust-state, not the React entry.");
 assert.deepEqual([...trustStates], ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"]);
 const chipParts = (element) => element.props.children[0].props.children.filter(Boolean);
 const part = (element, className) => chipParts(element).find((child) => child.props.className === className);
@@ -180,6 +180,39 @@ const declaredValues = contrastDeclarations.statements.flatMap((node) => {
 });
 assert.deepEqual([...new Set(declaredValues)].sort(), Object.keys(contrast).sort(), "contrast/index.d.ts must declare exactly the runtime exports of contrast/index.js.");
 assert.deepEqual(contrast.validateBrandOverride({ base: "flow", overrides: { dark: { "--k-action": "#a8e6d8", "--k-action-contrast": "#ffffff" } } }).violations.map((violation) => violation.kind), ["contrast"]);
+
+// @kontourai/ui/trust-state is the framework-free trust-state module that
+// TrustState and k-trust-state render from, for consumers that build HTML
+// strings. It must import nothing (so it pulls in neither React nor the
+// elements) and run in Node with no DOM. @kontourai/ui/trust-state.css is the
+// chip rules alone; check:trust-state-css keeps it equal to react/styles.css.
+for (const [label, relativePath, exportTarget] of [
+  ["./trust-state types", "dist/react/trust-states.d.ts", pkg.exports["./trust-state"]?.types],
+  ["./trust-state import", "dist/react/trust-states.js", pkg.exports["./trust-state"]?.import],
+  ["./trust-state.css", "react/trust-state.css", pkg.exports["./trust-state.css"]],
+]) {
+  assertEqual(normalizeExportPath(exportTarget), relativePath, `Incorrect package export target: ${label}.`);
+  assertFile(relativePath, `Missing package export target: ${label}`);
+}
+assert.ok(!/^\s*import\b|\bimport\s*\(|\brequire\s*\(/m.test(readFile("dist/react/trust-states.js")), "dist/react/trust-states.js must stay dependency-free: no import or require.");
+assert.match(readFile("react/trust-state.css"), /\.trust-state--revoked \.trust-state__chip \{/, "trust-state.css must carry the per-state chip rules.");
+assert.ok(!/@import|--k-[a-z-]+\s*:/.test(readFile("react/trust-state.css")), "trust-state.css holds chip rules only; tokens stay in tokens.css.");
+const trustStateModule = await import("@kontourai/ui/trust-state");
+assert.deepEqual(Object.keys(trustStateModule).sort(), ["renderTrustStateHtml", "trustStateFor", "trustStateGlyphs", "trustStateLabels", "trustStatePresentation", "trustStates"]);
+assert.equal("renderTrustStateHtml" in reactIndexExports, false, "renderTrustStateHtml ships from @kontourai/ui/trust-state, not the React entry.");
+assert.equal(
+  trustStateModule.renderTrustStateHtml("verified"),
+  '<span class="trust-state trust-state--verified" data-trust-state="verified"><span class="trust-state__chip"><svg class="trust-state__glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.25 8.5l3 3 6.5-7"></path></svg><span class="trust-state__label">Verified</span></span></span>',
+);
+assert.equal(
+  trustStateModule.renderTrustStateHtml("stale", { label: '<img src=x onerror="alert(1)">', detail: "a & b", className: 'x" onclick="y' }),
+  '<span class="trust-state trust-state--stale x&quot; onclick=&quot;y" data-trust-state="stale"><span class="trust-state__chip"><svg class="trust-state__glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M12.75 8a4.75 4.75 0 1 1-1.4-3.36M12.75 2.75v3h-3"></path></svg><span class="trust-state__label">&lt;img src=x onerror=&quot;alert(1)&quot;&gt;</span><span class="trust-state__hidden"> (Needs refresh)</span></span><span class="trust-state__detail">a &amp; b</span></span>',
+);
+assert.equal(
+  trustStateModule.renderTrustStateHtml("<b>pending</b>"),
+  '<span class="trust-state"><span class="trust-state__chip"><span class="trust-state__label">&lt;b&gt;pending&lt;/b&gt;</span></span></span>',
+  "An unrecognized state renders as its own escaped text with no state class, attribute, or glyph.",
+);
 
 const registry = new Map();
 globalThis.HTMLElement = class HTMLElement {};

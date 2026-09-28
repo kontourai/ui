@@ -73,6 +73,10 @@ try {
     // White-label runtimes validate a theme with this before applying it (ui#83).
     "contrast/index.js",
     "contrast/index.d.ts",
+    // String-rendering consumers render and style the trust-state chip from these (ui#95).
+    "dist/react/trust-states.js",
+    "dist/react/trust-states.d.ts",
+    "react/trust-state.css",
     "elements/demo.html",
   ];
 
