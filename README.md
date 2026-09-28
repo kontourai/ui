@@ -26,8 +26,8 @@ shipped themes meet (see "Validating a white-label theme" in `docs/consumer-guid
 
 For products that build markup as HTML strings, `@kontourai/ui/trust-state` exports the
 trust-state chip without React or custom elements: `renderTrustStateHtml(state, { label, detail,
-className })` returns the markup `<k-trust-state>` renders, with every value HTML-escaped, beside
-the presentation data (`trustStates`, `trustStateLabels`, `trustStateGlyphs`, `trustStateFor`,
+className })` returns the markup `<k-trust-state>` renders, with every interpolated value HTML-escaped, beside
+the presentation data (the frozen tables `trustStates`, `trustStateLabels`, `trustStateGlyphs`, and the helpers `trustStateFor` and
 `trustStatePresentation`). Style it with the tokens plus `@kontourai/ui/trust-state.css`, which
 holds only the chip rules (see "Trust States" in `docs/consumer-guide.md`).
 

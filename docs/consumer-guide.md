@@ -306,6 +306,7 @@ Required assets:
 - `tokens/` — including `tokens/fonts/`, which holds the woff2 faces `fonts.css` points at
 - `react/styles.css` if using primitives or custom elements
 - `react/trust-state.css` instead, if the only primitive is a string-rendered trust-state chip
+- `dist/react/trust-states.js` if the page renders trust-state chips as strings in the browser
 - `dist/elements/elements/src/` if using custom elements
 
 Rules:
@@ -361,12 +362,14 @@ panel.innerHTML = renderTrustStateHtml(claim.status, {
 ```
 
 - The output is the markup `<k-trust-state>` renders for the same `state`, `label`, `detail`,
-  and `class-name` (a browser test compares them for every state). The label, detail, class
-  name, and an unrecognized state's text are HTML-escaped, so pass plain text, not markup.
+  and `class-name` (a browser test compares them for every state). Every value written into the
+  markup is HTML-escaped: the label, detail, class name, and an unrecognized state's text, and
+  also the state name and glyph path. Pass plain text, not markup.
 - An unrecognized state renders exactly as the element renders it: its own text, with no state
   class, `data-trust-state`, or glyph. It is never coerced into a state.
-- The module also exports the data the three renderers share: `trustStates`,
-  `trustStateLabels`, `trustStateGlyphs` (the SVG path per state), `trustStateFor`, and
+- The module also exports the data the three renderers share. The tables are frozen, so they
+  cannot be changed at runtime: `trustStates`, `trustStateLabels`, `trustStateGlyphs` (the SVG
+  path per state). It also exports `trustStateFor` and
   `trustStatePresentation(state, label, className)` (the classes, visible and hidden labels,
   and glyph for one chip).
 
