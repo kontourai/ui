@@ -64,6 +64,7 @@ export const BRAND_SLOT_PAIRS = Object.freeze(
     ["--k-focus", "--k-bg", 3.0, "focus ring on the page"],
     ["--k-focus", "--k-panel", 3.0, "focus ring on panels"],
     ["--k-brand", "--k-panel", 4.5, "brand as text (eyebrows, panel counts) on panels"],
+    ["--k-brand", "--k-bg", 3.0, "brand accents as UI components on the page"],
     ["--k-brand-contrast", "--k-brand", 4.5, "the brand slot's own text-on-brand pair"],
   ].map(([foreground, background, minimum, purpose]) => Object.freeze({ foreground, background, minimum, purpose })),
 );
@@ -83,7 +84,11 @@ const slot = (bg, panel, brand, brandContrast, action, actionContrast, focus) =>
  * The shipped values of the brand slot and the surfaces it is rated against,
  * per theme and mode, as the cascade resolves an element carrying the theme
  * class and data-theme (`default` is no theme class). check:contrast fails if
- * these drift from tokens/tokens.css and tokens/themes.css.
+ * these drift from tokens/tokens.css and tokens/themes.css. Informational: the
+ * values are this package version's, so validate with the same version whose
+ * CSS you serve. survey:light keeps the dark page (#06080b) because the survey
+ * theme's light block does not reset --k-bg (ui#81); an override is rated
+ * against that page until #81 is fixed.
  */
 export const SHIPPED_THEMES = Object.freeze({
   default: theme(
@@ -118,12 +123,18 @@ const own = (object, key) => Object.prototype.hasOwnProperty.call(object, key);
 const isRecord = (value) =>
   typeof value === "object" && value !== null && !Array.isArray(value) &&
   [Object.prototype, null].includes(Object.getPrototypeOf(value));
+// Messages echo caller data, so they are bounded; they are still untrusted text
+// and a consumer must escape them before rendering.
+const MAX_ECHO = 64;
+const clip = (text) => (text.length > MAX_ECHO ? `${text.slice(0, MAX_ECHO)}…` : text);
 const show = (value) => {
+  let text;
   try {
-    return JSON.stringify(value) ?? String(value);
+    text = JSON.stringify(value) ?? String(value);
   } catch {
-    return String(value);
+    text = Object.prototype.toString.call(value);
   }
+  return clip(text);
 };
 
 /**
@@ -131,55 +142,70 @@ const show = (value) => {
  *
  * `base` names the shipped theme the override is applied over (a key of
  * SHIPPED_THEMES); an unknown base is a programming error and throws.
- * `overrides` is untrusted data: `{ dark?: {...}, light?: {...} }`, each a map
- * of brand-slot properties to `#rgb`/`#rrggbb` values. Every problem in it is
- * returned as a violation; an empty list means the override may be applied.
+ * `overrides` is untrusted data, typically straight from JSON.parse:
+ * `{ dark?: {...}, light?: {...} }`, each a map of brand-slot properties to
+ * `#rgb`/`#rrggbb` values. Only plain objects are accepted (prototype
+ * Object.prototype or null in this realm); a Map, a class instance, or an
+ * object from another realm is rejected rather than inspected.
  *
- * A mode's pairs are rated on the base values with that mode's overrides laid
- * on top, and only pairs that include an overridden property are rated: the
- * validator judges the override, not the shipped theme underneath it.
+ * Returns `{ violations, accepted }`. `accepted` holds fresh null-prototype
+ * copies of the values that were validated, for each mode that had no
+ * violation; apply `accepted`, never the input, so what lands is exactly what
+ * was rated. A mode's pairs are rated on the base values with that mode's
+ * overrides laid on top, and only pairs that include an overridden property
+ * are rated: the validator judges the override, not the shipped theme under it.
  */
-export function validateBrandOverride({ base, overrides } = {}) {
+export function validateBrandOverride(input) {
+  const violations = [];
+  const accepted = Object.create(null);
+  const result = () => ({ violations, accepted: Object.freeze(accepted) });
+  if (!isRecord(input)) {
+    violations.push({ kind: "invalid-shape", message: `Expected { base, overrides }; got ${show(input)}.` });
+    return result();
+  }
+  const { base, overrides } = input;
   if (typeof base !== "string" || !own(SHIPPED_THEMES, base)) {
     throw new TypeError(`base must be one of ${Object.keys(SHIPPED_THEMES).join(", ")}; got ${show(base)}.`);
   }
-  const violations = [];
   if (!isRecord(overrides)) {
-    violations.push({ kind: "invalid-shape", message: `overrides must be an object keyed by mode (${MODES.join(", ")}); got ${show(overrides)}.` });
-    return violations;
+    violations.push({ kind: "invalid-shape", message: `overrides must be a plain object keyed by mode (${MODES.join(", ")}); got ${show(overrides)}.` });
+    return result();
   }
   for (const mode of Object.keys(overrides)) {
-    if (!MODES.includes(mode)) violations.push({ kind: "invalid-shape", mode, message: `Unknown mode ${show(mode)}; expected ${MODES.join(" or ")}.` });
+    if (!MODES.includes(mode)) violations.push({ kind: "invalid-shape", mode: clip(mode), message: `Unknown mode ${show(mode)}; expected ${MODES.join(" or ")}.` });
   }
   for (const mode of MODES) {
     if (!own(overrides, mode)) continue;
+    const before = violations.length;
+    // Every value is read exactly once, into this snapshot.
     const values = overrides[mode];
     if (!isRecord(values)) {
-      violations.push({ kind: "invalid-shape", mode, message: `overrides.${mode} must be an object of brand-slot properties; got ${show(values)}.` });
+      violations.push({ kind: "invalid-shape", mode, message: `overrides.${mode} must be a plain object of brand-slot properties; got ${show(values)}.` });
       continue;
     }
-    const accepted = {};
-    for (const property of Object.keys(values)) {
+    const valid = Object.create(null);
+    const sent = new Set(Object.keys(values));
+    for (const property of sent) {
       const value = values[property];
       if (!BRAND_SLOT_PROPERTIES.includes(property)) {
-        violations.push({ kind: "disallowed-property", mode, property, message: `${mode}: ${show(property)} is not a brand-slot property (${BRAND_SLOT_PROPERTIES.join(", ")}).` });
+        violations.push({ kind: "disallowed-property", mode, property: clip(property), message: `${mode}: ${show(property)} is not a brand-slot property (${BRAND_SLOT_PROPERTIES.join(", ")}).` });
       } else if (!isHexColor(value)) {
-        violations.push({ kind: "invalid-value", mode, property, value, message: `${mode}: ${property} must be a #rgb or #rrggbb colour; got ${show(value)}.` });
+        violations.push({ kind: "invalid-value", mode, property, message: `${mode}: ${property} must be a #rgb or #rrggbb colour; got ${show(value)}.` });
       } else {
-        accepted[property] = value;
+        valid[property] = value;
       }
     }
-    if (own(values, "--k-action") !== own(values, "--k-action-contrast")) {
-      const missing = own(values, "--k-action") ? "--k-action-contrast" : "--k-action";
+    if (sent.has("--k-action") !== sent.has("--k-action-contrast")) {
+      const missing = sent.has("--k-action") ? "--k-action-contrast" : "--k-action";
       violations.push({ kind: "unpaired-action", mode, property: missing, message: `${mode}: --k-action and --k-action-contrast are overridden as a pair; ${missing} is missing.` });
     }
-    const resolved = { ...SHIPPED_THEMES[base][mode], ...accepted };
+    const resolved = { ...SHIPPED_THEMES[base][mode], ...valid };
     for (const { foreground, background, minimum, purpose } of BRAND_SLOT_PAIRS) {
-      const overridden = [foreground, background].filter((property) => own(values, property));
+      const overridden = [foreground, background].filter((property) => sent.has(property));
       // Nothing overridden: the shipped pair is the kit's own concern. Invalid
       // member: already reported, and rating the base value instead would judge
       // something the caller did not send.
-      if (overridden.length === 0 || overridden.some((property) => !own(accepted, property))) continue;
+      if (overridden.length === 0 || overridden.some((property) => !own(valid, property))) continue;
       const ratio = contrastRatio(resolved[foreground], resolved[background]);
       if (ratio < minimum) {
         violations.push({
@@ -193,6 +219,7 @@ export function validateBrandOverride({ base, overrides } = {}) {
         });
       }
     }
+    if (violations.length === before) accepted[mode] = Object.freeze(valid);
   }
-  return violations;
+  return result();
 }

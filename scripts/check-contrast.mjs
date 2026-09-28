@@ -184,6 +184,7 @@ const PINNED_BRAND_SLOT_PAIRS = [
   ["--k-focus", "--k-bg", 3.0],
   ["--k-focus", "--k-panel", 3.0],
   ["--k-brand", "--k-panel", 4.5],
+  ["--k-brand", "--k-bg", 3.0],
   ["--k-brand-contrast", "--k-brand", 4.5],
 ];
 {

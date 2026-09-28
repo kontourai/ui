@@ -117,7 +117,7 @@ const declaredValues = contrastDeclarations.statements.flatMap((node) => {
   return [];
 });
 assert.deepEqual([...new Set(declaredValues)].sort(), Object.keys(contrast).sort(), "contrast/index.d.ts must declare exactly the runtime exports of contrast/index.js.");
-assert.deepEqual(contrast.validateBrandOverride({ base: "flow", overrides: { dark: { "--k-action": "#a8e6d8", "--k-action-contrast": "#ffffff" } } }).map((violation) => violation.kind), ["contrast"]);
+assert.deepEqual(contrast.validateBrandOverride({ base: "flow", overrides: { dark: { "--k-action": "#a8e6d8", "--k-action-contrast": "#ffffff" } } }).violations.map((violation) => violation.kind), ["contrast"]);
 
 const registry = new Map();
 globalThis.HTMLElement = class HTMLElement {};

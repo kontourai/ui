@@ -19,9 +19,10 @@ export type ResolvedBrandSlot = Readonly<Record<BrandSlotProperty | SurfacePrope
 export type BrandOverride = Partial<Record<ContrastMode, Partial<Record<BrandSlotProperty, string>>>>;
 
 export type BrandOverrideViolation =
+  /** `mode` and `property` echo caller data, cut to 64 characters. */
   | { kind: "invalid-shape"; mode?: string; message: string }
   | { kind: "disallowed-property"; mode: ContrastMode; property: string; message: string }
-  | { kind: "invalid-value"; mode: ContrastMode; property: BrandSlotProperty; value: unknown; message: string }
+  | { kind: "invalid-value"; mode: ContrastMode; property: BrandSlotProperty; message: string }
   | { kind: "unpaired-action"; mode: ContrastMode; property: "--k-action" | "--k-action-contrast"; message: string }
   | {
       kind: "contrast";
@@ -46,9 +47,26 @@ export const BRAND_SLOT_PAIRS: readonly BrandSlotPair[];
 export const SHIPPED_THEMES: Readonly<Record<ShippedTheme, Readonly<Record<ContrastMode, ResolvedBrandSlot>>>>;
 export const MODES: readonly ContrastMode[];
 
+/** The validated values, per mode, as fresh frozen null-prototype objects. */
+export type AcceptedBrandOverride = Readonly<Partial<Record<ContrastMode, Readonly<Partial<Record<BrandSlotProperty, string>>>>>>;
+
+export interface BrandOverrideResult {
+  /**
+   * Every problem found. Messages echo caller data (cut to 64 characters) and
+   * are untrusted text: escape them before rendering.
+   */
+  violations: BrandOverrideViolation[];
+  /**
+   * The allowlisted, well-formed values of each mode that had no violation.
+   * Apply these, not the input, so what lands is exactly what was rated.
+   */
+  accepted: AcceptedBrandOverride;
+}
+
 /**
- * Validate a white-label override against a shipped theme. `overrides` is
- * treated as untrusted data (every problem is returned as a violation);
- * an unknown `base` throws. An empty result means the override may be applied.
+ * Validate a white-label override against a shipped theme. Pass the object as
+ * JSON.parse returned it: only plain objects of this realm are accepted, and a
+ * Map, class instance, or cross-realm object is an `invalid-shape` violation.
+ * A non-object input is an `invalid-shape` violation; an unknown `base` throws.
  */
-export function validateBrandOverride(input: { base: ShippedTheme; overrides: unknown }): BrandOverrideViolation[];
+export function validateBrandOverride(input: { base: ShippedTheme; overrides: unknown }): BrandOverrideResult;

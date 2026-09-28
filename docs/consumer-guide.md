@@ -83,21 +83,26 @@ the same functions and thresholds, so the package and a runtime cannot disagree.
 ```js
 import { validateBrandOverride } from "@kontourai/ui/contrast";
 
-const violations = validateBrandOverride({
+const { violations, accepted } = validateBrandOverride({
   base: "flow", // the shipped theme the override is applied over
-  overrides: {
-    dark: { "--k-brand": "#f0a868", "--k-action": "#f0a868", "--k-action-contrast": "#06080b", "--k-focus": "#f0a868" },
-    light: { "--k-brand": "#9a4418", "--k-action": "#9a4418", "--k-action-contrast": "#ffffff", "--k-focus": "#9a4418" },
-  },
+  overrides: JSON.parse(themeJson), // pass the parsed object itself
+  // e.g. {"dark":  {"--k-brand": "#f0a868", "--k-action": "#f0a868", "--k-action-contrast": "#06080b", "--k-focus": "#f0a868"},
+  //       "light": {"--k-brand": "#9a4418", "--k-action": "#9a4418", "--k-action-contrast": "#ffffff", "--k-focus": "#9a4418"}}
 });
 if (violations.length > 0) {
+  // Messages echo caller data (cut to 64 characters): escape before rendering.
   for (const violation of violations) console.warn(violation.message);
   // Fall back to the shipped theme; never apply part of a rejected override.
+} else {
+  applyTheme(accepted); // your code: write accepted.dark / accepted.light to the theme's selectors
 }
 ```
 
 What it checks:
 
+- **Shape.** Pass the object `JSON.parse` returned. Only plain objects are read: a `Map`, a class
+  instance, an object from another realm (an iframe), or a non-object input is an
+  `invalid-shape` violation, so an unusual input fails closed. An unknown `base` throws.
 - **Keys.** Only `--k-brand`, `--k-brand-contrast`, `--k-action`, `--k-action-contrast`, and
   `--k-focus` (`BRAND_SLOT_PROPERTIES`), under a `dark` or `light` key. Anything else is a
   `disallowed-property` or `invalid-shape` violation.
@@ -106,16 +111,21 @@ What it checks:
 - **The action pair.** `--k-action` without `--k-action-contrast` (or the reverse) in a mode is
   `unpaired-action`, even when the ratio would pass.
 - **Contrast** (`BRAND_SLOT_PAIRS`): action text on the action fill 4.5:1; the action fill on the
-  panel 3:1; brand as text on the panel 4.5:1; brand-contrast text on the brand 4.5:1; focus on
-  the page and on the panel 3:1. A mode's override is laid over the base theme's shipped values
-  for that mode (`SHIPPED_THEMES`), and only pairs that include an overridden property are rated,
-  so an override is judged on what it changes.
+  panel 3:1; brand as text on the panel 4.5:1; brand as a UI accent on the page 3:1;
+  brand-contrast text on the brand 4.5:1; focus on the page and on the panel 3:1. A mode's
+  override is laid over the base theme's shipped values for that mode, and only pairs that
+  include an overridden property are rated, so an override is judged on what it changes.
+
+`accepted` holds fresh, frozen, null-prototype copies of the validated values for each mode that
+had no violation. Apply `accepted` rather than the input: each input value is read once, so what
+lands is exactly what was rated.
 
 The surfaces come from the package rather than the caller: an override cannot change `--k-bg` or
-`--k-panel`, so the only surfaces it can land on are the shipped ones, and `check:contrast` fails
-if `SHIPPED_THEMES` drifts from the token files. An unknown `base` is a programming error and
-throws. `contrastRatio(a, b)` and `relativeLuminance(hex)` are exported too and throw a
-`TypeError` for anything but `#rgb` / `#rrggbb`.
+`--k-panel`, so the only surfaces it can land on are the shipped ones. `SHIPPED_THEMES` exposes
+them for information; `check:contrast` fails if it drifts from the token files. Validate with the
+same `@kontourai/ui` version whose CSS you serve, since a different version's surfaces may differ.
+`contrastRatio(a, b)` and `relativeLuminance(hex)` are exported too and throw a `TypeError` for
+anything but `#rgb` / `#rrggbb`.
 
 Consumer CSS should read `--k-focus` for focus color. `--k-focus-ring` is kept as an alias for
 existing styles, but it does not follow an inline `--k-focus` override on a descendant element.
