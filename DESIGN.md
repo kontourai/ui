@@ -916,8 +916,12 @@ only by `npm run check:surface-parity`, which fails when the states, their order
 default labels differ from Surface's; bumping it is how a Surface vocabulary change reaches this
 package. Nothing shipped imports Surface (`npm run check:pack` enforces it).
 
-Shipped: tokens in `tokens/tokens.css`, the `TrustState` React primitive, and the
-`k-trust-state` element. Each state has its own ink and fill in both modes, resolved the same in
+Shipped: tokens in `tokens/tokens.css`, the `TrustState` React primitive, the
+`k-trust-state` element, and, for renderers that build HTML strings,
+`renderTrustStateHtml` from `@kontourai/ui/trust-state`. All three render from one
+framework-free module, and the string renderer's output is tested against the element's
+markup. A string consumer includes the tokens and `@kontourai/ui/trust-state.css`, the chip
+rules alone, generated from `react/styles.css`. Each state has its own ink and fill in both modes, resolved the same in
 every product theme, and never reads a product accent, the action role, or the focus role
 (`npm run check:tokens`). `npm run check:contrast` rates every label on its fill and every
 border against the panel, in every theme and mode, and fails when two states' inks are too

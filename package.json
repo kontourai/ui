@@ -16,7 +16,8 @@
     "test:browser": "playwright test",
     "check:explorer": "node scripts/check-explorer.mjs",
     "check:design": "node scripts/generate-design-md.mjs --check",
-    "check": "npm run check:tokens && npm run check:contrast && npm run test:unit && npm run check:design && npm run check:exports && npm run check:surface-parity && npm run check:readiness && npm run check:explorer",
+    "check:trust-state-css": "node scripts/generate-trust-state-css.mjs --check",
+    "check": "npm run check:tokens && npm run check:contrast && npm run test:unit && npm run check:design && npm run check:trust-state-css && npm run check:exports && npm run check:surface-parity && npm run check:readiness && npm run check:explorer",
     "verify": "npm run check && npm run check:pack && npm run test:browser",
     "workflow:sidecar": "flow-agents-workflow-sidecar",
     "workflow:validate-artifacts": "flow-agents-validate-artifacts",
@@ -46,6 +47,11 @@
       "import": "./dist/react/index.js"
     },
     "./react/styles.css": "./react/styles.css",
+    "./trust-state": {
+      "types": "./dist/react/trust-states.d.ts",
+      "import": "./dist/react/trust-states.js"
+    },
+    "./trust-state.css": "./react/trust-state.css",
     "./icons/*": "./icons/*",
     "./elements": {
       "types": "./dist/elements/elements/src/index.d.ts",
@@ -63,6 +69,7 @@
     "elements/",
     "icons/",
     "react/styles.css",
+    "react/trust-state.css",
     "tokens/",
     "README.md",
     "DESIGN.md"

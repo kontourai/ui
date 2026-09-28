@@ -24,6 +24,13 @@ It also exports `@kontourai/ui/contrast`, a dependency-free module for runtimes 
 white-label theme from data: it rejects a brand-slot override that fails the thresholds the
 shipped themes meet (see "Validating a white-label theme" in `docs/consumer-guide.md`).
 
+For products that build markup as HTML strings, `@kontourai/ui/trust-state` exports the
+trust-state chip without React or custom elements: `renderTrustStateHtml(state, { label, detail,
+className })` returns the markup `<k-trust-state>` renders, with every value HTML-escaped, beside
+the presentation data (`trustStates`, `trustStateLabels`, `trustStateGlyphs`, `trustStateFor`,
+`trustStatePresentation`). Style it with the tokens plus `@kontourai/ui/trust-state.css`, which
+holds only the chip rules (see "Trust States" in `docs/consumer-guide.md`).
+
 Package docs:
 
 - `docs/consumer-guide.md` covers React, custom elements, static HTML, theme classes, and vendored asset sync.
