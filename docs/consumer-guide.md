@@ -344,6 +344,54 @@ import { TrustState } from "@kontourai/ui/react";
   Visualization"): solid is no dash array, dashed and dotted become a `stroke-dasharray`
   pattern, and double has no stroke equivalent (draw two strokes or use the glyph as a marker).
 
+## Trust Basis
+
+The trust-basis line follows a trust-state chip and says how the claim's status was established:
+`1 cited only · Extracted from a source · 2 entail the claim` (caveats first). Surface computes it: pass the
+view from `claimBasisView` in `@kontourai/surface/display` as-is. Kontour UI does not depend on
+Surface; your app does.
+
+```tsx
+import { claimBasisView } from "@kontourai/surface/display";
+import { TrustBasis, TrustState } from "@kontourai/ui/react";
+
+// Pass the claim's evidence or the whole bundle's: only evidence linked to this
+// claim (claimId === claim.id) is used, never execution-trail tool calls.
+const basis = claimBasisView(claim, bundle.evidence);
+
+<TrustState state={claim.status} />
+<TrustBasis basis={basis} />
+<TrustBasis basis={basis} density="inspector" />
+```
+
+```html
+<k-trust-state state="verified"></k-trust-state>
+<k-trust-basis id="basis"></k-trust-basis>
+<script type="module">
+  import { claimBasisView } from "@kontourai/surface/display";
+  document.querySelector("#basis").basis = claimBasisView(claim, bundle.evidence);
+</script>
+
+<!-- Or serialize the view into an attribute: -->
+<k-trust-basis density="inspector" basis-json='{"state":"not-recorded","label":"Basis not recorded"}'></k-trust-basis>
+```
+
+- Do not build, filter, reorder, or relabel facets yourself; the line's order (caveats first) and
+  words are Surface's, so every product shows the same basis.
+- For a permission denial or a failed read, which only the host knows about, pass
+  `missingClaimBasisView("restricted")` or `missingClaimBasisView("unavailable")`, or
+  `missingClaimBasisView("not-available")` when you cannot or should not say which.
+- The line is never blank. A missing or malformed view renders "Basis not available" and logs a
+  console warning. One malformed facet or detail row is enough: the component never renders a
+  partial line, since that could drop a caveat.
+- `density="inspector"` adds one labelled row per detail (How, Support, Results, Derived, Review,
+  Producer rating, Sources) below the line.
+- The `basis` property takes precedence over `basis-json`; setting it to `null` or `undefined` falls
+  back to the attribute. A `basis` set before the element is defined is kept.
+- Caveat facets are underlined with a dashed line in the text's own color
+  (`--k-basis-caveat-decoration`). Style the line with neutral tokens only; do not color it by
+  status or caveat.
+
 ## Tone Mapping
 
 Product-specific domain words should map to the shared semantic scale:

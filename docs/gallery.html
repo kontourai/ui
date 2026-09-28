@@ -92,6 +92,19 @@
         gap: var(--k-space-2);
       }
 
+      .trust-claim {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--k-space-1) var(--k-space-3);
+      }
+
+      .trust-claim--inspector {
+        display: grid;
+        justify-items: start;
+        gap: var(--k-space-2);
+      }
+
       @media (max-width: 820px) {
         main {
           width: min(100% - var(--k-space-4), 1180px);
@@ -138,6 +151,8 @@
           control.setAttribute("label", `${name} playground`);
         if (target === "k-badge") control.setAttribute("value", name);
         if (target === "k-trust-state") control.setAttribute("state", "verified");
+        if (target === "k-trust-basis")
+          control.setAttribute("basis-json", JSON.stringify({ state: "recorded", facets: [{ field: "method", code: "extraction", label: "Extracted from a source", caveat: false }] }));
         return control;
       };
       for (const entry of [...manifest.exports, ...manifest.elements]) {
@@ -299,6 +314,63 @@
             <k-trust-state state="superseded" detail="Replaced by the March filing"></k-trust-state>
             <k-trust-state state="rejected" detail="Schema validation rejected 4 rows"></k-trust-state>
             <k-trust-state state="revoked" detail="The producer withdrew this claim"></k-trust-state>
+          </div>
+        </k-panel>
+      </section>
+
+      <section aria-labelledby="basis-title" data-basis-gallery>
+        <k-panel title="Trust basis" count="how the status was established">
+          <div class="stack">
+            <span id="basis-title" class="label">A muted line after the status chip: caveats first, dashed underline, never blank</span>
+            <div class="trust-claim" data-fixture="extracted" data-density="inline">
+              <k-trust-state state="verified"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"recorded","facets":[{"field":"supportStrength","code":"cited","label":"1 cited only","caveat":true},{"field":"method","code":"extraction","label":"Extracted from a source","caveat":false},{"field":"supportStrength","code":"entails","label":"2 entail the claim","caveat":false}],"detail":[{"label":"How","value":"Extracted from a source (3)"},{"label":"Support","value":"2 entail the claim · 1 cited only"},{"label":"Results","value":"3 passed"},{"label":"Sources","value":"3 distinct sources"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="linked-check-only" data-density="inline">
+              <k-trust-state state="verified"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"recorded","facets":[{"field":"method","code":"validation","label":"Checked against expectations","caveat":false},{"field":"supportStrength","code":"entails","label":"1 entails the claim","caveat":false}],"detail":[{"label":"How","value":"Checked against expectations (1)"},{"label":"Support","value":"1 entails the claim"},{"label":"Results","value":"1 passed"},{"label":"Sources","value":"1 distinct source"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="model-derived" data-density="inline">
+              <k-trust-state state="proposed"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"recorded","facets":[{"field":"derivationMethod","code":"model","label":"Model-derived","caveat":true},{"field":"result","code":"not-evaluated","label":"1 not evaluated","caveat":true},{"field":"method","code":"extraction","label":"Extracted from a source","caveat":false}],"detail":[{"label":"How","value":"Extracted from a source (1)"},{"label":"Support","value":"1 entails the claim"},{"label":"Results","value":"1 not evaluated"},{"label":"Derived","value":"Model-derived (1 input)"},{"label":"Sources","value":"1 distinct source"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="caveat-heavy" data-density="inline">
+              <k-trust-state state="disputed"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"recorded","facets":[{"field":"derivationMethod","code":"model","label":"Model-derived","caveat":true},{"field":"result","code":"not-evaluated","label":"1 not evaluated","caveat":true},{"field":"supportStrength","code":"cited","label":"1 cited only","caveat":true},{"field":"counterevidence","code":"counterevidence","label":"1 contradicts the claim","caveat":true},{"field":"result","code":"failed-not-blocking","label":"1 failed (not blocking)","caveat":true}],"detail":[{"label":"How","value":"Extracted from a source (1) · Checked against expectations (2) · Corroborated independently (1)"},{"label":"Support","value":"3 entail the claim · 1 cited only · 1 contradicts the claim"},{"label":"Results","value":"1 passed · 2 failed · 1 not evaluated"},{"label":"Derived","value":"Model-derived (1 input)"},{"label":"Sources","value":"4 distinct sources"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="reviewed" data-density="inline">
+              <k-trust-state state="verified"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"recorded","facets":[{"field":"method","code":"validation","label":"Checked against expectations + 1 more method","caveat":false},{"field":"supportStrength","code":"entails","label":"2 entail the claim","caveat":false},{"field":"reviewerAuthority","code":"operator","label":"Operator reviewed","caveat":false}],"detail":[{"label":"How","value":"Checked against expectations (1) · Vouched for (1)"},{"label":"Support","value":"2 entail the claim"},{"label":"Results","value":"2 passed"},{"label":"Review","value":"Operator reviewed"},{"label":"Producer rating","value":"Strong support (producer-rated)"},{"label":"Calibrated confidence (producer-supplied)","value":"0.82 probability the conclusion is correct, interval 0.74–0.88 · isotonic"},{"label":"Sources","value":"2 distinct sources"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="not-recorded" data-density="inline">
+              <k-trust-state state="unknown"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"not-recorded","label":"Basis not recorded"}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="restricted" data-density="inline">
+              <k-trust-state state="verified"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"restricted","label":"Basis restricted"}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="unavailable" data-density="inline">
+              <k-trust-state state="stale"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"unavailable","label":"Basis unavailable"}'></k-trust-basis>
+            </div>
+            <div class="trust-claim" data-fixture="not-available" data-density="inline">
+              <k-trust-state state="proposed"></k-trust-state>
+              <k-trust-basis basis-json='{"state":"not-available","label":"Basis not available"}'></k-trust-basis>
+            </div>
+            <span class="label">Inspector density: one labelled row per detail</span>
+            <div class="trust-claim trust-claim--inspector" data-fixture="reviewed" data-density="inspector">
+              <k-trust-state state="verified"></k-trust-state>
+              <k-trust-basis density="inspector" basis-json='{"state":"recorded","facets":[{"field":"method","code":"validation","label":"Checked against expectations + 1 more method","caveat":false},{"field":"supportStrength","code":"entails","label":"2 entail the claim","caveat":false},{"field":"reviewerAuthority","code":"operator","label":"Operator reviewed","caveat":false}],"detail":[{"label":"How","value":"Checked against expectations (1) · Vouched for (1)"},{"label":"Support","value":"2 entail the claim"},{"label":"Results","value":"2 passed"},{"label":"Review","value":"Operator reviewed"},{"label":"Producer rating","value":"Strong support (producer-rated)"},{"label":"Calibrated confidence (producer-supplied)","value":"0.82 probability the conclusion is correct, interval 0.74–0.88 · isotonic"},{"label":"Sources","value":"2 distinct sources"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim trust-claim--inspector" data-fixture="caveat-heavy" data-density="inspector">
+              <k-trust-state state="disputed"></k-trust-state>
+              <k-trust-basis density="inspector" basis-json='{"state":"recorded","facets":[{"field":"derivationMethod","code":"model","label":"Model-derived","caveat":true},{"field":"result","code":"not-evaluated","label":"1 not evaluated","caveat":true},{"field":"supportStrength","code":"cited","label":"1 cited only","caveat":true},{"field":"counterevidence","code":"counterevidence","label":"1 contradicts the claim","caveat":true},{"field":"result","code":"failed-not-blocking","label":"1 failed (not blocking)","caveat":true}],"detail":[{"label":"How","value":"Extracted from a source (1) · Checked against expectations (2) · Corroborated independently (1)"},{"label":"Support","value":"3 entail the claim · 1 cited only · 1 contradicts the claim"},{"label":"Results","value":"1 passed · 2 failed · 1 not evaluated"},{"label":"Derived","value":"Model-derived (1 input)"},{"label":"Sources","value":"4 distinct sources"}]}'></k-trust-basis>
+            </div>
+            <div class="trust-claim trust-claim--inspector" data-fixture="not-recorded-with-rating" data-density="inspector">
+              <k-trust-state state="assumed"></k-trust-state>
+              <k-trust-basis density="inspector" basis-json='{"state":"not-recorded","label":"Basis not recorded","detail":[{"label":"Producer rating","value":"Weak support (producer-rated)"}]}'></k-trust-basis>
+            </div>
           </div>
         </k-panel>
       </section>

@@ -40,6 +40,7 @@ const elementFiles = [
   "dist/elements/elements/src/k-progress.js",
   "dist/elements/elements/src/k-status-badge.js",
   "dist/elements/elements/src/k-topbar.js",
+  "dist/elements/elements/src/k-trust-basis.js",
   "dist/elements/elements/src/k-trust-state.js",
 ];
 
@@ -102,6 +103,67 @@ assert.equal(part(unrecognized, "trust-state__glyph"), undefined, "An unrecogniz
 assert.equal(trustStateFor(" Verified "), "verified");
 assert.equal(trustStateFor("not checked"), null);
 
+// TrustBasis renders Surface's view as-is: a hidden "Basis:" prefix, facets in
+// the view's order with its labels and data attributes, aria-hidden
+// separators, and "Basis not available" (never nothing) for an unusable view.
+// The React tree is flattened to its host elements for these assertions.
+const { TrustBasis } = await import("@kontourai/ui/react");
+assert.equal("trustBasisPresentation" in reactIndexExports, false, "trustBasisPresentation is internal; do not export it.");
+const hostNodes = (node, out = []) => {
+  if (Array.isArray(node)) node.forEach((child) => hostNodes(child, out));
+  else if (node && typeof node === "object" && "props" in node) {
+    if (typeof node.type === "string") out.push(node);
+    hostNodes(node.props.children, out);
+  }
+  return out;
+};
+const textOf = (node) => (typeof node === "string" ? node : Array.isArray(node) ? node.map(textOf).join("") : node?.props ? textOf(node.props.children) : "");
+const originalWarn = console.warn;
+const warnings = [];
+console.warn = (message) => warnings.push(String(message));
+try {
+  const view = {
+    state: "recorded",
+    facets: [
+      { field: "derivationMethod", code: "model", label: "Model-derived", caveat: true },
+      { field: "method", code: "extraction", label: "Extracted from a source", caveat: false },
+    ],
+    detail: [{ label: "How", value: "Extracted from a source (1)" }],
+  };
+  const inline = TrustBasis({ basis: view });
+  assert.equal(inline.type, "span");
+  assert.equal(inline.props.className, "trust-basis trust-basis--inline");
+  assert.equal(inline.props["data-basis-state"], "recorded");
+  const nodes = hostNodes(inline);
+  assert.equal(nodes.filter((node) => node.props.className === "trust-basis__hidden")[0].props.children, "Basis: ");
+  const facets = nodes.filter((node) => node.props.className === "trust-basis__facet");
+  assert.deepEqual(facets.map((node) => [node.props["data-field"], node.props["data-code"], node.props["data-caveat"], node.props.children]), [
+    ["derivationMethod", "model", "true", "Model-derived"],
+    ["method", "extraction", "false", "Extracted from a source"],
+  ]);
+  const separators = nodes.filter((node) => node.props.className === "trust-basis__sep");
+  assert.equal(separators.length, 1);
+  assert.equal(separators[0].props["aria-hidden"], "true");
+  assert.equal(nodes.some((node) => node.type === "dl"), false, "Inline density renders no detail rows.");
+  const inspector = TrustBasis({ basis: view, density: "inspector" });
+  assert.equal(inspector.type, "div");
+  const rows = hostNodes(inspector).filter((node) => node.props.className === "trust-basis__row");
+  assert.deepEqual(rows.map((row) => hostNodes(row.props.children).map(textOf)), [["How", "Extracted from a source (1)"]]);
+  for (const bad of [undefined, null, {}, { state: "recorded", facets: [] }, { state: "not-recorded", label: "" }, { state: "pending", label: "Pending" },
+    // All or nothing: one malformed facet or row must not leave a partial line.
+    { state: "recorded", facets: [{ field: "derivationMethod", code: "model", label: "", caveat: true }, view.facets[1]] },
+    { state: "recorded", facets: [{ ...view.facets[0], caveat: "true" }, view.facets[1]] },
+    { ...view, detail: [...view.detail, { label: "Support", value: "" }] }]) {
+    const fallback = TrustBasis({ basis: bad });
+    assert.equal(fallback.props["data-basis-state"], "not-available", `${JSON.stringify(bad)} must fall back.`);
+    assert.equal(textOf(fallback), "Basis not available", `${JSON.stringify(bad)} must render "Basis not available".`);
+  }
+  assert.equal(textOf(TrustBasis({ basis: { state: "restricted", label: "Basis restricted" } })), "Basis restricted");
+  assert.ok(warnings.length > 0 && warnings.every((message) => message.startsWith("[@kontourai/ui TrustBasis]")), "Unusable views warn.");
+} finally {
+  console.warn = originalWarn;
+}
+
 // @kontourai/ui/contrast runs in a browser and a Node server alike, so it may
 // import nothing, and its hand-written declarations must cover exactly its
 // runtime exports.
@@ -130,7 +192,7 @@ globalThis.customElements = {
   }
 };
 await import("@kontourai/ui/elements");
-for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon", "k-trust-state"]) {
+for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon", "k-trust-state", "k-trust-basis"]) {
   assert.ok(registry.has(tag), `${tag} should be registered.`);
 }
 

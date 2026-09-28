@@ -19,6 +19,7 @@ import { KTextarea } from "./k-textarea.js";
 import { KToastHost } from "./k-toast-host.js";
 import { KToggle } from "./k-toggle.js";
 import { KTooltip } from "./k-tooltip.js";
+import { KTrustBasis } from "./k-trust-basis.js";
 import { KTrustState } from "./k-trust-state.js";
 import { KTopbar } from "./k-topbar.js";
 
@@ -42,6 +43,7 @@ defineElement("k-textarea", KTextarea);
 defineElement("k-toast-host", KToastHost);
 defineElement("k-toggle", KToggle);
 defineElement("k-tooltip", KTooltip);
+defineElement("k-trust-basis", KTrustBasis);
 defineElement("k-trust-state", KTrustState);
 defineElement("k-topbar", KTopbar);
 
@@ -65,6 +67,7 @@ export { KTextarea } from "./k-textarea.js";
 export { KToastHost } from "./k-toast-host.js";
 export { KToggle } from "./k-toggle.js";
 export { KTooltip } from "./k-tooltip.js";
+export { KTrustBasis } from "./k-trust-basis.js";
 export { KTrustState } from "./k-trust-state.js";
 export { KTopbar } from "./k-topbar.js";
 export {
@@ -81,3 +84,13 @@ export {
   trustStates,
   type TrustStateName,
 } from "../react/trust-states.js";
+export type {
+  TrustBasisDensity,
+  TrustBasisDetailRow,
+  TrustBasisFacet,
+  TrustBasisFacetField,
+  TrustBasisMissingState,
+  TrustBasisMissingView,
+  TrustBasisRecordedView,
+  TrustBasisView,
+} from "../react/trust-basis.js";

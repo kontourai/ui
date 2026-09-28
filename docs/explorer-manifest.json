@@ -18,6 +18,7 @@
     "--k-action-contrast",
     "--k-active",
     "--k-active-soft",
+    "--k-basis-caveat-decoration",
     "--k-bg",
     "--k-border-thick",
     "--k-border-thin",
@@ -399,6 +400,48 @@
       "accessibility": "Labeled native switch supports keyboard interaction."
     },
     {
+      "id": "react:TrustBasis",
+      "kind": "react-primitive",
+      "name": "TrustBasis",
+      "specification": "react:TrustBasis documented interactive primitive",
+      "playground": "element:k-trust-basis",
+      "states": [
+        "recorded",
+        "not-recorded",
+        "restricted",
+        "unavailable",
+        "not-available"
+      ],
+      "variants": [
+        "inline",
+        "inspector"
+      ],
+      "styleClasses": [
+        "trust-basis",
+        "trust-basis--inspector",
+        "trust-basis__facet",
+        "trust-basis__hidden",
+        "trust-basis__detail",
+        "trust-basis__row",
+        "trust-basis__term",
+        "trust-basis__value"
+      ],
+      "tokens": [
+        "--k-basis-caveat-decoration",
+        "--k-border-thin",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-text-muted",
+        "--k-text-sm"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Renders the view from Surface's claimBasisView as muted text, never blank; a visually hidden \"Basis:\" prefix and commas name the line for assistive tech while the visible separators are aria-hidden; caveat facets carry a dashed underline, not a color; each facet has data-field, data-code, and data-caveat; inspector density adds a definition list with one labelled row per detail."
+    },
+    {
       "id": "react:TrustState",
       "kind": "react-primitive",
       "name": "TrustState",
@@ -774,6 +817,48 @@
       ],
       "responsive": "Wraps in the explorer grid without horizontal overflow.",
       "accessibility": "Labeled native switch supports keyboard interaction."
+    },
+    {
+      "id": "element:k-trust-basis",
+      "kind": "custom-element",
+      "name": "k-trust-basis",
+      "specification": "element:k-trust-basis documented interactive primitive",
+      "playground": "element:k-trust-basis",
+      "states": [
+        "recorded",
+        "not-recorded",
+        "restricted",
+        "unavailable",
+        "not-available"
+      ],
+      "variants": [
+        "inline",
+        "inspector"
+      ],
+      "styleClasses": [
+        "trust-basis",
+        "trust-basis--inspector",
+        "trust-basis__facet",
+        "trust-basis__hidden",
+        "trust-basis__detail",
+        "trust-basis__row",
+        "trust-basis__term",
+        "trust-basis__value"
+      ],
+      "tokens": [
+        "--k-basis-caveat-decoration",
+        "--k-border-thin",
+        "--k-font-ui",
+        "--k-leading-normal",
+        "--k-line",
+        "--k-space-1",
+        "--k-space-2",
+        "--k-space-3",
+        "--k-text-muted",
+        "--k-text-sm"
+      ],
+      "responsive": "Wraps in the explorer grid without horizontal overflow.",
+      "accessibility": "Renders the view from Surface's claimBasisView as muted text, never blank; a visually hidden \"Basis:\" prefix and commas name the line for assistive tech while the visible separators are aria-hidden; caveat facets carry a dashed underline, not a color; each facet has data-field, data-code, and data-caveat; inspector density adds a definition list with one labelled row per detail."
     },
     {
       "id": "element:k-trust-state",

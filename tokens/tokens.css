@@ -86,6 +86,12 @@
   --k-trust-revoked-fill: #323036;
   --k-trust-revoked-line: dotted;
 
+  /* trust basis — the line after a trust-state chip. Caveat facets
+     (Model-derived, not evaluated, cited only, contradicts, failed) are
+     underlined with a dashed line in the text's own color: a line-style cue,
+     never a hue. Names no color, so it inherits the rated muted text. */
+  --k-basis-caveat-decoration: underline dashed 1px;
+
   /* spacing */
   --k-space-1: 4px;
   --k-space-2: 8px;
