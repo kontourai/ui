@@ -168,17 +168,29 @@ test("accepted holds exactly the validated values, in fresh null-prototype objec
   let reads = 0;
   const light = { "--k-brand": "#9a4418" };
   Object.defineProperty(light, "--k-focus", { enumerable: true, get: () => (reads++ === 0 ? "#9a4418" : "#ffffff") });
-  const dark = { "--k-action": "#a8e6d8", "--k-action-contrast": "#ffffff", "--k-brand": "#f0a868" };
+  const dark = { "--k-action": "#f0a868", "--k-action-contrast": "#06080b" };
   const { violations, accepted } = validateBrandOverride({ base: "flow", overrides: { dark, light } });
-  // The pale dark action pair is rejected, so nothing of dark is accepted.
-  assert.deepEqual(violations.map((violation) => `${violation.mode} ${violation.kind}`), ["dark contrast"]);
-  assert.equal(accepted.dark, undefined);
+  assert.deepEqual(violations, []);
   assert.deepEqual({ ...accepted.light }, { "--k-brand": "#9a4418", "--k-focus": "#9a4418" });
+  assert.deepEqual({ ...accepted.dark }, dark);
   assert.equal(reads, 1, "each input value is read once");
   assert.equal(Object.getPrototypeOf(accepted), null);
   assert.equal(Object.getPrototypeOf(accepted.light), null);
   assert.notEqual(accepted.light, light);
-  assert.ok(Object.isFrozen(accepted) && Object.isFrozen(accepted.light));
+  assert.ok(Object.isFrozen(accepted) && Object.isFrozen(accepted.light) && Object.isFrozen(accepted.dark));
+});
+
+test("accepted is empty when any part of the override is rejected", () => {
+  // A good light mode does not survive a rejected (pale) dark action pair.
+  const light = { "--k-brand": "#9a4418", "--k-focus": "#9a4418" };
+  const dark = { "--k-action": "#a8e6d8", "--k-action-contrast": "#ffffff" };
+  const { violations, accepted } = validateBrandOverride({ base: "flow", overrides: { dark, light } });
+  assert.deepEqual(violations.map((violation) => `${violation.mode} ${violation.kind}`), ["dark contrast"]);
+  assert.deepEqual(Object.keys(accepted), []);
+  assert.equal(Object.getPrototypeOf(accepted), null);
+  assert.ok(Object.isFrozen(accepted));
+  // An unknown mode key alone empties it too.
+  assert.deepEqual(Object.keys(validateBrandOverride({ base: "flow", overrides: { light, dim: {} } }).accepted), []);
 });
 
 test("echoed caller data is bounded", () => {

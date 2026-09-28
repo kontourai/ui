@@ -47,7 +47,7 @@ export const BRAND_SLOT_PAIRS: readonly BrandSlotPair[];
 export const SHIPPED_THEMES: Readonly<Record<ShippedTheme, Readonly<Record<ContrastMode, ResolvedBrandSlot>>>>;
 export const MODES: readonly ContrastMode[];
 
-/** The validated values, per mode, as fresh frozen null-prototype objects. */
+/** The validated values, per mode, as fresh frozen null-prototype objects; empty unless the whole override passed. */
 export type AcceptedBrandOverride = Readonly<Partial<Record<ContrastMode, Readonly<Partial<Record<BrandSlotProperty, string>>>>>>;
 
 export interface BrandOverrideResult {
@@ -57,8 +57,10 @@ export interface BrandOverrideResult {
    */
   violations: BrandOverrideViolation[];
   /**
-   * The allowlisted, well-formed values of each mode that had no violation.
-   * Apply these, not the input, so what lands is exactly what was rated.
+   * All or nothing: every validated mode's values when `violations` is empty,
+   * and an empty object otherwise, so applying it never lands part of a
+   * rejected override. Apply these, not the input, so what lands is exactly
+   * what was rated.
    */
   accepted: AcceptedBrandOverride;
 }
@@ -68,5 +70,7 @@ export interface BrandOverrideResult {
  * JSON.parse returned it: only plain objects of this realm are accepted, and a
  * Map, class instance, or cross-realm object is an `invalid-shape` violation.
  * A non-object input is an `invalid-shape` violation; an unknown `base` throws.
+ * A getter or Proxy trap on the input that throws propagates the exception;
+ * JSON.parse output has neither, so it cannot throw here.
  */
 export function validateBrandOverride(input: { base: ShippedTheme; overrides: unknown }): BrandOverrideResult;

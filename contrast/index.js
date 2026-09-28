@@ -148,17 +148,20 @@ const show = (value) => {
  * Object.prototype or null in this realm); a Map, a class instance, or an
  * object from another realm is rejected rather than inspected.
  *
- * Returns `{ violations, accepted }`. `accepted` holds fresh null-prototype
- * copies of the values that were validated, for each mode that had no
- * violation; apply `accepted`, never the input, so what lands is exactly what
- * was rated. A mode's pairs are rated on the base values with that mode's
+ * Returns `{ violations, accepted }`. `accepted` is all or nothing: when there
+ * are no violations it holds fresh null-prototype copies of every validated
+ * mode's values, and otherwise it is empty, so applying it can never land part
+ * of a rejected override. Apply `accepted`, never the input, so what lands is
+ * exactly what was rated. A getter or Proxy trap on the input that throws
+ * propagates the exception; pass JSON.parse output, which has neither. A mode's pairs are rated on the base values with that mode's
  * overrides laid on top, and only pairs that include an overridden property
  * are rated: the validator judges the override, not the shipped theme under it.
  */
 export function validateBrandOverride(input) {
   const violations = [];
-  const accepted = Object.create(null);
-  const result = () => ({ violations, accepted: Object.freeze(accepted) });
+  const validated = Object.create(null);
+  // All or nothing: one violation anywhere empties `accepted`.
+  const result = () => ({ violations, accepted: Object.freeze(violations.length === 0 ? validated : Object.create(null)) });
   if (!isRecord(input)) {
     violations.push({ kind: "invalid-shape", message: `Expected { base, overrides }; got ${show(input)}.` });
     return result();
@@ -176,7 +179,6 @@ export function validateBrandOverride(input) {
   }
   for (const mode of MODES) {
     if (!own(overrides, mode)) continue;
-    const before = violations.length;
     // Every value is read exactly once, into this snapshot.
     const values = overrides[mode];
     if (!isRecord(values)) {
@@ -219,7 +221,7 @@ export function validateBrandOverride(input) {
         });
       }
     }
-    if (violations.length === before) accepted[mode] = Object.freeze(valid);
+    validated[mode] = Object.freeze(valid);
   }
   return result();
 }

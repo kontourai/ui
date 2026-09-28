@@ -116,9 +116,12 @@ What it checks:
   override is laid over the base theme's shipped values for that mode, and only pairs that
   include an overridden property are rated, so an override is judged on what it changes.
 
-`accepted` holds fresh, frozen, null-prototype copies of the validated values for each mode that
-had no violation. Apply `accepted` rather than the input: each input value is read once, so what
-lands is exactly what was rated.
+`accepted` is all or nothing. When `violations` is empty it holds fresh, frozen, null-prototype
+copies of the validated values for each mode sent; otherwise it is empty, so applying it can never
+land half an override (light applied while dark was rejected). Apply `accepted` rather than the
+input: each input value is read once, so what lands is exactly what was rated. A getter or Proxy
+trap on the input that throws propagates the exception; `JSON.parse` output has neither, so pass
+that.
 
 The surfaces come from the package rather than the caller: an override cannot change `--k-bg` or
 `--k-panel`, so the only surfaces it can land on are the shipped ones. `SHIPPED_THEMES` exposes
