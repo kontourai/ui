@@ -32,6 +32,7 @@ export { Toast, type ToastProps } from "./Toast.js";
 export { ToastHost, type ToastHostProps, type ToastPlacement } from "./ToastHost.js";
 export { Toggle, type ToggleProps } from "./Toggle.js";
 export { Tooltip, type TooltipPlacement, type TooltipProps } from "./Tooltip.js";
+export { TrustBasis, type TrustBasisProps } from "./TrustBasis.js";
 export { TrustState, type TrustStateProps } from "./TrustState.js";
 export { Topbar, type TopbarMetaItem, type TopbarProps } from "./Topbar.js";
 export {
@@ -48,3 +49,13 @@ export {
   trustStates,
   type TrustStateName,
 } from "./trust-states.js";
+export type {
+  TrustBasisDensity,
+  TrustBasisDetailRow,
+  TrustBasisFacet,
+  TrustBasisFacetField,
+  TrustBasisMissingState,
+  TrustBasisMissingView,
+  TrustBasisRecordedView,
+  TrustBasisView,
+} from "./trust-basis.js";

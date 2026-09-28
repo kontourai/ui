@@ -209,6 +209,10 @@ const ROLE_PAIRS = [
     [`--k-trust-${state}`, `--k-trust-${state}-fill`, 4.5, `${state} trust label on its fill`],
     [`--k-trust-${state}`, "--k-panel", 3.0, `${state} trust border and glyph against the panel`],
   ]),
+  // The trust-basis line (ui#87) and its caveat underline are muted text; the
+  // decoration names no color (checked below), so this pair rates both, in
+  // every resolved theme and mode.
+  ["--k-text-muted", "--k-panel", 4.5, "trust-basis line and caveat underline on panels"],
 ];
 
 // Shipped values that already fail a role pair. Recorded, not fixed, because
@@ -270,6 +274,22 @@ for (const theme of themes) {
       }
     }
   }
+}
+
+// The caveat decoration must not carry its own color: an underline color
+// would be an unrated pair and a hue cue. It inherits the muted text rated
+// above.
+{
+  const decorations = [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/--k-basis-caveat-decoration:\s*([^;]+);/g)].map((match) => match[1].trim());
+  if (decorations.length === 0) failures.push("--k-basis-caveat-decoration is not declared; the trust-basis caveat cue has no token.");
+  for (const value of decorations) {
+    // Line keyword, style, optional thickness; anything else (a hex, a
+    // function, a var(), a named color) could set the underline color.
+    if (!/^underline dashed(?: [0-9.]+px)?$/.test(value)) {
+      failures.push(`--k-basis-caveat-decoration: ${value} must name no color; the underline inherits the rated muted text.`);
+    }
+  }
+  checked += decorations.length;
 }
 
 for (const id of KNOWN_ROLE_FAILURES.keys()) {
