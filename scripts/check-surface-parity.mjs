@@ -51,52 +51,30 @@ console.log(`Surface parity check passed: ${ui.trustStates.length} trust states 
 // 3. The fixture views the browser tests and gallery render are what
 //    claimBasisView returns for the fixture inputs, so no test renders a view
 //    Surface would not produce.
-// PENDING: the repo's pnpm policy (minimumReleaseAge, 24 hours) cannot resolve
-// Surface 3.3.0 until about 2026-09-28T23:00Z. Until the devDependency is
-// bumped to 3.3.0 or later these checks are reported as pending, not passed;
-// once the installed Surface is 3.3.0 or later they are mandatory, and a
-// missing export fails instead of skipping. Pending has a hard deadline
-// (PENDING_DEADLINE): after it, the old Surface fails this check, so the bump
-// cannot be forgotten. The bump commit deletes the pending branch entirely.
-const PENDING_DEADLINE = Date.parse("2026-09-29T12:00:00Z");
 const require = createRequire(import.meta.url);
 // The package's exports map hides package.json, so read the installed copy.
 const installed = JSON.parse(readFileSync(path.join(root, "node_modules/@kontourai/surface/package.json"), "utf8")).version;
-const [major, minor] = installed.split(".").map(Number);
-if (major < 3 || (major === 3 && minor < 3)) {
-  if (Date.now() > PENDING_DEADLINE) {
-    throw new Error(
-      `Trust-basis Surface parity has been pending past ${new Date(PENDING_DEADLINE).toISOString()}: installed @kontourai/surface ${installed} predates claimBasisView. ` +
-        "Bump the @kontourai/surface devDependency to exactly 3.3.0 (pnpm add -D -E @kontourai/surface@3.3.0) and delete this pending branch (ui#87).",
-    );
-  }
-  console.log(
-    `Surface parity PENDING for the trust basis: installed @kontourai/surface ${installed} predates claimBasisView (3.3.0). ` +
-      `Type parity, the fallback label, and the fixture views are not checked until the devDependency is bumped; this fails after ${new Date(PENDING_DEADLINE).toISOString()} (ui#87).`,
-  );
-} else {
-  const tsc = require.resolve("typescript/bin/tsc");
-  try {
-    execFileSync(process.execPath, [tsc, "-p", path.join(root, "tests/types/tsconfig.json")], { cwd: root, encoding: "utf8", stdio: "pipe" });
-  } catch (error) {
-    throw new Error(`TrustBasisView (react/src/trust-basis.ts) no longer matches @kontourai/surface/display ${installed}:\n${error.stdout}${error.stderr}`);
-  }
-
-  const display = await import("@kontourai/surface/display");
-  assert.equal(typeof display.claimBasisView, "function", `@kontourai/surface/display ${installed} does not export claimBasisView; update this check.`);
-  assert.equal(typeof display.missingClaimBasisView, "function", `@kontourai/surface/display ${installed} does not export missingClaimBasisView; update this check.`);
-  const basis = await import(pathToFileURL(path.join(root, "dist/react/trust-basis.js")).href);
-  assert.equal(
-    basis.TRUST_BASIS_FALLBACK_LABEL,
-    display.CLAIM_BASIS_MISSING_LABELS?.["not-available"],
-    "TRUST_BASIS_FALLBACK_LABEL (react/src/trust-basis.ts) must equal Surface's CLAIM_BASIS_MISSING_LABELS['not-available'].",
-  );
-
-  const fixture = JSON.parse(readFileSync(path.join(root, "tests/browser/fixtures/trust-basis-views.json"), "utf8"));
-  assert.ok(fixture.cases.length >= 8, "trust-basis fixture lost its cases.");
-  for (const entry of fixture.cases) {
-    const produced = entry.missing ? display.missingClaimBasisView(entry.missing) : display.claimBasisView(entry.claim, entry.evidence);
-    assert.deepEqual(entry.view, produced, `Fixture "${entry.name}" differs from what @kontourai/surface ${installed} produces; regenerate it from Surface.`);
-  }
-  console.log(`Surface parity check passed: TrustBasisView matches @kontourai/surface/display ${installed}; ${fixture.cases.length} fixture views match claimBasisView.`);
+const tsc = require.resolve("typescript/bin/tsc");
+try {
+  execFileSync(process.execPath, [tsc, "-p", path.join(root, "tests/types/tsconfig.json")], { cwd: root, encoding: "utf8", stdio: "pipe" });
+} catch (error) {
+  throw new Error(`TrustBasisView (react/src/trust-basis.ts) no longer matches @kontourai/surface/display ${installed}:\n${error.stdout}${error.stderr}`);
 }
+
+const display = await import("@kontourai/surface/display");
+assert.equal(typeof display.claimBasisView, "function", `@kontourai/surface/display ${installed} does not export claimBasisView; update this check.`);
+assert.equal(typeof display.missingClaimBasisView, "function", `@kontourai/surface/display ${installed} does not export missingClaimBasisView; update this check.`);
+const basis = await import(pathToFileURL(path.join(root, "dist/react/trust-basis.js")).href);
+assert.equal(
+  basis.TRUST_BASIS_FALLBACK_LABEL,
+  display.CLAIM_BASIS_MISSING_LABELS?.["not-available"],
+  "TRUST_BASIS_FALLBACK_LABEL (react/src/trust-basis.ts) must equal Surface's CLAIM_BASIS_MISSING_LABELS['not-available'].",
+);
+
+const fixture = JSON.parse(readFileSync(path.join(root, "tests/browser/fixtures/trust-basis-views.json"), "utf8"));
+assert.ok(fixture.cases.length >= 8, "trust-basis fixture lost its cases.");
+for (const entry of fixture.cases) {
+  const produced = entry.missing ? display.missingClaimBasisView(entry.missing) : display.claimBasisView(entry.claim, entry.evidence);
+  assert.deepEqual(entry.view, produced, `Fixture "${entry.name}" differs from what @kontourai/surface ${installed} produces; regenerate it from Surface.`);
+}
+console.log(`Surface parity check passed: TrustBasisView matches @kontourai/surface/display ${installed}; ${fixture.cases.length} fixture views match claimBasisView.`);

@@ -5,8 +5,8 @@ import { expect, test, type Page } from "@playwright/test";
 
 // Trust basis (ui#87). Surface's claimBasisView owns the summary; Kontour UI
 // renders the view it is given. The fixture views were produced by
-// @kontourai/surface 3.3.0 (check:surface-parity recomputes them once that
-// version is installed), so these tests render what Surface actually emits.
+// @kontourai/surface 3.3.0 (check:surface-parity recomputes them with the
+// installed Surface), so these tests render what Surface actually emits.
 type Facet = { field: string; code: string; label: string; caveat: boolean };
 type Row = { label: string; value: string };
 type View = { state: string; facets?: Facet[]; label?: string; detail?: Row[] };

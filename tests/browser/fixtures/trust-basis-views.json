@@ -1,5 +1,5 @@
 {
-  "_about": "Trust basis views produced by @kontourai/surface 3.3.0: claimBasisView(claim, evidence) for claim cases, missingClaimBasisView(missing) for host-detected missing states. The browser tests and the gallery render these views; check:surface-parity recomputes them with the installed @kontourai/surface once it is 3.3.0 or later and fails on any difference. Inputs carry only the fields claimBasisView reads.",
+  "_about": "Trust basis views produced by @kontourai/surface 3.3.0: claimBasisView(claim, evidence) for claim cases, missingClaimBasisView(missing) for host-detected missing states. The browser tests and the gallery render these views; check:surface-parity recomputes them with the installed @kontourai/surface and fails on any difference. Inputs carry only the fields claimBasisView reads.",
   "cases": [
     {
       "name": "extracted",
