@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import ts from "typescript";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pkg = JSON.parse(readFileSync(path.join(root, "package.json"), "utf8"));
@@ -19,6 +20,8 @@ const requiredExports = [
   ["./react/styles.css", "react/styles.css", pkg.exports["./react/styles.css"]],
   ["./elements types", "dist/elements/elements/src/index.d.ts", pkg.exports["./elements"]?.types],
   ["./elements import", "dist/elements/elements/src/index.js", pkg.exports["./elements"]?.import],
+  ["./contrast types", "contrast/index.d.ts", pkg.exports["./contrast"]?.types],
+  ["./contrast import", "contrast/index.js", pkg.exports["./contrast"]?.import],
 ];
 
 for (const [label, relativePath, exportTarget] of requiredExports) {
@@ -160,6 +163,23 @@ try {
 } finally {
   console.warn = originalWarn;
 }
+
+// @kontourai/ui/contrast runs in a browser and a Node server alike, so it may
+// import nothing, and its hand-written declarations must cover exactly its
+// runtime exports.
+const contrastSource = readFile("contrast/index.js");
+assert.ok(!/^\s*import\b|\bimport\s*\(|\brequire\s*\(/m.test(contrastSource), "contrast/index.js must stay dependency-free: no import or require.");
+const contrast = await import("@kontourai/ui/contrast");
+const contrastDeclarations = ts.createSourceFile("contrast/index.d.ts", readFile("contrast/index.d.ts"), ts.ScriptTarget.Latest, true);
+const declaredValues = contrastDeclarations.statements.flatMap((node) => {
+  const exported = node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
+  if (!exported) return [];
+  if (ts.isFunctionDeclaration(node)) return [node.name.text];
+  if (ts.isVariableStatement(node)) return node.declarationList.declarations.map((declaration) => declaration.name.text);
+  return [];
+});
+assert.deepEqual([...new Set(declaredValues)].sort(), Object.keys(contrast).sort(), "contrast/index.d.ts must declare exactly the runtime exports of contrast/index.js.");
+assert.deepEqual(contrast.validateBrandOverride({ base: "flow", overrides: { dark: { "--k-action": "#a8e6d8", "--k-action-contrast": "#ffffff" } } }).violations.map((violation) => violation.kind), ["contrast"]);
 
 const registry = new Map();
 globalThis.HTMLElement = class HTMLElement {};

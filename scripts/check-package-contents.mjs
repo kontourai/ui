@@ -70,6 +70,9 @@ try {
     "icons/flow-agents.svg",
     "dist/elements/elements/src/index.js",
     "dist/elements/elements/src/index.d.ts",
+    // White-label runtimes validate a theme with this before applying it (ui#83).
+    "contrast/index.js",
+    "contrast/index.d.ts",
     "elements/demo.html",
   ];
 

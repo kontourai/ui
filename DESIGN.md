@@ -541,7 +541,8 @@ Rules for the values:
 - A runtime that applies a theme at run time (rather than a reviewed stylesheet) must reject a
   pair that fails the thresholds `npm run check:contrast` applies to the roles: AA text
   contrast for text on a fill, and non-text contrast for the focus ring and checked controls.
-  The package does not export that check yet.
+  Use `validateBrandOverride` from `@kontourai/ui/contrast`, which applies those thresholds and
+  the allowlist above; see "Validating a white-label theme" in `docs/consumer-guide.md`.
 
 `--k-focus-ring` remains as an alias for existing consumer CSS; new CSS reads `--k-focus`.
 

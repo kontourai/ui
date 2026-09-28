@@ -20,6 +20,10 @@ Kontour UI ships three layers:
 - `@kontourai/ui/react` — class-driven React primitives: display (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `TrustState`, `TrustBasis`, `Empty`, `ProductIcon`), form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`), and overlays/feedback (`Dialog`, `Toast`, `ToastHost`, `Tooltip`, `Popover`) that read the token contract.
 - `@kontourai/ui/elements` — light-DOM web-component wrappers for vanilla products.
 
+It also exports `@kontourai/ui/contrast`, a dependency-free module for runtimes that apply a
+white-label theme from data: it rejects a brand-slot override that fails the thresholds the
+shipped themes meet (see "Validating a white-label theme" in `docs/consumer-guide.md`).
+
 Package docs:
 
 - `docs/consumer-guide.md` covers React, custom elements, static HTML, theme classes, and vendored asset sync.
@@ -133,6 +137,7 @@ Products should style components with `--k-*` variables and treat the product th
 ## Checks
 
 - `npm run check:tokens` verifies the token/theme contract and keeps React styles token-only.
+- `npm run check:contrast` rates every shipped theme and mode against the WCAG pairs, through the same functions and thresholds `@kontourai/ui/contrast` exports; `npm run test:unit` tests that module.
 - `npm run check:exports` builds and verifies package export targets, ESM output, declaration files, package naming, and framework-free element output.
 - `npm run check:readiness` verifies release docs, gallery, package metadata, and adopter contract markers.
 - `npm run check:pack` previews package contents with `npm pack --dry-run`.

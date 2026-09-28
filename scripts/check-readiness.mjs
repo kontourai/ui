@@ -15,6 +15,7 @@ assertIncludes(pkg.files, "tokens/", "Package files must include tokens.");
 assertIncludes(pkg.files, "react/styles.css", "Package files must include React styles.");
 assertIncludes(pkg.files, "elements/", "Package files must include element source/demo assets.");
 assertIncludes(pkg.files, "docs/", "Package files must include consumer docs.");
+assertIncludes(pkg.files, "contrast/", "Package files must include the white-label contrast validator.");
 
 for (const file of [
   "README.md",
@@ -32,6 +33,7 @@ for (const expected of [
   "@kontourai/ui/tokens",
   "@kontourai/ui/react",
   "@kontourai/ui/elements",
+  "@kontourai/ui/contrast",
   "theme-console",
   "theme-flow",
   "theme-survey",
