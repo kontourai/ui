@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/kontourai/ui/compare/v1.15.0...v1.16.0) (2026-09-28)
+
+
+### Features
+
+* **contrast:** export the white-label contrast validator as @kontourai/ui/contrast ([#93](https://github.com/kontourai/ui/issues/93)) ([9fd216d](https://github.com/kontourai/ui/commit/9fd216d32912ef0b01158324fbe3095db9b38284))
+
 ## [1.15.0](https://github.com/kontourai/ui/compare/v1.14.0...v1.15.0) (2026-09-27)
 
 
