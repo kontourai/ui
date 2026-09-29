@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.17.0](https://github.com/kontourai/ui/compare/v1.16.0...v1.17.0) (2026-09-29)
+
+
+### Features
+
+* **trust-state:** export a framework-free trust-state renderer and chip stylesheet ([#98](https://github.com/kontourai/ui/issues/98)) ([7a2d290](https://github.com/kontourai/ui/commit/7a2d2902f79d368c15481e15a191f39d2f58c353))
+* **trust:** TrustBasis line rendering Surface's claim basis view ([#91](https://github.com/kontourai/ui/issues/91)) ([e54dfea](https://github.com/kontourai/ui/commit/e54dfeaee371f37e613e9327ca1a0230ce3869b1))
+
 ## [1.16.0](https://github.com/kontourai/ui/compare/v1.15.0...v1.16.0) (2026-09-28)
 
 
