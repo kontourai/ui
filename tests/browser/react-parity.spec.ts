@@ -128,6 +128,9 @@ test("React TrustState renders the same DOM as k-trust-state", async ({ page }) 
     { state: "pending", label: "Awaiting" },
     { state: "" },
     { state: "disputed", label: "Tom & Jerry's <b>", detail: 'a & b "quoted"' },
+    // ui#100: a string detail is trimmed, and a blank one renders no detail.
+    { state: "verified", detail: "  padded  " },
+    { state: "stale", detail: "   " },
   ];
   const cases = plain.map((entry) => {
     const attributes: Record<string, string> = { state: entry.state };
@@ -143,8 +146,12 @@ test("React TrustState renders the same DOM as k-trust-state", async ({ page }) 
     setup: { attributes: { state: "verified" }, children: '<a href="#evidence">12 source records</a>' } as never,
   });
   const result = await compare(page, "k-trust-state", cases);
-  expect(result.compared).toBe(STATES.length * 2 + 10);
+  expect(result.compared).toBe(STATES.length * 2 + 12);
   expect(result.mismatches).toEqual([]);
+  // Parity alone would pass if every renderer kept the padding; pin the value.
+  const html = (entry: Case) => cases.find((candidate) => candidate.id === JSON.stringify(entry))!.html;
+  expect(html({ state: "verified", detail: "  padded  " })).toContain('<span class="trust-state__detail">padded</span>');
+  expect(html({ state: "stale", detail: "   " })).not.toContain("trust-state__detail");
   expect(cases.filter((entry) => entry.html.includes('class="trust-state__glyph"')).length).toBeGreaterThanOrEqual(STATES.length * 2);
   expect(errors).toEqual([]);
 });

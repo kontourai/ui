@@ -62,11 +62,11 @@ export function trustStateFor(value: string | null | undefined): TrustStateName 
 }
 
 // Shared by the React primitive, the k-trust-state element, and
-// renderTrustStateHtml so all three render the same classes, glyph, and
-// fallbacks. Public through @kontourai/ui/trust-state only; @kontourai/ui/react
+// renderTrustStateHtml so all three render the same classes, glyph,
+// fallbacks, and detail text. Public through @kontourai/ui/trust-state only; @kontourai/ui/react
 // does not export it. This module imports nothing, so that subpath pulls in
 // neither React nor the custom elements.
-export interface TrustStatePresentation {
+export interface TrustStatePresentation<D = never> {
   /** The recognized state, or null when the input names none. */
   state: TrustStateName | null;
   /** Always non-empty: an override, else the state's default label, else the raw input. */
@@ -76,9 +76,20 @@ export interface TrustStatePresentation {
   /** SVG path for the state's glyph; null for an unrecognized state (no glyph box). */
   glyph: string | null;
   className: string;
+  /**
+   * The detail to render, or null for none. A string is trimmed, and a blank
+   * one is null; null, undefined, and booleans are null. Anything else (a
+   * React node) passes through unchanged.
+   */
+  detail: Exclude<D, string | boolean | null | undefined> | string | null;
 }
 
-export function trustStatePresentation(value: string | null | undefined, label?: string | null, className?: string | null): TrustStatePresentation {
+export function trustStatePresentation<D = never>(
+  value: string | null | undefined,
+  label?: string | null,
+  className?: string | null,
+  detail?: D | string | null,
+): TrustStatePresentation<D> {
   const state = trustStateFor(value);
   const override = label?.trim();
   const fallback = state ? trustStateLabels[state] : String(value ?? "").trim() || "Unrecognized trust state";
@@ -90,6 +101,9 @@ export function trustStatePresentation(value: string | null | undefined, label?:
     hiddenState: state && shown.toLowerCase() !== trustStateLabels[state].toLowerCase() ? trustStateLabels[state] : null,
     glyph: state ? trustStateGlyphs[state] : null,
     className: ["trust-state", state && `trust-state--${state}`, className].filter(Boolean).join(" "),
+    detail: typeof detail === "string" ? detail.trim() || null
+      : detail == null || typeof detail === "boolean" ? null
+      : detail as Exclude<D, string | boolean | null | undefined>,
   };
 }
 
@@ -112,15 +126,14 @@ export interface TrustStateHtmlOptions {
  * the tokens.
  */
 export function renderTrustStateHtml(state: string | null | undefined, options: TrustStateHtmlOptions = {}): string {
-  const view = trustStatePresentation(state, options.label, options.className);
+  const view = trustStatePresentation(state, options.label, options.className, options.detail);
   const glyph = view.glyph
     ? `<svg class="trust-state__glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="${escapeHtml(view.glyph)}"></path></svg>`
     : "";
   const hidden = view.hiddenState ? `<span class="trust-state__hidden"> (${escapeHtml(view.hiddenState)})</span>` : "";
-  const detail = options.detail?.trim();
   return `<span class="${escapeHtml(view.className)}"${view.state ? ` data-trust-state="${escapeHtml(view.state)}"` : ""}>`
     + `<span class="trust-state__chip">${glyph}<span class="trust-state__label">${escapeHtml(view.label)}</span>${hidden}</span>`
-    + (detail ? `<span class="trust-state__detail">${escapeHtml(detail)}</span>` : "")
+    + (view.detail ? `<span class="trust-state__detail">${escapeHtml(view.detail)}</span>` : "")
     + "</span>";
 }
 
