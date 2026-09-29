@@ -1054,7 +1054,7 @@ keyword, not a stroke value, so a chart translates it:
 | --- | --- |
 | solid | no dash array |
 | dashed | a dash pattern, such as `stroke-dasharray: 4 3` |
-| dotted | round caps on a near-zero dash, such as `stroke-dasharray: 0.1 3` with `stroke-linecap: round` |
+| dotted | round caps on zero-length dashes, relative to the stroke width: a dash of `0` and a gap of about twice the width (`stroke-dasharray: 0 3` for a 1.5px stroke), with `stroke-linecap: round`, so each dot is as wide as the stroke |
 | double | no stroke equivalent: draw two parallel strokes, or use the state's glyph as the marker |
 
 Broken/continuous contour logic is allowed only when semantically appropriate. Provide textual
