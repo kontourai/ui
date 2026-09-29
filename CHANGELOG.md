@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.2](https://github.com/kontourai/ui/compare/v1.17.1...v1.17.2) (2026-09-29)
+
+
+### Fixes
+
+* trim trust-state detail in every renderer; reject hidden chip borders ([#106](https://github.com/kontourai/ui/issues/106)) ([70fa4f4](https://github.com/kontourai/ui/commit/70fa4f474e67a1d303d504af307d7125489c670e)), closes [#102](https://github.com/kontourai/ui/issues/102)
+
 ## [1.17.1](https://github.com/kontourai/ui/compare/v1.17.0...v1.17.1) (2026-09-29)
 
 
