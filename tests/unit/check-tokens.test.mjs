@@ -168,6 +168,51 @@ const cases = [
     styles: append("@media print { .trust-basis { color: red; } }"),
     expect: { selector: ".trust-basis (inside @media print)", says: /color: red must be --k-text-muted, --k-text, --k-line, or inherited, or a system color/ },
   },
+  {
+    name: "a consumer rule redefines a trust ink",
+    styles: append(".consumer { --k-trust-stale: var(--k-negative); }"),
+    expect: { selector: ".consumer", says: /declares --k-trust-stale; --k-trust-\* tokens are defined in tokens\// },
+  },
+  {
+    name: "the k-trust-state element redefines a line token",
+    styles: append("k-trust-state { --k-trust-verified-line: dotted; }"),
+    expect: { selector: "k-trust-state", says: /declares --k-trust-verified-line;/ },
+  },
+  {
+    name: "a system color under `@media print, all`",
+    styles: append("@media print, all { .trust-state__chip { color: CanvasText; } }"),
+    expect: { selector: ".trust-state__chip (inside @media print, all)", says: /color: CanvasText must read a --k-\* token/ },
+  },
+  {
+    name: "a system color under `@media not print`",
+    styles: append("@media not print { .trust-state__chip { color: CanvasText; } }"),
+    expect: { selector: ".trust-state__chip (inside @media not print)", says: /color: CanvasText must read a --k-\* token/ },
+  },
+  {
+    name: "-webkit-text-fill-color on the chip from another rule",
+    styles: append(".trust-state span.trust-state__chip { -webkit-text-fill-color: var(--k-text); }"),
+    expect: { selector: ".trust-state span.trust-state__chip", says: /sets -webkit-text-fill-color on the chip/ },
+  },
+  {
+    name: "-webkit-text-fill-color in a state's chip rule",
+    styles: editChip("verified", "  color: var(--k-trust-verified);\n  background: var(--k-trust-verified-fill);\n  border-color: var(--k-trust-verified);\n  border-style: var(--k-trust-verified-line);\n  -webkit-text-fill-color: var(--k-trust-verified);"),
+    expect: { selector: ".trust-state--verified .trust-state__chip", says: /sets -webkit-text-fill-color; a state's chip rule sets only/ },
+  },
+  {
+    name: "border-width zeroed on the chip from another rule",
+    styles: append(".trust-state .trust-state__chip { border-width: 0; }"),
+    expect: { selector: ".trust-state .trust-state__chip", says: /sets border-width on the chip/ },
+  },
+  {
+    name: "a border longhand width on the chip from another rule",
+    styles: append(".trust-state .trust-state__chip { border-top-width: 0; }"),
+    expect: { selector: ".trust-state .trust-state__chip", says: /sets border-top-width on the chip/ },
+  },
+  {
+    name: "a border width inside the forced-colors carve-out",
+    styles: append("@media (forced-colors: active) { .trust-state__chip { border-width: 0; } }"),
+    expect: { selector: ".trust-state__chip (inside @media (forced-colors: active))", says: /sets border-width; inside @media/ },
+  },
   // ui#92: basis rules are found by parsing the selector, not by substring.
   {
     name: "[data-basis-state] descendant reads a status tone",
@@ -234,6 +279,8 @@ for (const entry of cases) {
 const accepted = [
   { name: "system colors on the chip under forced colors", styles: append("@media (forced-colors: active) { .trust-state__chip { color: CanvasText; background: Canvas; border-color: CanvasText; } }") },
   { name: "currentColor on a state's chip in print", styles: append("@media print { .trust-state--stale .trust-state__chip { border-color: currentColor; background: transparent; } }") },
+  { name: "ButtonFace and a text fill on the chip under forced colors", styles: append("@media (forced-colors: active) { .trust-state__chip { background: ButtonFace; -webkit-text-fill-color: ButtonText; } }") },
+  { name: "a state's own border width in a separate rule", styles: append(".trust-state--verified .trust-state__chip { border-width: var(--k-border-thick); }") },
   { name: "a system color on the basis line under forced colors", styles: append("@media (forced-colors: active) { .trust-basis { color: CanvasText; } }") },
   { name: "the chip only inside :not()", styles: append(".trust-state span:not(.trust-state__chip) { color: var(--k-text-muted); }") },
   { name: "the chip only inside :has()", styles: append(".trust-state:has(.trust-state__chip) { color: var(--k-text-muted); }") },

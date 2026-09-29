@@ -184,20 +184,26 @@ for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-them
 // neutral colors, so an unrecognized state looks tentative. Each state then
 // has exactly one top-level `.trust-state--<state> .trust-state__chip` rule
 // that sets color, background, border-color, and border-style to exactly
-// that state's tokens, once each. Of the paint properties this check names
-// (color, background, background-color, background-image, and the border
-// shorthands, color, and style longhands), it sets no others. A state whose
+// that state's tokens, once each. Of the paint properties this check lists
+// (CHIP_PAINT: color, -webkit-text-fill-color, background, background-color,
+// background-image, and the border shorthands and their color and style
+// longhands), it sets no others; it may also set border widths (CHIP_WIDTH),
+// as disputed's double line does. The list is not exhaustive; the browser
+// token spec is the backstop for properties it does not name. A state whose
 // line token moved to another property would otherwise still render dotted
 // through the base rule, and a theme's override of that token would be
 // silently ignored. There is exactly one top-level .trust-state__chip rule,
 // with no !important paint. Outside those rules, no top-level rule whose
 // subject is the chip (a class in its last compound, or in :is() / :where()
-// there; not inside :not() or :has()) may set those paint properties.
+// there; not inside :not() or :has()) may set those paint or width
+// properties. No rule anywhere in react/styles.css declares a --k-trust-*
+// custom property; the trust tokens live in tokens/.
 //
 // Carve-out: inside a top-level `@media (forced-colors: active)` or
-// `@media print`, a trust-state rule may set color, background(-color), and
-// border / outline / text-decoration colors, fill, and stroke, but only to a
-// CSS system color, transparent, or currentColor. No other paint property is
+// `@media print` (matched exactly, so `print, all` or `not print` do not
+// qualify), a trust-state rule may set the color properties in
+// COLOR_PROPERTY, but only to a CSS system color, transparent, or
+// currentColor. The other CHIP_PAINT and CHIP_WIDTH properties are not
 // allowed there, so the line style still comes from the state's token.
 //
 // Outside the carve-out, color properties in trust-state rules read a --k-*
@@ -207,12 +213,13 @@ for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-them
 // reaches the chip without naming .trust-state__chip in its last compound
 // (such as `.trust-state--stale > *`).
 const TRUST_FORBIDDEN = /--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring)\b(?!-)/;
-const CHIP_PAINT = /^(?:color|background(?:-color|-image)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-(?:color|style))?)$/;
-const COLOR_PROPERTY = /^(?:color|background(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?-color|outline-color|text-decoration-color|fill|stroke)$/;
+const CHIP_PAINT = /^(?:color|-webkit-text-fill-color|background(?:-color|-image)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-(?:color|style))?)$/;
+const CHIP_WIDTH = /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?-width$/;
+const COLOR_PROPERTY = /^(?:color|-webkit-text-fill-color|background(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?-color|outline-color|text-decoration-color|fill|stroke)$/;
 const SYSTEM_COLORS = new Set([
   "canvas", "canvastext", "linktext", "buttontext", "buttonborder", "graytext", "highlight", "highlighttext",
   "mark", "marktext", "accentcolor", "accentcolortext", "field", "fieldtext", "visitedtext", "activetext",
-  "selecteditem", "selecteditemtext", "transparent", "currentcolor",
+  "selecteditem", "selecteditemtext", "buttonface", "transparent", "currentcolor",
 ]);
 const chipPaint = (state) => ({
   color: `var(--k-trust-${state})`,
@@ -241,14 +248,18 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
     }
     if (media) {
       if (COLOR_PROPERTY.test(prop) && !isSystemColor(decl.value)) throw new Error(`${where}: ${decl.prop}: ${decl.value}; inside @media ${media} a trust-state rule may set colors only to a system color, transparent, or currentColor.`);
-      if (CHIP_PAINT.test(prop) && !COLOR_PROPERTY.test(prop)) throw new Error(`${where}: sets ${decl.prop}; inside @media ${media} a trust-state rule may set only colors, so the line style still comes from the state's token.`);
+      if ((CHIP_PAINT.test(prop) || CHIP_WIDTH.test(prop)) && !COLOR_PROPERTY.test(prop)) throw new Error(`${where}: sets ${decl.prop}; inside @media ${media} a trust-state rule may set only colors, so the line style still comes from the state's token.`);
     } else if (COLOR_PROPERTY.test(prop) && !/^(?:var\(--k-[a-z0-9-]+\)|inherit|currentcolor|transparent|none)$/i.test(decl.value.trim())) {
       throw new Error(`${where}: ${decl.prop}: ${decl.value} must read a --k-* token (or be inherit, currentColor, transparent, or none).`);
     }
   });
   if (media) return;
   const paint = rule.nodes.filter((node) => node.type === "decl" && CHIP_PAINT.test(node.prop.toLowerCase()));
+  const widths = rule.nodes.filter((node) => node.type === "decl" && CHIP_WIDTH.test(node.prop.toLowerCase()));
   const state = TRUST_STATES.find((candidate) => sameSelector(parsed, `.trust-state--${candidate} .trust-state__chip`));
+  // A state's own chip rule may set border widths (disputed's double line
+  // needs a wider border), in the painting rule or a separate one.
+  if (state && rule.parent?.type === "root" && paint.length === 0) return;
   if (state && rule.parent?.type === "root" && paint.length > 0) {
     const expected = chipPaint(state);
     const seen = paint.map((decl) => decl.prop.toLowerCase());
@@ -273,9 +284,15 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
     if (paint.some((decl) => decl.important)) throw new Error(`${where}: chip paint must not be !important; it would override every state.`);
     return;
   }
-  if (paint.length > 0 && parsed.some((selector) => subjectHasClass(selector, "trust-state__chip"))) {
-    throw new Error(`${where}: sets ${paint.map((decl) => decl.prop).join(", ")} on the chip; only the one .trust-state__chip rule and each state's one top-level .trust-state--<state> .trust-state__chip rule may paint the chip.`);
+  if (paint.length + widths.length > 0 && parsed.some((selector) => subjectHasClass(selector, "trust-state__chip"))) {
+    throw new Error(`${where}: sets ${[...paint, ...widths].map((decl) => decl.prop).join(", ")} on the chip; only the one .trust-state__chip rule and each state's one top-level .trust-state--<state> .trust-state__chip rule may paint the chip.`);
   }
+});
+// Trust tokens are defined in tokens/, never in the component stylesheet: a
+// scoped redefinition anywhere (`.consumer { --k-trust-stale: ... }`) would
+// repaint the chips under it while every chip rule still reads its token.
+postcss.parse(tokenFiles["react/styles.css"]).walkDecls((decl) => {
+  if (/^--k-trust-/i.test(decl.prop)) throw new Error(`${decl.parent.type === "rule" ? describeRule(decl.parent) : `react/styles.css ${decl.parent.type === "atrule" ? `@${decl.parent.name} ${decl.parent.params}` : "(top level)"}`}: declares ${decl.prop}; --k-trust-* tokens are defined in tokens/, never in react/styles.css.`);
 });
 if (baseChipRules !== 1) throw new Error(`react/styles.css must have exactly one top-level .trust-state__chip rule; found ${baseChipRules}.`);
 for (const [state, count] of trustRules) {
