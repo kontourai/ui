@@ -64,15 +64,17 @@ export const BRAND_SLOT_PAIRS = Object.freeze(
     ["--k-focus", "--k-bg", 3.0, "focus ring on the page"],
     ["--k-focus", "--k-panel", 3.0, "focus ring on panels"],
     ["--k-brand", "--k-panel", 4.5, "brand as text (eyebrows, panel counts) on panels"],
-    ["--k-brand", "--k-bg", 3.0, "brand accents as UI components on the page"],
+    ["--k-brand", "--k-bg", 4.5, "brand as text on the page"],
+    ["--k-brand", "--k-panel-raised", 4.5, "brand as text on raised panels"],
     ["--k-brand-contrast", "--k-brand", 4.5, "the brand slot's own text-on-brand pair"],
   ].map(([foreground, background, minimum, purpose]) => Object.freeze({ foreground, background, minimum, purpose })),
 );
 
 const theme = (dark, light) => Object.freeze({ dark: Object.freeze(dark), light: Object.freeze(light) });
-const slot = (bg, panel, brand, brandContrast, action, actionContrast, focus) => ({
+const slot = (bg, panel, raised, brand, brandContrast, action, actionContrast, focus) => ({
   "--k-bg": bg,
   "--k-panel": panel,
+  "--k-panel-raised": raised,
   "--k-brand": brand,
   "--k-brand-contrast": brandContrast,
   "--k-action": action,
@@ -90,28 +92,28 @@ const slot = (bg, panel, brand, brandContrast, action, actionContrast, focus) =>
  */
 export const SHIPPED_THEMES = Object.freeze({
   default: theme(
-    slot("#0a0e13", "#111824", "#5ce0c6", "#06080b", "#5ce0c6", "#06080b", "#5ce0c6"),
-    slot("#f5f4ef", "#ffffff", "#0e7c64", "#ffffff", "#0e7c64", "#ffffff", "#0e7c64"),
+    slot("#0a0e13", "#111824", "#16202d", "#5ce0c6", "#06080b", "#5ce0c6", "#06080b", "#5ce0c6"),
+    slot("#f5f4ef", "#ffffff", "#fbfaf7", "#0e7c64", "#ffffff", "#0e7c64", "#ffffff", "#0e7c64"),
   ),
   console: theme(
-    slot("#11120f", "#191b16", "#c9ff4a", "#11120f", "#c9ff4a", "#11120f", "#c9ff4a"),
-    slot("#f3f5eb", "#fbfcf7", "#6c9400", "#ffffff", "#6c9400", "#11120f", "#6c9400"),
+    slot("#11120f", "#191b16", "#20231e", "#c9ff4a", "#11120f", "#c9ff4a", "#11120f", "#c9ff4a"),
+    slot("#f3f5eb", "#fbfcf7", "#eef2e6", "#577800", "#ffffff", "#6c9400", "#11120f", "#6c9400"),
   ),
   flow: theme(
-    slot("#0a0e13", "#111824", "#2f88a6", "#06080b", "#2f88a6", "#06080b", "#2f88a6"),
-    slot("#f5f4ef", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88"),
+    slot("#0a0e13", "#111824", "#16202d", "#3890ae", "#06080b", "#2f88a6", "#06080b", "#2f88a6"),
+    slot("#f5f4ef", "#ffffff", "#fbfaf7", "#1f6f88", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88"),
   ),
   station: theme(
-    slot("#0a0e13", "#111824", "#9364ff", "#06080b", "#7c3aed", "#ffffff", "#9364ff"),
-    slot("#f5f4ef", "#ffffff", "#7c3aed", "#ffffff", "#7c3aed", "#ffffff", "#7c3aed"),
+    slot("#0a0e13", "#111824", "#16202d", "#966aff", "#06080b", "#7c3aed", "#ffffff", "#9364ff"),
+    slot("#f5f4ef", "#ffffff", "#fbfaf7", "#7c3aed", "#ffffff", "#7c3aed", "#ffffff", "#7c3aed"),
   ),
   surface: theme(
-    slot("#0a0e13", "#111824", "#14a37a", "#06080b", "#14a37a", "#06080b", "#14a37a"),
-    slot("#f5f4ef", "#ffffff", "#0f6b52", "#ffffff", "#0f6b52", "#ffffff", "#0f6b52"),
+    slot("#0a0e13", "#111824", "#16202d", "#14a37a", "#06080b", "#14a37a", "#06080b", "#14a37a"),
+    slot("#f5f4ef", "#ffffff", "#fbfaf7", "#0f6b52", "#ffffff", "#0f6b52", "#ffffff", "#0f6b52"),
   ),
   survey: theme(
-    slot("#06080b", "#111824", "#5ce0c6", "#06080b", "#5ce0c6", "#06080b", "#5ce0c6"),
-    slot("#f5f4ef", "#ffffff", "#16806f", "#ffffff", "#16806f", "#ffffff", "#16806f"),
+    slot("#06080b", "#111824", "#16202d", "#5ce0c6", "#06080b", "#5ce0c6", "#06080b", "#5ce0c6"),
+    slot("#f5f4ef", "#ffffff", "#fbfaf7", "#107e6d", "#ffffff", "#16806f", "#ffffff", "#16806f"),
   ),
 });
 

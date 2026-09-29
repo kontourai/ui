@@ -68,8 +68,12 @@
   --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
 }
 
+/* Flow dark: the brand is the accent lightened (OKLCH hue within 0.3°, same chroma)
+   just enough to read as text at 4.5:1 on bg, panel and raised panel; the
+   action and focus keep the accent, which clears their 3:1 and dark-text
+   pairs. */
 .theme-flow {
-  --k-brand: #2f88a6;
+  --k-brand: #3890ae;
   --k-action: #2f88a6;
   --k-action-contrast: #06080b;
   --k-focus: #2f88a6;
@@ -86,32 +90,41 @@
 
 /* Station: the draft accent, adjusted per mode only where WCAG AA needs it.
    Dark: the accent carries white text as a fill but is too dark to read as
-   text on the dark panel, so the brand (and the focus ring) is the accent
-   lightened to clear contrast; the action keeps the draft accent. */
+   text on the dark panel, so the focus ring is the accent lightened to clear
+   contrast, and the brand is lightened a little further (OKLCH hue within 0.1°) to
+   read as text at 4.5:1 on bg, panel and raised panel; the action keeps the
+   draft accent. */
 .theme-station {
-  --k-brand: #9364ff;
+  --k-brand: #966aff;
   --k-action: #7c3aed;
   --k-action-contrast: #ffffff;
   --k-focus: #9364ff;
   --k-focus-ring: var(--k-focus);
 }
 
+/* Survey light: the brand is the accent darkened (same OKLCH hue and chroma) just enough
+   to read as text at 4.5:1 on the light canvas; the action and focus keep the
+   accent. */
 [data-theme="light"].theme-survey,
 [data-theme="light"] .theme-survey:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *)),
 :where(.theme-survey) [data-theme="light"]:where(:not(.theme-console, .theme-flow, .theme-surface, .theme-station, .theme-survey :is(.theme-console, .theme-flow, .theme-surface, .theme-station) *)) {
   --k-bg: #f5f4ef;
   --k-text-faint: #6a707b;
-  --k-brand: #16806f;
+  --k-brand: #107e6d;
   --k-action: #16806f;
   --k-action-contrast: #ffffff;
   --k-focus: #16806f;
   --k-focus-ring: var(--k-focus);
 }
 
+/* Console light: the brand is the lime darkened (OKLCH hue within 0.1°) just enough
+   to read as text at 4.5:1 on bg, panel and raised panel, and it keeps white
+   brand-contrast text (5.1:1; dark text would be 3.7:1). The action and focus
+   keep the brighter lime with dark text. */
 [data-theme="light"].theme-console,
 [data-theme="light"] .theme-console:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *)),
 :where(.theme-console) [data-theme="light"]:where(:not(.theme-survey, .theme-flow, .theme-surface, .theme-station, .theme-console :is(.theme-survey, .theme-flow, .theme-surface, .theme-station) *)) {
-  --k-brand: #6c9400;
+  --k-brand: #577800;
   --k-brand-contrast: #ffffff;
   --k-action: #6c9400;
   --k-action-contrast: #11120f;
@@ -211,7 +224,7 @@
 }
 
 [data-theme="dark"]:where(.theme-flow *):where([data-theme="light"] *):where(:not(.theme-survey, .theme-console, .theme-surface, .theme-station, .theme-flow :is(.theme-survey, .theme-console, .theme-surface, .theme-station) *)) {
-  --k-brand: #2f88a6;
+  --k-brand: #3890ae;
   --k-action: #2f88a6;
   --k-action-contrast: #06080b;
   --k-focus: #2f88a6;
@@ -227,7 +240,7 @@
 }
 
 [data-theme="dark"]:where(.theme-station *):where([data-theme="light"] *):where(:not(.theme-survey, .theme-console, .theme-flow, .theme-surface, .theme-station :is(.theme-survey, .theme-console, .theme-flow, .theme-surface) *)) {
-  --k-brand: #9364ff;
+  --k-brand: #966aff;
   --k-action: #7c3aed;
   --k-action-contrast: #ffffff;
   --k-focus: #9364ff;

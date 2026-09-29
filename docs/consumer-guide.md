@@ -137,7 +137,7 @@ What it checks:
 - **The action pair.** `--k-action` without `--k-action-contrast` (or the reverse) in a mode is
   `unpaired-action`, even when the ratio would pass.
 - **Contrast** (`BRAND_SLOT_PAIRS`): action text on the action fill 4.5:1; the action fill on the
-  panel 3:1; brand as text on the panel 4.5:1; brand as a UI accent on the page 3:1;
+  panel 3:1; brand as text on the page, the panel, and the raised panel 4.5:1;
   brand-contrast text on the brand 4.5:1; focus on the page and on the panel 3:1. A mode's
   override is laid over the base theme's shipped values for that mode, and only pairs that
   include an overridden property are rated, so an override is judged on what it changes.
@@ -149,8 +149,8 @@ input: each input value is read once, so what lands is exactly what was rated. A
 trap on the input that throws propagates the exception; `JSON.parse` output has neither, so pass
 that.
 
-The surfaces come from the package rather than the caller: an override cannot change `--k-bg` or
-`--k-panel`, so the only surfaces it can land on are the shipped ones. `SHIPPED_THEMES` exposes
+The surfaces come from the package rather than the caller: an override cannot change `--k-bg`,
+`--k-panel`, or `--k-panel-raised`, so the only surfaces it can land on are the shipped ones. `SHIPPED_THEMES` exposes
 them for information; `check:contrast` fails if it drifts from the token files. Validate with the
 same `@kontourai/ui` version whose CSS you serve, since a different version's surfaces may differ.
 `contrastRatio(a, b)` and `relativeLuminance(hex)` are exported too and throw a `TypeError` for

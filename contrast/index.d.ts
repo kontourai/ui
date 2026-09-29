@@ -1,7 +1,7 @@
 /** A property a white-label theme may set. */
 export type BrandSlotProperty = "--k-brand" | "--k-brand-contrast" | "--k-action" | "--k-action-contrast" | "--k-focus";
 /** A surface the brand slot is rated against. */
-export type SurfaceProperty = "--k-bg" | "--k-panel";
+export type SurfaceProperty = "--k-bg" | "--k-panel" | "--k-panel-raised";
 export type ContrastMode = "dark" | "light";
 export type ShippedTheme = "default" | "console" | "flow" | "station" | "surface" | "survey";
 
