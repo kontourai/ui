@@ -88,9 +88,17 @@ const css = topRules.filter((rule) => !isIsland(rule)).map((rule) => rule.node.t
     const dark = pick(top(`.theme-${theme}`));
     // A mode-dependent token the base block sets and the light block does not
     // keeps its dark value in light mode (ui#81: survey's dark canvas under
-    // light text). The reverse is safe: the tokens.css reset restores the dark
-    // default inside a dark island.
+    // light text). The reverse is safe for mode tokens: the tokens.css reset
+    // restores their dark default inside a dark island.
     for (const prop of dark.keys()) if (!light.decls.has(prop)) failures.push(`tokens/themes.css .theme-${theme} sets ${prop} but its light block does not, so light mode keeps the dark value.`);
+    // A light block may set only tokens the dark reset covers (modeKeys). Any
+    // other token (a radius, a font) is inherited unchanged into a dark island
+    // below the light element, so its light value would leak into dark mode;
+    // setting it in the base block too would not help, because the island
+    // inherits from the light element, not from the base block.
+    for (const prop of light.decls.keys()) {
+      if (!modeKeys.includes(prop)) failures.push(`tokens/themes.css .theme-${theme}'s light block sets ${prop}, which the dark reset does not cover, so a dark island below a light .theme-${theme} keeps the light value; set it in the base block only.`);
+    }
     islands.add(island);
     const islandRule = topRules.find((rule) => rule.selector === island);
     if (!islandRule) failures.push(`tokens/themes.css: .theme-${theme} needs a dark-island block: ${island}`);

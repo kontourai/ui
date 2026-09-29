@@ -46,7 +46,8 @@ Where to put an override:
 - Declare them in a stylesheet loaded after the tokens, using the theme's own selectors:
 
 ```css
-.theme-flow {
+.theme-flow,
+[data-theme="dark"]:where(.theme-flow *):where([data-theme="light"] *):where(:not(.theme-survey, .theme-console, .theme-surface, .theme-station, .theme-flow :is(.theme-survey, .theme-console, .theme-surface, .theme-station) *)) {
   --k-brand: #f0a868;
   --k-action: #f0a868;
   --k-action-contrast: #06080b;
@@ -63,9 +64,10 @@ Where to put an override:
 ```
 
 Copy the selectors exactly as `tokens/themes.css` spells them, including the `:where(:not(...))`
-tails that keep a block to the nearest theme and mode. For a dark element inside a light page,
-also override the theme's dark-island block (the `[data-theme="dark"]:where(.theme-flow *)…`
-rule at the end of `tokens/themes.css`).
+tails that keep a block to the nearest theme and mode. The dark values go on the theme's base
+block and on its dark-island block (the second selector of the first rule, from the end of
+`tokens/themes.css`), which is where a `data-theme="dark"` element inside a light page resolves.
+A browser test loads this example straight from this file.
 
 Without a theme class, override `:root` and `[data-theme="dark"]:where([data-theme="light"] *)`
 together for dark (the second is where a dark element below a light one resets), and

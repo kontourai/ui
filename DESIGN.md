@@ -641,8 +641,9 @@ product.** Both are counted from the element itself outward, at any depth, and i
   layer over what it inherits, in both modes: `.theme-flow` inside `.theme-console` keeps
   Console's surfaces and uses Flow's brand and roles.
 - Each theme's light block sets every mode-dependent token its base block sets, so light mode
-  never keeps a dark value (`npm run check:contrast` fails otherwise); inside a dark island the
-  reset restores the dark defaults for the rest.
+  never keeps a dark value, and sets nothing else: a token outside the mode reset (a radius, a
+  font) would carry its light value into a dark island below. `npm run check:contrast` fails
+  either way.
 
 How it is built: plain selectors with `:where(:not(...))` tails. The class-below-attribute
 light form stops at a nearer `data-theme="dark"`; the attribute-below-class form stops at a

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 // Interaction roles (--k-action, --k-action-contrast, --k-focus) are separate
@@ -181,7 +183,9 @@ test("a white-label override on the theme's selectors applies per mode and keeps
 // Dark islands (ui#80): a data-theme="dark" element below a light one now
 // really resolves dark, so a white-label override reaches it only through the
 // selectors DESIGN.md documents ("Migrating overrides"). Selectors are pinned
-// here as literals, copied from the docs, not read from the CSS.
+// here as literals, not read from the CSS: the light forms and the dark-island
+// form as tokens/themes.css spells them (the docs name the island block and
+// point there), and the no-theme reset as DESIGN.md names it.
 const FLOW_OTHERS = ".theme-survey, .theme-console, .theme-surface, .theme-station";
 const DOCUMENTED = {
   flowDark: `.theme-flow,\n[data-theme="dark"]:where(.theme-flow *):where([data-theme="light"] *):where(:not(${FLOW_OTHERS}, .theme-flow :is(${FLOW_OTHERS}) *))`,
@@ -239,6 +243,31 @@ for (const placement of ISLANDS) {
     expect(contrast(roles.brandPaint, roles.panelPaint), `${placement.name}: brand on the island's panel`).toBeGreaterThanOrEqual(3);
   });
 }
+
+// The consumer guide's white-label example, loaded from the guide itself (its
+// first fenced css block that names .theme-flow), must be complete: copied
+// verbatim, it resolves the override in each dark-island placement and in
+// light mode, never the shipped Flow values.
+test("the consumer guide's white-label example is complete for dark islands", async ({ page }) => {
+  const guide = readFileSync(path.join(test.info().config.rootDir, "../../docs/consumer-guide.md"), "utf8");
+  const css = [...guide.matchAll(/```css\n([\s\S]*?)```/g)].map((match) => match[1]).find((block) => block.includes(".theme-flow"));
+  expect(css, "no css example naming .theme-flow in docs/consumer-guide.md").toBeTruthy();
+  await loadGallery(page);
+  const placements = [
+    { name: "theme on a light root, dark island below", html: { className: "theme-flow", theme: "light" }, island: { theme: "dark" }, mode: "dark" },
+    { name: "dark theme element on a light page", html: { theme: "light" }, island: { className: "theme-flow", theme: "dark" }, mode: "dark" },
+    { name: "light element inside a dark theme root", html: { className: "theme-flow", theme: "dark" }, island: { theme: "light" }, mode: "light" },
+  ] as const;
+  for (const placement of placements) {
+    const roles = await islandRoles(page, css!, placement.html, placement.island);
+    const expected = WHITE_LABEL[placement.mode];
+    expect(roles.brand, `${placement.name}: brand`).toBe(expected.brand);
+    expect(roles.action, `${placement.name}: action`).toBe(expected.action);
+    expect(roles.actionContrast, `${placement.name}: action contrast`).toBe(expected.actionContrast);
+    expect(roles.focus, `${placement.name}: focus`).toBe(expected.focus);
+    expect(contrast(roles.brandPaint, roles.bgPaint), `${placement.name}: brand on the page`).toBeGreaterThanOrEqual(3);
+  }
+});
 
 // Migration hazard, pinned on purpose: main's documented class-below-attribute
 // light form has no tail, weighs 0-2-0, and still matches a dark theme element
