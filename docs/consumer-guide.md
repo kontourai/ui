@@ -63,8 +63,8 @@ Where to put an override:
 }
 ```
 
-Copy the selectors exactly as `tokens/themes.css` spells them, including the `:where(:not(...))`
-tails that keep a block to the nearest theme and mode. The dark values go on the theme's base
+Copy the selectors exactly as `tokens/themes.css` spells them. Where a form has a
+`:where(:not(...))` tail, copy that too: the tail keeps the block to the nearest theme and mode. The dark values go on the theme's base
 block and on its dark-island block (the second selector of the first rule, from the end of
 `tokens/themes.css`), which is where a `data-theme="dark"` element inside a light page resolves.
 A browser test loads this example straight from this file.

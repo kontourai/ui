@@ -385,35 +385,47 @@ const proseClaims = (body, offset) => {
 // code span there that names a selector (it contains `.theme-`, `[data-theme` or `:root`)
 // must be a selector tokens/tokens.css or tokens/themes.css ships (ui#103). Table cells
 // under a header that starts with "Earlier" are exempt: they name the selectors being
-// migrated away from. Two notations stand in for shipped text:
+// migrated away from. A code span may not wrap onto a second line (an odd backtick count
+// on a line fails), so no span escapes the check. Two notations stand in for shipped text:
 //   <theme>      each shipped theme name; the selector must exist for every theme.
-//   :not(...)    any :not() argument list, so a doc can point at a tail without copying
-//                it. `...` anywhere else is an error, not an elision.
+//   :not(...)    written literally with three ASCII dots, stands for whatever argument
+//                the shipped selector has at that outermost :not(), so a doc can point at
+//                a tail without copying it. Any other :not() argument, a tail written out,
+//                is compared exactly. `...` anywhere else is an error, not an elision.
 const SELECTOR_SECTION = "### White-label overrides";
 const SELECTOR_SPAN = /`([^`]*(?:\.theme-|\[data-theme|:root)[^`]*)`/g;
 const ELIDED = ":not(.__elided__)";
-const normalizeSelector = (text) => {
+// Parses one selector, replaces the argument of each outermost :not() whose index is in
+// `elide` with the elision marker, and returns the whitespace-normalized text together
+// with the indexes of outermost :not()s that already held the marker.
+const normalizeSelector = (text, elide = []) => {
   let out = null;
+  const marked = [];
   selectorParser((selectors) => {
     if (selectors.nodes.length !== 1) throw new Error(`expected one selector, got ${selectors.nodes.length}`);
-    // Replace each outermost :not() argument with the elision marker.
+    const nots = [];
     selectors.walkPseudos((pseudo) => {
       if (pseudo.value !== ":not") return;
       for (let parent = pseudo.parent; parent; parent = parent.parent) if (parent.type === "pseudo" && parent.value === ":not") return;
+      nots.push(pseudo);
+    });
+    nots.forEach((pseudo, index) => {
+      if (pseudo.toString().trim() === ELIDED) marked.push(index);
+      if (!elide.includes(index)) return;
       pseudo.removeAll();
       pseudo.append(selectorParser.selector({ nodes: [selectorParser.className({ value: "__elided__" })] }));
     });
     out = selectors.toString();
   }).processSync(text);
-  return out.replace(/\s+/g, " ").trim();
+  return { text: out.replace(/\s+/g, " ").trim(), marked };
 };
 const shippedSelectors = () => {
-  const shipped = new Set();
+  const shipped = [];
   const themes = new Set();
   for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
     postcss.parse(read(file), { from: file }).walkRules((rule) => {
       for (const selector of rule.selectors) {
-        shipped.add(normalizeSelector(selector));
+        shipped.push(selector);
         const theme = /^\.theme-([a-z0-9-]+)$/.exec(selector.trim())?.[1];
         if (theme) themes.add(theme);
       }
@@ -421,6 +433,11 @@ const shippedSelectors = () => {
   }
   if (!themes.size) throw new Error("tokens/themes.css ships no .theme-<name> base block.");
   return { shipped, themes: [...themes] };
+};
+// Elides a shipped selector at exactly the :not() positions the documented one elides.
+const isShipped = (documented, shipped) => {
+  const { text, marked } = normalizeSelector(documented);
+  return shipped.some((selector) => normalizeSelector(selector, marked).text === text);
 };
 const documentedSelectors = (text, offset) => {
   const lines = text.split("\n");
@@ -432,6 +449,9 @@ const documentedSelectors = (text, offset) => {
   let header = null;
   for (let index = start + 1; index < lines.length && !/^#{1,3} /.test(lines[index]); index += 1) {
     const at = `line ${index + 1 + offset}`;
+    if ((lines[index].match(/`/g) ?? []).length % 2) {
+      problems.push(`${at}: a code span wraps onto the next line (odd number of backticks); keep each selector on one line so it is checked: ${lines[index].trim()}`);
+    }
     const bare = stripQuote(lines[index]);
     let scanned = lines[index];
     if (bare.startsWith("|")) {
@@ -452,14 +472,14 @@ const documentedSelectors = (text, offset) => {
       const missing = [];
       for (const theme of documented.includes("<theme>") ? themes : [null]) {
         const filled = theme ? expanded.replaceAll("<theme>", theme) : expanded;
-        let normalized;
+        let found;
         try {
-          normalized = normalizeSelector(filled);
+          found = isShipped(filled, shipped);
         } catch (error) {
           problems.push(`${at}: \`${documented}\` is not a single CSS selector (${error.message})`);
           break;
         }
-        if (!shipped.has(normalized)) missing.push(theme ? filled.replaceAll(ELIDED, ":not(...)") : documented);
+        if (!found) missing.push(theme ? filled.replaceAll(ELIDED, ":not(...)") : documented);
       }
       if (missing.length) problems.push(`${at}: \`${documented}\` is not a shipped selector in tokens/tokens.css or tokens/themes.css (${missing.length > 1 && missing.length === themes.length ? "missing for every shipped theme" : `missing: ${missing.join("; ")}`})`);
     }

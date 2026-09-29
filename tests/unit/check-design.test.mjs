@@ -75,3 +75,57 @@ test("exempts the Earlier selector column", () => {
   const result = runCheck(replaceOnce(pristine, "| `:where(.theme-<theme>) [data-theme=\"light\"]` |", "| `:where(.theme-<theme>) [data-theme=\"retired\"]` |"));
   assert.equal(result.status, 0, result.stderr);
 });
+
+// A tail written out in full is compared exactly; only a literal `:not(...)` elides.
+const LIGHT_CELL = '`[data-theme="light"] .theme-<theme>:where(:not(...))`;';
+const LIGHT_TAIL = '[data-theme="dark"], [data-theme="light"] [data-theme="dark"] *';
+const withLightTail = (tail) => replaceOnce(pristine, LIGHT_CELL, `\`[data-theme="light"] .theme-<theme>:where(:not(${tail}))\`;`);
+
+test("accepts a tail written out exactly as shipped", () => {
+  const result = runCheck(withLightTail(LIGHT_TAIL));
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test("rejects a typo inside a written-out tail", () => {
+  const typo = LIGHT_TAIL.replace('"dark"', '"drak"');
+  const result = runCheck(withLightTail(typo));
+  assert.notEqual(result.status, 0);
+  assert.ok(result.stderr.includes(`\`[data-theme="light"] .theme-<theme>:where(:not(${typo}))\` is not a shipped selector`), result.stderr);
+});
+
+test("rejects a unicode ellipsis in place of :not(...)", () => {
+  const result = runCheck(withLightTail("…"));
+  assert.notEqual(result.status, 0);
+  assert.ok(result.stderr.includes('`[data-theme="light"] .theme-<theme>:where(:not(…))`'), result.stderr);
+});
+
+test("rejects a selector that ships for some themes but not all", () => {
+  // Flow's own tail, with the theme name as the placeholder: it ships only for flow.
+  const others = ".theme-survey, .theme-console, .theme-surface, .theme-station";
+  const cell = '`:where(.theme-<theme>) [data-theme="light"]:where(:not(...))`, copying';
+  const flowOnly = `:where(.theme-<theme>) [data-theme="light"]:where(:not(${others}, .theme-<theme> :is(${others}) *))`;
+  const result = runCheck(replaceOnce(pristine, cell, `\`${flowOnly}\`, copying`));
+  assert.notEqual(result.status, 0);
+  assert.ok(result.stderr.includes(`\`${flowOnly}\` is not a shipped selector`), result.stderr);
+  assert.match(result.stderr, /missing: :where\(\.theme-survey\) /);
+  assert.doesNotMatch(result.stderr, /missing[^\n]*:where\(\.theme-flow\) /);
+});
+
+test("rejects a code span that wraps onto the next line", () => {
+  const span = '`[data-theme="dark"]:where([data-theme="light"] *)` beside';
+  const result = runCheck(replaceOnce(pristine, span, '`[data-theme="dark"]:where(\n  [data-theme="light"] *)` beside'));
+  assert.notEqual(result.status, 0);
+  assert.ok(result.stderr.includes('a code span wraps onto the next line (odd number of backticks); keep each selector on one line so it is checked: add the dark reset `[data-theme="dark"]:where('), result.stderr);
+});
+
+test("rejects a missing section", () => {
+  const result = runCheck(replaceOnce(pristine, "\n### White-label overrides\n", "\n### White-label theming\n"));
+  assert.notEqual(result.status, 0);
+  assert.ok(result.stderr.includes('has no "### White-label overrides" section'), result.stderr);
+});
+
+test("rejects a section that names no selectors", () => {
+  const result = runCheck(replaceOnce(pristine, "\n### White-label overrides\n", "\n### White-label overrides\n\nSee below.\n\n### White-label theming\n"));
+  assert.notEqual(result.status, 0);
+  assert.ok(result.stderr.includes('"### White-label overrides" names no selectors'), result.stderr);
+});
