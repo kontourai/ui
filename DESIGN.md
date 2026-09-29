@@ -526,6 +526,21 @@ Where an override goes decides whether it applies:
   dark-island block. A declaration on `:root` loses to the
   theme's light block whenever a theme class is present, and an inline style on `<html>`
   does not reach a theme class placed on `<body>`.
+- With no theme class, override `:root` for dark and `[data-theme="light"]` for light, and
+  add the dark reset `[data-theme="dark"]:where([data-theme="light"] *)` beside `:root`: a
+  dark element below a light one resets there, not to `:root`.
+
+> **Migrating overrides.** Dark islands now resolve dark (ui#80), so an override written with
+> the earlier selectors can misplace values. Change each selector as follows:
+>
+> | Earlier selector | Now |
+> | --- | --- |
+> | `.theme-<theme>` (dark) | keep it, and add the theme's dark-island block `[data-theme="dark"]:where(.theme-<theme> *):where([data-theme="light"] *):where(:not(...))`; without it a dark element below a light one shows the shipped product brand |
+> | `[data-theme="light"] .theme-<theme>` | the same with its `:where(:not(...))` tail; without the tail a dark theme element on a light page takes the light override onto dark surfaces |
+> | `:where(.theme-<theme>) [data-theme="light"]` | the same with its tail, so the override stops at a nested theme |
+> | `:root` (no theme class) | add `[data-theme="dark"]:where([data-theme="light"] *)` |
+>
+> Copy the tails from `tokens/themes.css`; `docs/consumer-guide.md` shows a full example.
 
 Rules for the values:
 
@@ -617,15 +632,17 @@ on dark surfaces. Final dark surface, text, and border ramps are OPEN.
 product.** Both are counted from the element itself outward, at any depth, and independently:
 
 - An element with `data-theme` resolves to its mode's contract plus its nearest theme's values
-  for that mode. A theme further out contributes nothing to it.
+  for that mode. A theme further out contributes no mode-dependent tokens to it (its
+  mode-independent ones, such as radii and fonts, still inherit).
 - `data-theme="dark"` inside a light element restores the dark contract (surfaces, text,
   status, trust states, and roles) and its nearest theme's dark values. With no light element
   above it there is nothing to restore, and it inherits.
 - A theme class with no `data-theme` of its own takes the nearest mode above it. Its values
   layer over what it inherits, in both modes: `.theme-flow` inside `.theme-console` keeps
   Console's surfaces and uses Flow's brand and roles.
-- Each theme's base block and light block set the same mode-dependent tokens, so no placement
-  keeps the other mode's value (`npm run check:contrast` fails otherwise).
+- Each theme's light block sets every mode-dependent token its base block sets, so light mode
+  never keeps a dark value (`npm run check:contrast` fails otherwise); inside a dark island the
+  reset restores the dark defaults for the rest.
 
 How it is built: plain selectors with `:where(:not(...))` tails. The class-below-attribute
 light form stops at a nearer `data-theme="dark"`; the attribute-below-class form stops at a

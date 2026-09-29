@@ -48,8 +48,8 @@ const css = topRules.filter((rule) => !isIsland(rule)).map((rule) => rule.node.t
 // Scoping (ui#80, ui#81, ui#84): the nearest data-theme picks the mode and the
 // nearest theme class picks the product. The selectors that implement it are
 // pinned here from the theme list, so a theme added without its exclusions
-// (or a dropped :not()) fails; and each mode's blocks must set the same
-// tokens, so no placement inherits the other mode's value.
+// (or a dropped :not()) fails; and a theme's light block must cover every
+// mode-dependent token its base block sets.
 {
   const top = (selector) => {
     const rule = topRules.find((candidate) => candidate.selector === selector);
@@ -86,12 +86,11 @@ const css = topRules.filter((rule) => !isIsland(rule)).map((rule) => rule.node.t
       continue;
     }
     const dark = pick(top(`.theme-${theme}`));
-    // Each mode sets the same tokens: a token the base block sets and the light
-    // block does not keeps its dark value in light mode (ui#81: survey's dark
-    // canvas under light text), and the reverse keeps a light value inside a
-    // dark island.
+    // A mode-dependent token the base block sets and the light block does not
+    // keeps its dark value in light mode (ui#81: survey's dark canvas under
+    // light text). The reverse is safe: the tokens.css reset restores the dark
+    // default inside a dark island.
     for (const prop of dark.keys()) if (!light.decls.has(prop)) failures.push(`tokens/themes.css .theme-${theme} sets ${prop} but its light block does not, so light mode keeps the dark value.`);
-    for (const prop of light.decls.keys()) if (!dark.has(prop)) failures.push(`tokens/themes.css .theme-${theme}'s light block sets ${prop} but its base block does not, so a dark island keeps the light value.`);
     islands.add(island);
     const islandRule = topRules.find((rule) => rule.selector === island);
     if (!islandRule) failures.push(`tokens/themes.css: .theme-${theme} needs a dark-island block: ${island}`);

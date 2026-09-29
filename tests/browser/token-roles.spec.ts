@@ -178,6 +178,83 @@ test("a white-label override on the theme's selectors applies per mode and keeps
   }
 });
 
+// Dark islands (ui#80): a data-theme="dark" element below a light one now
+// really resolves dark, so a white-label override reaches it only through the
+// selectors DESIGN.md documents ("Migrating overrides"). Selectors are pinned
+// here as literals, copied from the docs, not read from the CSS.
+const FLOW_OTHERS = ".theme-survey, .theme-console, .theme-surface, .theme-station";
+const DOCUMENTED = {
+  flowDark: `.theme-flow,\n[data-theme="dark"]:where(.theme-flow *):where([data-theme="light"] *):where(:not(${FLOW_OTHERS}, .theme-flow :is(${FLOW_OTHERS}) *))`,
+  flowLight: `[data-theme="light"].theme-flow,\n[data-theme="light"] .theme-flow:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *)),\n:where(.theme-flow) [data-theme="light"]:where(:not(${FLOW_OTHERS}, .theme-flow :is(${FLOW_OTHERS}) *))`,
+  rootDark: `:root,\n[data-theme="dark"]:where([data-theme="light"] *)`,
+  rootLight: `[data-theme="light"]`,
+  // main's documented light forms, before the scoping tails.
+  oldFlowLight: `[data-theme="light"].theme-flow, [data-theme="light"] .theme-flow, :where(.theme-flow) [data-theme="light"]`,
+};
+const ISLANDS = [
+  { name: "theme on a light root, dark island below", html: { className: "theme-flow", theme: "light" }, island: { theme: "dark" }, dark: "flowDark", light: "flowLight" },
+  { name: "dark theme element on a light page", html: { theme: "light" }, island: { className: "theme-flow", theme: "dark" }, dark: "flowDark", light: "flowLight" },
+  { name: "no theme class, dark island on a light page", html: { theme: "light" }, island: { theme: "dark" }, dark: "rootDark", light: "rootLight" },
+] as const;
+
+async function islandRoles(page: Page, css: string, html: { className?: string; theme?: string }, island: { className?: string; theme?: string }) {
+  return page.evaluate(({ css, html, island }) => {
+    const style = document.createElement("style");
+    style.textContent = css;
+    document.head.append(style);
+    const root = document.documentElement;
+    root.className = html.className ?? "";
+    root.dataset.theme = html.theme ?? "dark";
+    const section = document.createElement("section");
+    section.className = island.className ?? "";
+    if (island.theme) section.dataset.theme = island.theme;
+    document.body.append(section);
+    const probe = document.createElement("span");
+    probe.style.cssText = "color: var(--k-brand); background: var(--k-bg); border-color: var(--k-panel)";
+    section.append(probe);
+    const computed = getComputedStyle(section);
+    const painted = getComputedStyle(probe);
+    const read = (name: string) => computed.getPropertyValue(name).trim();
+    const result = { brand: read("--k-brand"), action: read("--k-action"), actionContrast: read("--k-action-contrast"), focus: read("--k-focus"), bg: read("--k-bg"), brandPaint: painted.color, bgPaint: painted.backgroundColor, panelPaint: painted.borderTopColor };
+    section.remove();
+    style.remove();
+    return result;
+  }, { css, html, island });
+}
+
+for (const placement of ISLANDS) {
+  test(`a white-label override reaches a dark island with the documented selectors: ${placement.name}`, async ({ page }) => {
+    await loadGallery(page);
+    const decl = (v: typeof WHITE_LABEL.dark) =>
+      `--k-brand: ${v.brand}; --k-action: ${v.action}; --k-action-contrast: ${v.actionContrast}; --k-focus: ${v.focus};`;
+    const css = `${DOCUMENTED[placement.dark]} { ${decl(WHITE_LABEL.dark)} }\n${DOCUMENTED[placement.light]} { ${decl(WHITE_LABEL.light)} }`;
+    const roles = await islandRoles(page, css, placement.html, placement.island);
+    const expected = WHITE_LABEL.dark;
+    expect(roles.brand, `${placement.name}: brand`).toBe(expected.brand);
+    expect(roles.action, `${placement.name}: action`).toBe(expected.action);
+    expect(roles.actionContrast, `${placement.name}: action contrast`).toBe(expected.actionContrast);
+    expect(roles.focus, `${placement.name}: focus`).toBe(expected.focus);
+    expect(roles.bg, `${placement.name}: the island's page is the dark page`).toBe("#0a0e13");
+    expect(contrast(roles.brandPaint, roles.bgPaint), `${placement.name}: brand on the island's page`).toBeGreaterThanOrEqual(3);
+    expect(contrast(roles.brandPaint, roles.panelPaint), `${placement.name}: brand on the island's panel`).toBeGreaterThanOrEqual(3);
+  });
+}
+
+// Migration hazard, pinned on purpose: main's documented class-below-attribute
+// light form has no tail, weighs 0-2-0, and still matches a dark theme element
+// on a light page, so an override left on the old selectors paints its LIGHT
+// values onto the dark island. DESIGN.md "Migrating overrides" tells consumers
+// to add the tail. If this starts failing, the hazard is gone: update the docs.
+test("migration hazard: an override on main's old light selectors lands on a dark theme element under a light page", async ({ page }) => {
+  await loadGallery(page);
+  const decl = (v: typeof WHITE_LABEL.dark) =>
+    `--k-brand: ${v.brand}; --k-action: ${v.action}; --k-action-contrast: ${v.actionContrast}; --k-focus: ${v.focus};`;
+  const css = `.theme-flow { ${decl(WHITE_LABEL.dark)} }\n${DOCUMENTED.oldFlowLight} { ${decl(WHITE_LABEL.light)} }`;
+  const roles = await islandRoles(page, css, { theme: "light" }, { className: "theme-flow", theme: "dark" });
+  expect(roles.bg, "the island itself is dark").toBe("#0a0e13");
+  expect(roles.brand, "old selectors apply the light override inside the dark island").toBe(WHITE_LABEL.light.brand);
+});
+
 // A theme scope nested under another theme's scope (the gallery's matrix
 // samples under a themed <html>) must carry its own action text color: a scope
 // that set only the action fill would inherit the outer scope's text onto it.

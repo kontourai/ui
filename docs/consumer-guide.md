@@ -67,8 +67,24 @@ tails that keep a block to the nearest theme and mode. For a dark element inside
 also override the theme's dark-island block (the `[data-theme="dark"]:where(.theme-flow *)…`
 rule at the end of `tokens/themes.css`).
 
+Without a theme class, override `:root` and `[data-theme="dark"]:where([data-theme="light"] *)`
+together for dark (the second is where a dark element below a light one resets), and
+`[data-theme="light"]` for light.
+
 A declaration on `:root` loses to the theme's light block when a theme class is present, and an
 inline style on `<html>` does not reach a theme class on `<body>`.
+
+> **Migrating overrides.** Dark elements inside a light page now really resolve dark, so an
+> override written with the earlier selectors can misplace values:
+>
+> - `.theme-flow` alone (dark): add the dark-island block. Without it, a
+>   `data-theme="dark"` element below a light one shows the shipped Flow brand, not yours.
+> - `[data-theme="light"] .theme-flow` without its `:where(:not(...))` tail: add the tail.
+>   Without it, a `.theme-flow` element with `data-theme="dark"` on a light page takes your
+>   light values onto dark surfaces.
+> - `:where(.theme-flow) [data-theme="light"]` without its tail: add it, so your light values
+>   stop at a nested theme.
+> - `:root` only (no theme class): add `[data-theme="dark"]:where([data-theme="light"] *)`.
 
 Rules for the values:
 
