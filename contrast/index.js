@@ -102,7 +102,7 @@ export const SHIPPED_THEMES = Object.freeze({
     slot("#f5f4ef", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88"),
   ),
   station: theme(
-    slot("#0a0e13", "#111824", "#9364ff", "#06080b", "#7c3aed", "#ffffff", "#9364ff"),
+    slot("#0a0e13", "#111824", "#966aff", "#06080b", "#7c3aed", "#ffffff", "#9364ff"),
     slot("#f5f4ef", "#ffffff", "#7c3aed", "#ffffff", "#7c3aed", "#ffffff", "#7c3aed"),
   ),
   surface: theme(
@@ -111,7 +111,7 @@ export const SHIPPED_THEMES = Object.freeze({
   ),
   survey: theme(
     slot("#06080b", "#111824", "#5ce0c6", "#06080b", "#5ce0c6", "#06080b", "#5ce0c6"),
-    slot("#f5f4ef", "#ffffff", "#16806f", "#ffffff", "#16806f", "#ffffff", "#16806f"),
+    slot("#f5f4ef", "#ffffff", "#137e6e", "#ffffff", "#16806f", "#ffffff", "#16806f"),
   ),
 });
 

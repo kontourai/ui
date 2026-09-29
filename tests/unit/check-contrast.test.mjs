@@ -66,3 +66,22 @@ test("a dark-island block that drifts from its base block fails", () => {
   assert.equal(result.status, 1, result.stdout);
   assert.match(result.stderr, /--k-brand is #3890af; the block it mirrors sets #3890ae/);
 });
+
+// Brand as text is rated at 4.5:1 on the page, the panel, and the raised panel
+// in every theme and mode (ui#77). Each case restores one pre-fix brand value
+// (literals pinned here) and must fail on the named pair with its ratio.
+test("a brand too light to read as text on the light page fails (survey light)", () => {
+  const result = runCheck(surveyLightBody("  --k-brand: #137e6e;", "  --k-brand: #16806f;"));
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /survey:light --k-brand on --k-bg = 4\.38:1 \(needs 4\.5:1/);
+});
+
+test("a brand too dark to read as text on the dark raised panel fails (station dark)", () => {
+  // Both the base block and its dark-island mirror, so the mirror check stays quiet.
+  const restored = pristine.split("  --k-brand: #966aff;").join("  --k-brand: #9364ff;");
+  assert.equal(pristine.split("  --k-brand: #966aff;").length, 3);
+  const result = runCheck(restored);
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /station:dark --k-brand on --k-panel-raised = 4\.31:1 \(needs 4\.5:1/);
+  assert.doesNotMatch(result.stderr, /mirrors/);
+});

@@ -50,7 +50,7 @@ Apply one product theme class on a stable root element to set the product identi
 | `theme-survey` | Survey / Review Workbench | `#5ce0c6` teal | Evidence-forward; minimal overrides on the default dark shell |
 | `theme-console` | Kontour Console | `#c9ff4a` lime-green | Dense operator plane; condensed font, zero radius, high-contrast palette |
 | `theme-flow` | Flow | `#2f88a6` blue | Process-transparency; cool accent on the default dark shell |
-| `theme-station` | Station | `#9364ff` violet (dark), `#7c3aed` violet (light) | Draft violet accent adjusted for readable brand text on dark panels |
+| `theme-station` | Station | `#966aff` violet (dark), `#7c3aed` violet (light) | Draft violet accent adjusted for readable brand text on dark panels |
 | `theme-surface` | Surface | `#14a37a` green | Trust-state inspection; earthy-green accent on the default dark shell |
 
 All themes support `[data-theme="light"]` for light-mode overrides. See [`docs/gallery.html`](docs/gallery.html) for rendered examples of each theme in both modes.

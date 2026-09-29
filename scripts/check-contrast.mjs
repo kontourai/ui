@@ -309,6 +309,11 @@ const ROLE_PAIRS = [
   ["--k-text-faint", "--k-bg", 4.5, "faint text on the page"],
   ["--k-text-faint", "--k-panel", 4.5, "faint text on panels"],
   ["--k-text-faint", "--k-panel-raised", 4.5, "faint text on raised panels"],
+  // Brand as text (eyebrows, panel counts) sits on the page and on raised
+  // panels too; the brand slot pairs above rate it on the panel only, and on
+  // the page as a 3:1 component (ui#77).
+  ["--k-brand", "--k-bg", 4.5, "brand as text on the page"],
+  ["--k-brand", "--k-panel-raised", 4.5, "brand as text on raised panels"],
   // A button's focus ring is offset onto the surface around it (ui#82).
   ["--k-focus", "--k-panel-raised", 3.0, "focus ring on raised panels"],
 ];

@@ -121,14 +121,14 @@ colors:
   action-contrast-surface: "#06080b"
   focus-surface: "#14a37a"
   focus-ring-surface: "{colors.focus-surface}"
-  brand-station: "#9364ff"
+  brand-station: "#966aff"
   action-station: "#7c3aed"
   action-contrast-station: "#ffffff"
   focus-station: "#9364ff"
   focus-ring-station: "{colors.focus-station}"
   bg-survey-light: "#f5f4ef"
   text-faint-survey-light: "#6a707b"
-  brand-survey-light: "#16806f"
+  brand-survey-light: "#137e6e"
   action-survey-light: "#16806f"
   action-contrast-survey-light: "#ffffff"
   focus-survey-light: "#16806f"
@@ -596,7 +596,7 @@ One theme class on a stable root selects the product identity (`docs/consumer-gu
 | --- | --- | --- |
 | Corporate ink | none; dark canvas `--k-bg` = `#0a0e13` | Ink `#0B1220` |
 | Corporate light ground | none; light canvas `--k-bg` (light) = `#f5f4ef` | Stone `#F2EFEA`, White `#FFFFFF` |
-| Station accent | `.theme-station`: `--k-brand` (station) = `#9364ff`, `--k-action` (station) = `#7c3aed`; `--k-brand` (station-light) = `#7c3aed` | `#7C3AED` |
+| Station accent | `.theme-station`: `--k-brand` (station) = `#966aff`, `--k-focus` (station) = `#9364ff`, `--k-action` (station) = `#7c3aed`; `--k-brand` (station-light) = `#7c3aed` | `#7C3AED` |
 | Flow accent | `.theme-flow`: `--k-brand` (flow) = `#3890ae`, `--k-action` (flow) = `#2f88a6`; `--k-brand` (flow-light) = `#1f6f88` | `#2563EB` |
 | Surface accent | `--k-brand` (surface) = `#14a37a`, `--k-brand` (surface-light) = `#0f6b52` | `#14B8A6` |
 | Default brand | `--k-brand` = `#5ce0c6`, `--k-brand` (light) = `#0e7c64` | not specified |
@@ -606,15 +606,19 @@ Migration to the brand palette is [#74](https://github.com/kontourai/ui/issues/7
 and dark-mode colors are also open.
 
 Station ships the owner's draft accent, adjusted only where contrast requires it. In dark mode,
-the draft accent remains the action fill with white text; brand text and the focus ring use a
-lighter same-hue accent that reads on the dark panel. In light mode, the draft accent is brand,
-action, and focus. `npm run check:contrast` rates every one of these pairs in both modes.
+the draft accent remains the action fill with white text; the focus ring uses a lighter
+same-hue accent, and brand text a slightly lighter one again so it reads at 4.5:1 on the page,
+panel, and raised panel. In light mode, the draft accent is brand, action, and focus.
+`npm run check:contrast` rates every one of these pairs in both modes.
 
-Flow dark and Console light follow the same rule. Flow's dark brand is its accent lightened at
+Flow dark, Console light, and Survey light follow the same rule. Brand used as text is rated at
+4.5:1 on the page, panel, and raised panel in every theme and mode. Flow's dark brand is its accent lightened at
 the same OKLCH hue and chroma until brand text reads at 4.5:1 on the page, panel, and raised
 panel; the action and focus keep the accent. Console's light brand is its lime darkened at the
 same hue for the same reason. It keeps white brand-contrast text, since dark text on the darker
 lime would fall below 4.5:1, and the action and focus keep the brighter lime with dark text.
+Survey's light brand is its accent darkened at the same hue just enough to read on the light
+canvas; the action and focus keep the accent, and brand-contrast stays white.
 
 **OPEN-10 — Console and Survey themes.** The draft does not cover `theme-console` or
 `theme-survey`. They stay as shipped until the palette work decides their relationship to the

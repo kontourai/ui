@@ -90,22 +90,27 @@
 
 /* Station: the draft accent, adjusted per mode only where WCAG AA needs it.
    Dark: the accent carries white text as a fill but is too dark to read as
-   text on the dark panel, so the brand (and the focus ring) is the accent
-   lightened to clear contrast; the action keeps the draft accent. */
+   text on the dark panel, so the focus ring is the accent lightened to clear
+   contrast, and the brand is lightened a little further (same OKLCH hue) to
+   read as text at 4.5:1 on bg, panel and raised panel; the action keeps the
+   draft accent. */
 .theme-station {
-  --k-brand: #9364ff;
+  --k-brand: #966aff;
   --k-action: #7c3aed;
   --k-action-contrast: #ffffff;
   --k-focus: #9364ff;
   --k-focus-ring: var(--k-focus);
 }
 
+/* Survey light: the brand is the accent darkened (same OKLCH hue) just enough
+   to read as text at 4.5:1 on the light canvas; the action and focus keep the
+   accent. */
 [data-theme="light"].theme-survey,
 [data-theme="light"] .theme-survey:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *)),
 :where(.theme-survey) [data-theme="light"]:where(:not(.theme-console, .theme-flow, .theme-surface, .theme-station, .theme-survey :is(.theme-console, .theme-flow, .theme-surface, .theme-station) *)) {
   --k-bg: #f5f4ef;
   --k-text-faint: #6a707b;
-  --k-brand: #16806f;
+  --k-brand: #137e6e;
   --k-action: #16806f;
   --k-action-contrast: #ffffff;
   --k-focus: #16806f;
@@ -235,7 +240,7 @@
 }
 
 [data-theme="dark"]:where(.theme-station *):where([data-theme="light"] *):where(:not(.theme-survey, .theme-console, .theme-flow, .theme-surface, .theme-station :is(.theme-survey, .theme-console, .theme-flow, .theme-surface) *)) {
-  --k-brand: #9364ff;
+  --k-brand: #966aff;
   --k-action: #7c3aed;
   --k-action-contrast: #ffffff;
   --k-focus: #9364ff;

@@ -63,12 +63,12 @@ test("applies each product theme selector to component behavior and detects a co
     "theme-console:light": { brand: "#577800", action: "#6c9400", background: "#f3f5eb", panel: "#fbfcf7", raised: "#eef2e6" },
     "theme-flow:dark": { brand: "#3890ae", action: "#2f88a6", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-flow:light": { brand: "#1f6f88", action: "#1f6f88", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
-    "theme-station:dark": { brand: "#9364ff", action: "#7c3aed", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
+    "theme-station:dark": { brand: "#966aff", action: "#7c3aed", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-station:light": { brand: "#7c3aed", action: "#7c3aed", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
     "theme-surface:dark": { brand: "#14a37a", action: "#14a37a", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-surface:light": { brand: "#0f6b52", action: "#0f6b52", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
     "theme-survey:dark": { brand: "#5ce0c6", action: "#5ce0c6", background: "#06080b", panel: "#111824", raised: "#16202d" },
-    "theme-survey:light": { brand: "#16806f", action: "#16806f", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-survey:light": { brand: "#137e6e", action: "#16806f", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
   };
   expect(matrix.map((sample) => sample.id).sort()).toEqual(Object.keys(expected).sort());
   for (const sample of matrix) {
