@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.18.0](https://github.com/kontourai/ui/compare/v1.17.2...v1.18.0) (2026-09-29)
+
+
+### Features
+
+* **contrast:** require brand text to meet AA on every surface; retint four brands ([#109](https://github.com/kontourai/ui/issues/109)) ([6122163](https://github.com/kontourai/ui/commit/61221631939319a8a8b8288f217e12dcfe2584f0)), closes [#77](https://github.com/kontourai/ui/issues/77)
+
 ## [1.17.2](https://github.com/kontourai/ui/compare/v1.17.1...v1.17.2) (2026-09-29)
 
 

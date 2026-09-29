@@ -1,6 +1,6 @@
 {
   "name": "@kontourai/ui",
-  "version": "1.17.2",
+  "version": "1.18.0",
   "description": "Framework-agnostic console tokens and shared UI primitives for Kontour console products.",
   "type": "module",
   "private": false,
