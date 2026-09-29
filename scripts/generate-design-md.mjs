@@ -381,6 +381,93 @@ const proseClaims = (body, offset) => {
   return { count, problems };
 };
 
+// The "White-label overrides" section tells consumers which selectors to copy, so every
+// code span there that names a selector (it contains `.theme-`, `[data-theme` or `:root`)
+// must be a selector tokens/tokens.css or tokens/themes.css ships (ui#103). Table cells
+// under a header that starts with "Earlier" are exempt: they name the selectors being
+// migrated away from. Two notations stand in for shipped text:
+//   <theme>      each shipped theme name; the selector must exist for every theme.
+//   :not(...)    any :not() argument list, so a doc can point at a tail without copying
+//                it. `...` anywhere else is an error, not an elision.
+const SELECTOR_SECTION = "### White-label overrides";
+const SELECTOR_SPAN = /`([^`]*(?:\.theme-|\[data-theme|:root)[^`]*)`/g;
+const ELIDED = ":not(.__elided__)";
+const normalizeSelector = (text) => {
+  let out = null;
+  selectorParser((selectors) => {
+    if (selectors.nodes.length !== 1) throw new Error(`expected one selector, got ${selectors.nodes.length}`);
+    // Replace each outermost :not() argument with the elision marker.
+    selectors.walkPseudos((pseudo) => {
+      if (pseudo.value !== ":not") return;
+      for (let parent = pseudo.parent; parent; parent = parent.parent) if (parent.type === "pseudo" && parent.value === ":not") return;
+      pseudo.removeAll();
+      pseudo.append(selectorParser.selector({ nodes: [selectorParser.className({ value: "__elided__" })] }));
+    });
+    out = selectors.toString();
+  }).processSync(text);
+  return out.replace(/\s+/g, " ").trim();
+};
+const shippedSelectors = () => {
+  const shipped = new Set();
+  const themes = new Set();
+  for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
+    postcss.parse(read(file), { from: file }).walkRules((rule) => {
+      for (const selector of rule.selectors) {
+        shipped.add(normalizeSelector(selector));
+        const theme = /^\.theme-([a-z0-9-]+)$/.exec(selector.trim())?.[1];
+        if (theme) themes.add(theme);
+      }
+    });
+  }
+  if (!themes.size) throw new Error("tokens/themes.css ships no .theme-<name> base block.");
+  return { shipped, themes: [...themes] };
+};
+const documentedSelectors = (text, offset) => {
+  const lines = text.split("\n");
+  const start = lines.findIndex((line) => line.trim() === SELECTOR_SECTION);
+  if (start === -1) return { count: 0, problems: [`${DESIGN_FILE} has no "${SELECTOR_SECTION}" section to check selectors in.`] };
+  const { shipped, themes } = shippedSelectors();
+  const problems = [];
+  let count = 0;
+  let header = null;
+  for (let index = start + 1; index < lines.length && !/^#{1,3} /.test(lines[index]); index += 1) {
+    const at = `line ${index + 1 + offset}`;
+    const bare = stripQuote(lines[index]);
+    let scanned = lines[index];
+    if (bare.startsWith("|")) {
+      if (isSeparator(bare)) continue;
+      const cells = cellsOf(bare);
+      if (isSeparator(stripQuote(lines[index + 1] ?? ""))) header = cells;
+      else scanned = cells.filter((_, column) => !/^earlier\b/i.test(header?.[column] ?? "")).join(" | ");
+    } else {
+      header = null;
+    }
+    for (const [, documented] of scanned.matchAll(SELECTOR_SPAN)) {
+      count += 1;
+      const expanded = documented.replaceAll(":not(...)", ELIDED);
+      if (expanded.includes("...")) {
+        problems.push(`${at}: \`${documented}\`: "..." may only elide a whole :not() argument, as :not(...)`);
+        continue;
+      }
+      const missing = [];
+      for (const theme of documented.includes("<theme>") ? themes : [null]) {
+        const filled = theme ? expanded.replaceAll("<theme>", theme) : expanded;
+        let normalized;
+        try {
+          normalized = normalizeSelector(filled);
+        } catch (error) {
+          problems.push(`${at}: \`${documented}\` is not a single CSS selector (${error.message})`);
+          break;
+        }
+        if (!shipped.has(normalized)) missing.push(theme ? filled.replaceAll(ELIDED, ":not(...)") : documented);
+      }
+      if (missing.length) problems.push(`${at}: \`${documented}\` is not a shipped selector in tokens/tokens.css or tokens/themes.css (${missing.length > 1 && missing.length === themes.length ? "missing for every shipped theme" : `missing: ${missing.join("; ")}`})`);
+    }
+  }
+  if (!count) problems.push(`${DESIGN_FILE} "${SELECTOR_SECTION}" names no selectors; the selector check would be vacuous.`);
+  return { count, problems };
+};
+
 const mode = process.argv[2];
 if (mode === "--write") {
   const [, body] = splitDesign(read(DESIGN_FILE));
@@ -404,7 +491,15 @@ if (mode === "--write") {
     console.error("Update the prose, or the OPEN item it records, in the same change as the token.");
     process.exit(1);
   }
+  const selectorCheck = documentedSelectors(read(DESIGN_FILE).slice(current.length), current.split("\n").length - 1);
+  if (selectorCheck.problems.length) {
+    console.error(`${DESIGN_FILE} documents override selectors that tokens/ does not ship:`);
+    for (const problem of selectorCheck.problems) console.error(`  ${problem}`);
+    console.error("Copy the selector from tokens/tokens.css or tokens/themes.css (write <theme> for the theme name and :not(...) for a tail).");
+    process.exit(1);
+  }
   console.log(`DESIGN.md prose quotes ${count} token values; all match tokens/.`);
+  console.log(`DESIGN.md white-label overrides name ${selectorCheck.count} selectors; all are shipped in tokens/.`);
   console.log(`DESIGN.md front matter matches the token contract: ${Object.keys(groups.colors).length} colors, ${Object.keys(typography).length} type levels, ${Object.keys(groups.rounded).length} radii, ${Object.keys(groups.spacing).length} spacing steps, ${Object.keys(components).length} components.`);
 } else if (mode === undefined) {
   process.stdout.write(frontMatter);

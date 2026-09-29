@@ -520,9 +520,10 @@ Where an override goes decides whether it applies:
   single element is only suitable when the mode never changes.
 - Declare them with the same selectors the theme uses, in a stylesheet loaded after the
   tokens: the `.theme-<theme>` base block, and for light mode all three forms of its light
-  block (`[data-theme="light"].theme-<theme>`, `[data-theme="light"] .theme-<theme>`,
-  `:where(.theme-<theme>) [data-theme="light"]`, each with the shipped `:where(:not(...))` tail
-  copied from `tokens/themes.css`), and for a dark element below a light one the theme's
+  block (`[data-theme="light"].theme-<theme>`,
+  `[data-theme="light"] .theme-<theme>:where(:not(...))` and
+  `:where(.theme-<theme>) [data-theme="light"]:where(:not(...))`, copying each `:not(...)`
+  tail from `tokens/themes.css`), and for a dark element below a light one the theme's
   dark-island block. A declaration on `:root` loses to the
   theme's light block whenever a theme class is present, and an inline style on `<html>`
   does not reach a theme class placed on `<body>`.
@@ -536,11 +537,13 @@ Where an override goes decides whether it applies:
 > | Earlier selector | Now |
 > | --- | --- |
 > | `.theme-<theme>` (dark) | keep it, and add the theme's dark-island block `[data-theme="dark"]:where(.theme-<theme> *):where([data-theme="light"] *):where(:not(...))`; without it a dark element below a light one shows the shipped product brand |
-> | `[data-theme="light"] .theme-<theme>` | the same with its `:where(:not(...))` tail; without the tail a dark theme element on a light page takes the light override onto dark surfaces |
-> | `:where(.theme-<theme>) [data-theme="light"]` | the same with its tail, so the override stops at a nested theme |
+> | `[data-theme="light"] .theme-<theme>` | `[data-theme="light"] .theme-<theme>:where(:not(...))`; without the tail a dark theme element on a light page takes the light override onto dark surfaces |
+> | `:where(.theme-<theme>) [data-theme="light"]` | `:where(.theme-<theme>) [data-theme="light"]:where(:not(...))`, so the override stops at a nested theme |
 > | `:root` (no theme class) | add `[data-theme="dark"]:where([data-theme="light"] *)` |
 >
-> Copy the tails from `tokens/themes.css`; `docs/consumer-guide.md` shows a full example.
+> Each `:not(...)` stands for a tail to copy from `tokens/themes.css`; `docs/consumer-guide.md`
+> shows a full example. `npm run check:design` checks every selector named in this section
+> (except the earlier ones) against the shipped CSS, for every theme.
 
 Rules for the values:
 
