@@ -169,25 +169,51 @@ for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-them
 // Trust-state rules never read the product identity or the action role: a
 // trust state is not a brand accent, and a white-label brand must not recolor
 // what Kontour can establish. Each state's rules read only its own trust
-// tokens, so one state cannot borrow another's color or line style.
+// tokens, so one state cannot borrow another's color or line style, and no
+// trust-state rule declares a custom property (a scoped
+// `--k-trust-stale-line: solid` would repaint the state while every rule
+// still reads the right token).
 //
 // Selectors are parsed (postcss-selector-parser), so escaped class names and
 // classes inside :is() / :where() / :not() are recognized by their unescaped
-// value, not by substring.
+// value, not by substring. A trust-state rule may not nest a rule or at-rule,
+// and may not be nested in one: this check reads a rule's own selector and
+// declarations, and does not resolve `&` against a parent selector.
 //
 // Chip paint (ui#89): the base .trust-state__chip draws a dotted line in
 // neutral colors, so an unrecognized state looks tentative. Each state then
 // has exactly one top-level `.trust-state--<state> .trust-state__chip` rule
 // that sets color, background, border-color, and border-style to exactly
-// that state's tokens, once each and with no other paint longhand. A state
-// whose line token moved to another property would otherwise still render
-// dotted through the base rule, and a theme's override of that token would be
-// silently ignored. No other rule whose subject is the chip may set chip
-// paint. Accepted gap: a selector that reaches the chip without naming
-// .trust-state__chip in its last compound (such as `.trust-state--stale > *`)
-// is not recognized.
+// that state's tokens, once each. Of the paint properties this check names
+// (color, background, background-color, background-image, and the border
+// shorthands, color, and style longhands), it sets no others. A state whose
+// line token moved to another property would otherwise still render dotted
+// through the base rule, and a theme's override of that token would be
+// silently ignored. There is exactly one top-level .trust-state__chip rule,
+// with no !important paint. Outside those rules, no top-level rule whose
+// subject is the chip (a class in its last compound, or in :is() / :where()
+// there; not inside :not() or :has()) may set those paint properties.
+//
+// Carve-out: inside a top-level `@media (forced-colors: active)` or
+// `@media print`, a trust-state rule may set color, background(-color), and
+// border / outline / text-decoration colors, fill, and stroke, but only to a
+// CSS system color, transparent, or currentColor. No other paint property is
+// allowed there, so the line style still comes from the state's token.
+//
+// Outside the carve-out, color properties in trust-state rules read a --k-*
+// token or are inherit, currentColor, transparent, or none, so a named color
+// (`color: red`) fails. Accepted gaps: a named color inside a shorthand
+// (`border: 1px solid red`) is not recognized, nor is a selector that
+// reaches the chip without naming .trust-state__chip in its last compound
+// (such as `.trust-state--stale > *`).
 const TRUST_FORBIDDEN = /--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring)\b(?!-)/;
 const CHIP_PAINT = /^(?:color|background(?:-color|-image)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-(?:color|style))?)$/;
+const COLOR_PROPERTY = /^(?:color|background(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?-color|outline-color|text-decoration-color|fill|stroke)$/;
+const SYSTEM_COLORS = new Set([
+  "canvas", "canvastext", "linktext", "buttontext", "buttonborder", "graytext", "highlight", "highlighttext",
+  "mark", "marktext", "accentcolor", "accentcolortext", "field", "fieldtext", "visitedtext", "activetext",
+  "selecteditem", "selecteditemtext", "transparent", "currentcolor",
+]);
 const chipPaint = (state) => ({
   color: `var(--k-trust-${state})`,
   background: `var(--k-trust-${state}-fill)`,
@@ -195,24 +221,33 @@ const chipPaint = (state) => ({
   "border-style": `var(--k-trust-${state}-line)`,
 });
 const trustRules = new Map(TRUST_STATES.map((state) => [state, 0]));
+let baseChipRules = 0;
 postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
   const parsed = parseSelectors(rule.selector);
   const classes = selectorNodes(parsed).filter((node) => node.type === "class").map((node) => node.value);
   if (!classes.some((name) => name.startsWith("trust-state"))) return;
-  const where = `react/styles.css ${rule.selector.replace(/\s+/g, " ").trim()}${rule.parent?.type === "atrule" ? ` (inside @${rule.parent.name} ${rule.parent.params})` : ""}`;
+  const where = describeRule(rule);
+  rejectNesting(rule, where, "trust-state");
   const owners = new Set(classes.filter((name) => name.startsWith("trust-state--")).map((name) => name.slice("trust-state--".length)));
+  const media = carveOutMedia(rule);
   rule.walkDecls((decl) => {
+    const prop = decl.prop.toLowerCase();
+    if (prop.startsWith("--")) throw new Error(`${where}: declares ${decl.prop}; trust-state rules read tokens and never redefine them.`);
     if (TRUST_FORBIDDEN.test(decl.value)) {
       throw new Error(`${where}: ${decl.prop}: ${decl.value} must not read the brand, action, or focus roles; trust states use --k-trust-* tokens.`);
     }
     for (const match of decl.value.matchAll(/--k-trust-([a-z-]+?)(?:-fill|-line)?\b(?![a-z-])/g)) {
       if (owners.size !== 1 || !owners.has(match[1])) throw new Error(`${where}: ${decl.prop} reads --k-trust-${match[1]}*, which belongs to another state.`);
     }
+    if (media) {
+      if (COLOR_PROPERTY.test(prop) && !isSystemColor(decl.value)) throw new Error(`${where}: ${decl.prop}: ${decl.value}; inside @media ${media} a trust-state rule may set colors only to a system color, transparent, or currentColor.`);
+      if (CHIP_PAINT.test(prop) && !COLOR_PROPERTY.test(prop)) throw new Error(`${where}: sets ${decl.prop}; inside @media ${media} a trust-state rule may set only colors, so the line style still comes from the state's token.`);
+    } else if (COLOR_PROPERTY.test(prop) && !/^(?:var\(--k-[a-z0-9-]+\)|inherit|currentcolor|transparent|none)$/i.test(decl.value.trim())) {
+      throw new Error(`${where}: ${decl.prop}: ${decl.value} must read a --k-* token (or be inherit, currentColor, transparent, or none).`);
+    }
   });
+  if (media) return;
   const paint = rule.nodes.filter((node) => node.type === "decl" && CHIP_PAINT.test(node.prop.toLowerCase()));
-  const subjects = parsed.map((selector) => selector.nodes.slice(selector.nodes.findLastIndex((node) => node.type === "combinator") + 1));
-  const isChip = (node) => (node.type === "class" && node.value === "trust-state__chip") || (node.nodes ?? []).some(isChip);
-  const paintsChip = subjects.some((compound) => compound.some(isChip));
   const state = TRUST_STATES.find((candidate) => sameSelector(parsed, `.trust-state--${candidate} .trust-state__chip`));
   if (state && rule.parent?.type === "root" && paint.length > 0) {
     const expected = chipPaint(state);
@@ -229,14 +264,20 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
     trustRules.set(state, trustRules.get(state) + 1);
     return;
   }
-  // The base chip rule may paint the neutral fallback; its specificity is
-  // below every state rule's. No other chip rule may paint.
+  // The base chip rule paints the neutral fallback; its specificity is below
+  // every state rule's. No other chip rule may paint.
   const base = rule.parent?.type === "root" && sameSelector(parsed, ".trust-state__chip");
-  if (paintsChip && paint.length > 0 && !base) {
-    throw new Error(`${where}: sets ${paint.map((decl) => decl.prop).join(", ")} on the chip; only .trust-state__chip and each state's one top-level .trust-state--<state> .trust-state__chip rule may paint the chip.`);
+  if (base) {
+    baseChipRules += 1;
+    if (baseChipRules > 1) throw new Error(`${where}: a second top-level .trust-state__chip rule; the base chip rule must be exactly one.`);
+    if (paint.some((decl) => decl.important)) throw new Error(`${where}: chip paint must not be !important; it would override every state.`);
+    return;
   }
-  if (base && paint.some((decl) => decl.important)) throw new Error(`${where}: chip paint must not be !important; it would override every state.`);
+  if (paint.length > 0 && parsed.some((selector) => subjectHasClass(selector, "trust-state__chip"))) {
+    throw new Error(`${where}: sets ${paint.map((decl) => decl.prop).join(", ")} on the chip; only the one .trust-state__chip rule and each state's one top-level .trust-state--<state> .trust-state__chip rule may paint the chip.`);
+  }
 });
+if (baseChipRules !== 1) throw new Error(`react/styles.css must have exactly one top-level .trust-state__chip rule; found ${baseChipRules}.`);
 for (const [state, count] of trustRules) {
   if (count !== 1) throw new Error(`react/styles.css must have exactly one top-level .trust-state--${state} .trust-state__chip rule painting the chip with the ${state} tokens; found ${count}.`);
 }
@@ -287,8 +328,9 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
   if (!isBasis) return;
   basisRules += 1;
   const caveat = nodes.some((node) => attribute(node) === "data-caveat");
-  const selector = rule.selector.replace(/\s+/g, " ").trim();
-  const where = `react/styles.css ${selector}${rule.parent?.type === "atrule" ? ` (inside @${rule.parent.name} ${rule.parent.params})` : ""}`;
+  const where = describeRule(rule);
+  rejectNesting(rule, where, "trust-basis");
+  const media = carveOutMedia(rule);
   rule.walkDecls((decl) => {
     const prop = decl.prop.toLowerCase();
     // A scoped token override ([data-basis-state]{--k-text-muted: ...})
@@ -300,8 +342,10 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
       if (!BASIS_ALLOWED.test(token)) throw new Error(`${where}: ${decl.prop} reads ${token}, which is not a neutral text, line, or layout token allowed in trust-basis rules.`);
       if (token === BASIS_DECORATION && !caveat) throw new Error(`${where}: only ${BASIS_CAVEAT_SELECTOR} may read ${BASIS_DECORATION}.`);
     }
-    if (/^(?:color|background(?:-color)?|border(?:-[a-z]+)*-color|text-decoration-color|outline-color|fill|stroke)$/.test(prop) && !/^var\(--k-(?:text|text-muted|line)\)$|^(?:inherit|currentColor)$/.test(decl.value.trim())) {
-      throw new Error(`${where}: ${decl.prop}: ${decl.value} must be --k-text-muted, --k-text, --k-line, or inherited.`);
+    // In the forced-colors / print carve-out (see the trust-state rules), a
+    // system color is allowed too.
+    if (/^(?:color|background(?:-color)?|border(?:-[a-z]+)*-color|text-decoration-color|outline-color|fill|stroke)$/.test(prop) && !/^var\(--k-(?:text|text-muted|line)\)$|^(?:inherit|currentColor)$/.test(decl.value.trim()) && !(media && isSystemColor(decl.value))) {
+      throw new Error(`${where}: ${decl.prop}: ${decl.value} must be --k-text-muted, --k-text, --k-line, or inherited${media ? `, or a system color inside @media ${media}` : ""}.`);
     }
     if (/^text-decoration(?:-line|-style)?$/.test(prop) && !caveat) {
       throw new Error(`${where}: sets ${decl.prop}; only caveat facets are decorated, through ${BASIS_CAVEAT_SELECTOR}.`);
@@ -435,4 +479,44 @@ function sameSelector(selectors, expected) {
     return parts.join("|");
   }).join(",");
   return describe(selectors) === describe(parseSelectors(expected));
+}
+
+// "react/styles.css <selector>", plus the enclosing at-rule if there is one.
+function describeRule(rule) {
+  const selector = rule.selector.replace(/\s+/g, " ").trim();
+  return `react/styles.css ${selector}${rule.parent?.type === "atrule" ? ` (inside @${rule.parent.name} ${rule.parent.params})` : ""}`;
+}
+
+// Nested CSS: the checks read a rule's own selector and declarations and do
+// not resolve `&`, so a scanned rule may neither contain nor sit inside a rule
+// or at-rule nesting.
+function rejectNesting(rule, where, kind) {
+  const inner = rule.nodes.find((node) => node.type === "rule" || node.type === "atrule");
+  if (inner) throw new Error(`${where}: nests ${inner.type === "rule" ? inner.selector : `@${inner.name}`}; ${kind} rules may not use nesting, which this check does not resolve.`);
+  for (let parent = rule.parent; parent && parent.type !== "root"; parent = parent.parent) {
+    if (parent.type === "rule") throw new Error(`${where}: is nested inside ${parent.selector}; ${kind} rules may not use nesting, which this check does not resolve.`);
+  }
+}
+
+// The forced-colors / print carve-out: a rule directly inside a top-level
+// `@media (forced-colors: active)` or `@media print` returns that query.
+function carveOutMedia(rule) {
+  const parent = rule.parent;
+  if (parent?.type !== "atrule" || parent.name.toLowerCase() !== "media" || parent.parent?.type !== "root") return null;
+  const query = parent.params.toLowerCase().replace(/\s+/g, "");
+  return query === "(forced-colors:active)" || query === "print" ? parent.params : null;
+}
+
+function isSystemColor(value) {
+  return SYSTEM_COLORS.has(value.trim().toLowerCase());
+}
+
+// Whether the selector's subject (its last compound, including :is() and
+// :where() arguments there, which match the same element) has the class.
+// Classes inside :not(), :has(), or earlier compounds do not count.
+function subjectHasClass(selector, name) {
+  const last = selector.nodes.slice(selector.nodes.findLastIndex((node) => node.type === "combinator") + 1);
+  return last.some((node) =>
+    (node.type === "class" && node.value === name)
+    || (node.type === "pseudo" && [":is", ":where", ":matches", ":-webkit-any"].includes(node.value.toLowerCase()) && node.nodes.some((inner) => subjectHasClass(inner, name))));
 }

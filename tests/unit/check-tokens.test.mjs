@@ -91,7 +91,7 @@ const cases = [
   {
     name: "a same-specificity rule paints every chip",
     styles: append(".trust-state .trust-state__chip { border-style: dotted; }"),
-    expect: { selector: ".trust-state .trust-state__chip", says: /only \.trust-state__chip and each state's one top-level/ },
+    expect: { selector: ".trust-state .trust-state__chip", says: /only the one \.trust-state__chip rule and each state's one top-level/ },
   },
   {
     name: "a state's chip is repainted inside @media",
@@ -102,6 +102,71 @@ const cases = [
     name: "the base chip paint made !important",
     styles: replaceOnce(pristine, "  border-style: dotted;\n", "  border-style: dotted !important;\n"),
     expect: { selector: ".trust-state__chip", says: /must not be !important/ },
+  },
+  {
+    name: "a chip subject through :is() paints the chip",
+    styles: append(".trust-state span:is(.trust-state__chip) { color: var(--k-text); }"),
+    expect: { selector: ".trust-state span:is(.trust-state__chip)", says: /on the chip/ },
+  },
+  {
+    name: "a second top-level base chip rule",
+    styles: append(".trust-state__chip { border-style: solid; }"),
+    expect: { selector: ".trust-state__chip", says: /a second top-level \.trust-state__chip rule/ },
+  },
+  {
+    name: "a state rule nested in the base chip through &",
+    styles: append(".trust-state__chip { .trust-state--stale & { border-style: solid; } }"),
+    expect: { selector: ".trust-state__chip", says: /nests \.trust-state--stale &; trust-state rules may not use nesting/ },
+  },
+  {
+    name: "& nested inside stale's own chip rule",
+    styles: editChip("stale", "  color: var(--k-trust-stale);\n  background: var(--k-trust-stale-fill);\n  border-color: var(--k-trust-stale);\n  border-style: var(--k-trust-stale-line);\n  & { border-style: solid; }"),
+    expect: { selector: ".trust-state--stale .trust-state__chip", says: /nests &; trust-state rules may not use nesting/ },
+  },
+  {
+    name: "a chip rule nested in an unrelated rule",
+    styles: append(".consumer { & .trust-state__chip { border-style: solid; } }"),
+    expect: { selector: "& .trust-state__chip", says: /is nested inside \.consumer/ },
+  },
+  {
+    name: "an at-rule nested in a trust-state rule",
+    styles: append(".trust-state__detail { @media print { color: var(--k-text); } }"),
+    expect: { selector: ".trust-state__detail", says: /nests @media/ },
+  },
+  {
+    name: "a state rule redeclares its own line token",
+    styles: append(".trust-state--stale { --k-trust-stale-line: solid; }"),
+    expect: { selector: ".trust-state--stale", says: /declares --k-trust-stale-line; trust-state rules read tokens and never redefine them/ },
+  },
+  {
+    name: "a trust-state rule aliases a state's ink to a status tone",
+    styles: append(".trust-state { --k-trust-stale: var(--k-negative); }"),
+    expect: { selector: ".trust-state", says: /declares --k-trust-stale;/ },
+  },
+  {
+    name: "a named color in a trust-state rule",
+    styles: append(".trust-state__label { color: red; }"),
+    expect: { selector: ".trust-state__label", says: /color: red must read a --k-\* token/ },
+  },
+  {
+    name: "a literal color inside the forced-colors carve-out",
+    styles: append("@media (forced-colors: active) { .trust-state__chip { border-color: red; } }"),
+    expect: { selector: ".trust-state__chip (inside @media (forced-colors: active))", says: /may set colors only to a system color/ },
+  },
+  {
+    name: "a line style inside the print carve-out",
+    styles: append("@media print { .trust-state--stale .trust-state__chip { border-style: solid; } }"),
+    expect: { selector: ".trust-state--stale .trust-state__chip (inside @media print)", says: /may set only colors/ },
+  },
+  {
+    name: "a system color outside the carve-out media",
+    styles: append("@media screen { .trust-state__chip { border-color: CanvasText; } }"),
+    expect: { selector: ".trust-state__chip (inside @media screen)", says: /border-color: CanvasText must read a --k-\* token/ },
+  },
+  {
+    name: "a literal basis color inside the print carve-out",
+    styles: append("@media print { .trust-basis { color: red; } }"),
+    expect: { selector: ".trust-basis (inside @media print)", says: /color: red must be --k-text-muted, --k-text, --k-line, or inherited, or a system color/ },
   },
   // ui#92: basis rules are found by parsing the selector, not by substring.
   {
@@ -157,7 +222,26 @@ for (const entry of cases) {
     const result = runCheck(entry.styles);
     assert.notEqual(result.status, 0, `check:tokens passed with the violation:\n${result.stdout}`);
     assert.ok(result.message, `no Error line in stderr:\n${result.stderr}`);
-    assert.ok(result.message.startsWith(`react/styles.css ${entry.expect.selector}`), `wrong rule named: ${result.message}`);
+    // The rule named is exactly this selector (plus any at-rule), not a longer one.
+    const named = `react/styles.css ${entry.expect.selector}`;
+    assert.ok(result.message.startsWith(named) && /^(?::| must | \(inside )/.test(result.message.slice(named.length)), `wrong rule named: ${result.message}`);
     assert.match(result.message, entry.expect.says);
+  });
+}
+
+// What the check must keep accepting: the forced-colors / print carve-out,
+// and a rule that only mentions the chip inside :not() or :has().
+const accepted = [
+  { name: "system colors on the chip under forced colors", styles: append("@media (forced-colors: active) { .trust-state__chip { color: CanvasText; background: Canvas; border-color: CanvasText; } }") },
+  { name: "currentColor on a state's chip in print", styles: append("@media print { .trust-state--stale .trust-state__chip { border-color: currentColor; background: transparent; } }") },
+  { name: "a system color on the basis line under forced colors", styles: append("@media (forced-colors: active) { .trust-basis { color: CanvasText; } }") },
+  { name: "the chip only inside :not()", styles: append(".trust-state span:not(.trust-state__chip) { color: var(--k-text-muted); }") },
+  { name: "the chip only inside :has()", styles: append(".trust-state:has(.trust-state__chip) { color: var(--k-text-muted); }") },
+];
+for (const entry of accepted) {
+  test(`check:tokens accepts: ${entry.name}`, () => {
+    const result = runCheck(entry.styles);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /token smoke check passed/);
   });
 }
