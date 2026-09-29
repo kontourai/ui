@@ -19,7 +19,7 @@
   /* text */
   --k-text: #eef3f8;
   --k-text-muted: #aebccb;
-  --k-text-faint: #72869b;
+  --k-text-faint: #75889d;
 
   /* brand — the product identity slot (eyebrows, accents, the progress sweep).
      A product theme or a white-label deployment may override it; nothing
@@ -161,6 +161,63 @@
   --k-z-toast: 1400;
 }
 
+/* The dark contract again, for a data-theme="dark" element below a light
+   element (ui#80). It sets exactly the tokens the light block sets, with the
+   :root values; check:contrast fails if either drifts. Mode-independent
+   tokens (spacing, type, radii, fonts) are not reset, so a theme's own values
+   for them survive a mode switch. With no light ancestor there is nothing to
+   reset, so it does not match and a dark element simply inherits. */
+[data-theme="dark"]:where([data-theme="light"] *) {
+  color-scheme: dark;
+  --k-bg: #0a0e13;
+  --k-panel: #111824;
+  --k-panel-raised: #16202d;
+  --k-line: rgba(150, 180, 210, 0.12);
+  --k-line-strong: rgba(150, 180, 210, 0.22);
+  --k-shadow: 0 26px 60px -42px rgba(0, 0, 0, 0.95);
+  --k-elevation-overlay:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 24px 56px rgba(0, 0, 0, 0.4);
+  --k-text: #eef3f8;
+  --k-text-muted: #aebccb;
+  --k-text-faint: #75889d;
+  --k-brand: #5ce0c6;
+  --k-brand-contrast: #06080b;
+  --k-action: #5ce0c6;
+  --k-action-contrast: #06080b;
+  --k-focus: #5ce0c6;
+  --k-positive: #34d399;
+  --k-caution: #f3b14b;
+  --k-negative: #ff6f6f;
+  --k-neutral: #6f8095;
+  --k-active: #7aa2ff;
+  --k-status-contrast: #06080b;
+  --k-trust-unknown: #a2acb7;
+  --k-trust-unknown-fill: #252d39;
+  --k-trust-proposed: #87b1fd;
+  --k-trust-proposed-fill: #222d42;
+  --k-trust-assumed: #c4a4fe;
+  --k-trust-assumed-fill: #2a2c43;
+  --k-trust-verified: #50d492;
+  --k-trust-verified-fill: #1a3233;
+  --k-trust-stale: #f6b84d;
+  --k-trust-stale-fill: #312e2a;
+  --k-trust-disputed: #ec81c0;
+  --k-trust-disputed-fill: #30273a;
+  --k-trust-superseded: #6bc8d3;
+  --k-trust-superseded-fill: #1e313d;
+  --k-trust-rejected: #f66d67;
+  --k-trust-rejected-fill: #31242d;
+  --k-trust-revoked: #fdc2a2;
+  --k-trust-revoked-fill: #323036;
+  --k-focus-ring: var(--k-focus);
+  --k-positive-soft: color-mix(in oklab, var(--k-positive) 14%, transparent);
+  --k-caution-soft: color-mix(in oklab, var(--k-caution) 14%, transparent);
+  --k-negative-soft: color-mix(in oklab, var(--k-negative) 14%, transparent);
+  --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
+}
+
 [data-theme="light"] {
   color-scheme: light;
   --k-bg: #f5f4ef;
@@ -175,7 +232,7 @@
     0 18px 48px rgba(0, 0, 0, 0.08);
   --k-text: #202124;
   --k-text-muted: #5b626b;
-  --k-text-faint: #707782;
+  --k-text-faint: #6a707b;
   /* The dark-mode brand (#5ce0c6) is too light to carry white text or read as
      text on the light canvas (~1.6:1). Darken it for light mode: #0e7c64 holds
      the teal hue while clearing WCAG AA both as a button fill (white text,

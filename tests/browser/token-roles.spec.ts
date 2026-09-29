@@ -149,6 +149,33 @@ test("a white-label override on the theme's selectors applies per mode and keeps
     const ring = await page.locator("main").evaluate((node) => getComputedStyle(node).getPropertyValue("--k-focus-ring").trim());
     expect(ring, `${mode}: --k-focus-ring does not follow the override focus`).toBe(expected.focus);
   }
+
+  // The other two documented placements: the light attribute below the theme
+  // class, and the theme class below the light attribute. The scoping
+  // exclusions (ui#80, ui#84) keep the shipped selectors' weights, so an
+  // override written with the same selectors still wins in both.
+  for (const placement of ["attribute below class", "class below attribute"] as const) {
+    const brand = await page.evaluate((placement) => {
+      const html = document.documentElement;
+      const body = document.body;
+      if (placement === "attribute below class") {
+        html.className = "theme-flow";
+        delete html.dataset.theme;
+        body.className = "";
+        body.dataset.theme = "light";
+      } else {
+        html.className = "";
+        html.dataset.theme = "light";
+        body.className = "theme-flow";
+        delete body.dataset.theme;
+      }
+      const brand = getComputedStyle(document.querySelector("main")!).getPropertyValue("--k-brand").trim();
+      body.className = "";
+      delete body.dataset.theme;
+      return brand;
+    }, placement);
+    expect(brand, `${placement}: light override`).toBe(WHITE_LABEL.light.brand);
+  }
 });
 
 // A theme scope nested under another theme's scope (the gallery's matrix
