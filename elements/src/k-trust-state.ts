@@ -36,7 +36,7 @@ export class KTrustState extends HTMLElement {
   private render() {
     prepareLightDomHost(this);
     if (!this.content) this.content = [...this.childNodes];
-    const view = trustStatePresentation(this.getAttribute("state"), this.getAttribute("label"), this.getAttribute("class-name"));
+    const view = trustStatePresentation(this.getAttribute("state"), this.getAttribute("label"), this.getAttribute("class-name"), this.getAttribute("detail"));
     const root = document.createElement("span");
     root.className = view.className;
     if (view.state) root.dataset.trustState = view.state;
@@ -66,7 +66,7 @@ export class KTrustState extends HTMLElement {
     }
     root.append(chip);
 
-    const detailText = this.getAttribute("detail")?.trim();
+    const detailText = view.detail;
     const hasChildDetail = this.content.some((node) => node.nodeType !== Node.TEXT_NODE || node.textContent?.trim());
     if (detailText || hasChildDetail) {
       const detail = document.createElement("span");
