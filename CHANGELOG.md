@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.1](https://github.com/kontourai/ui/compare/v1.17.0...v1.17.1) (2026-09-29)
+
+
+### Fixes
+
+* **tokens:** nearest-scope themes and modes, faint text AA, visible button focus ([#101](https://github.com/kontourai/ui/issues/101)) ([ecc0d42](https://github.com/kontourai/ui/commit/ecc0d426857eb69c88824dfa49f80d72336cc077))
+
 ## [1.17.0](https://github.com/kontourai/ui/compare/v1.16.0...v1.17.0) (2026-09-29)
 
 
