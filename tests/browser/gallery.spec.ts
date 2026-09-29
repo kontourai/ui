@@ -68,7 +68,7 @@ test("applies each product theme selector to component behavior and detects a co
     "theme-surface:dark": { brand: "#14a37a", action: "#14a37a", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-surface:light": { brand: "#0f6b52", action: "#0f6b52", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
     "theme-survey:dark": { brand: "#5ce0c6", action: "#5ce0c6", background: "#06080b", panel: "#111824", raised: "#16202d" },
-    "theme-survey:light": { brand: "#137e6e", action: "#16806f", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-survey:light": { brand: "#107e6d", action: "#16806f", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
   };
   expect(matrix.map((sample) => sample.id).sort()).toEqual(Object.keys(expected).sort());
   for (const sample of matrix) {

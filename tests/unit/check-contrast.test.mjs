@@ -71,7 +71,7 @@ test("a dark-island block that drifts from its base block fails", () => {
 // in every theme and mode (ui#77). Each case restores one pre-fix brand value
 // (literals pinned here) and must fail on the named pair with its ratio.
 test("a brand too light to read as text on the light page fails (survey light)", () => {
-  const result = runCheck(surveyLightBody("  --k-brand: #137e6e;", "  --k-brand: #16806f;"));
+  const result = runCheck(surveyLightBody("  --k-brand: #107e6d;", "  --k-brand: #16806f;"));
   assert.equal(result.status, 1, result.stdout);
   assert.match(result.stderr, /survey:light --k-brand on --k-bg = 4\.38:1 \(needs 4\.5:1/);
 });

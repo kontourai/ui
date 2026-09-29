@@ -267,7 +267,9 @@ const PINNED_BRAND_SLOT_PAIRS = [
   ["--k-focus", "--k-bg", 3.0],
   ["--k-focus", "--k-panel", 3.0],
   ["--k-brand", "--k-panel", 4.5],
-  ["--k-brand", "--k-bg", 3.0],
+  // Brand as text on every surface (ui#77); the page pair was 3:1 before.
+  ["--k-brand", "--k-bg", 4.5],
+  ["--k-brand", "--k-panel-raised", 4.5],
   ["--k-brand-contrast", "--k-brand", 4.5],
 ];
 {
@@ -309,11 +311,6 @@ const ROLE_PAIRS = [
   ["--k-text-faint", "--k-bg", 4.5, "faint text on the page"],
   ["--k-text-faint", "--k-panel", 4.5, "faint text on panels"],
   ["--k-text-faint", "--k-panel-raised", 4.5, "faint text on raised panels"],
-  // Brand as text (eyebrows, panel counts) sits on the page and on raised
-  // panels too; the brand slot pairs above rate it on the panel only, and on
-  // the page as a 3:1 component (ui#77).
-  ["--k-brand", "--k-bg", 4.5, "brand as text on the page"],
-  ["--k-brand", "--k-panel-raised", 4.5, "brand as text on raised panels"],
   // A button's focus ring is offset onto the surface around it (ui#82).
   ["--k-focus", "--k-panel-raised", 3.0, "focus ring on raised panels"],
 ];

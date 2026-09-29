@@ -128,7 +128,7 @@ colors:
   focus-ring-station: "{colors.focus-station}"
   bg-survey-light: "#f5f4ef"
   text-faint-survey-light: "#6a707b"
-  brand-survey-light: "#137e6e"
+  brand-survey-light: "#107e6d"
   action-survey-light: "#16806f"
   action-contrast-survey-light: "#ffffff"
   focus-survey-light: "#16806f"
@@ -612,13 +612,14 @@ panel, and raised panel. In light mode, the draft accent is brand, action, and f
 `npm run check:contrast` rates every one of these pairs in both modes.
 
 Flow dark, Console light, and Survey light follow the same rule. Brand used as text is rated at
-4.5:1 on the page, panel, and raised panel in every theme and mode. Flow's dark brand is its accent lightened at
-the same OKLCH hue and chroma until brand text reads at 4.5:1 on the page, panel, and raised
-panel; the action and focus keep the accent. Console's light brand is its lime darkened at the
-same hue for the same reason. It keeps white brand-contrast text, since dark text on the darker
-lime would fall below 4.5:1, and the action and focus keep the brighter lime with dark text.
-Survey's light brand is its accent darkened at the same hue just enough to read on the light
-canvas; the action and focus keep the accent, and brand-contrast stays white.
+4.5:1 on the page, panel, and raised panel in every theme and mode, by `check:contrast` and by
+`validateBrandOverride` alike. Flow's dark brand is its accent lightened at the same OKLCH
+chroma and within 0.3° of its hue until brand text reads at 4.5:1 on all three surfaces; the
+action and focus keep the accent. Console's light brand is its lime darkened (hue within 0.1°)
+for the same reason. It keeps white brand-contrast text, since dark text on the darker lime
+would fall below 4.5:1, and the action and focus keep the brighter lime with dark text.
+Survey's light brand is its accent darkened at the same hue and chroma just enough to read on
+the light canvas; the action and focus keep the accent, and brand-contrast stays white.
 
 **OPEN-10 — Console and Survey themes.** The draft does not cover `theme-console` or
 `theme-survey`. They stay as shipped until the palette work decides their relationship to the

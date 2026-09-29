@@ -41,7 +41,7 @@ const CASES: Case[] = [
   // ui#84: light below a nested theme takes the nearest theme's values.
   { name: "station > flow > light", chain: [{ className: "theme-station" }, { className: "theme-flow" }, { theme: "light" }], expect: { className: "theme-flow", theme: "light" }, tokens: MODE_TOKENS, pinned: { "--k-brand": "#1f6f88", "--k-action": "#1f6f88" } },
   { name: "flow > station > light", chain: [{ className: "theme-flow" }, { className: "theme-station" }, { theme: "light" }], expect: { className: "theme-station", theme: "light" }, tokens: MODE_TOKENS, pinned: { "--k-brand": "#7c3aed" } },
-  { name: "console > survey > light", chain: [{ className: "theme-console" }, { className: "theme-survey" }, { theme: "light" }], expect: { className: "theme-survey", theme: "light" }, tokens: MODE_TOKENS, pinned: { "--k-brand": "#137e6e", "--k-bg": "#f5f4ef", "--k-panel": "#ffffff" } },
+  { name: "console > survey > light", chain: [{ className: "theme-console" }, { className: "theme-survey" }, { theme: "light" }], expect: { className: "theme-survey", theme: "light" }, tokens: MODE_TOKENS, pinned: { "--k-brand": "#107e6d", "--k-bg": "#f5f4ef", "--k-panel": "#ffffff" } },
   { name: "survey > console > light", chain: [{ className: "theme-survey" }, { className: "theme-console" }, { theme: "light" }], expect: { className: "theme-console", theme: "light" }, tokens: MODE_TOKENS, pinned: { "--k-brand": "#577800", "--k-bg": "#f3f5eb" } },
 ];
 

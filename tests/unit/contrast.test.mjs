@@ -57,7 +57,26 @@ test("brand as text is rated on the panel of the chosen mode", () => {
   const brand = { "--k-brand": "#f0a868" };
   assert.deepEqual(violationsOf({ base: "flow", overrides: { dark: brand } }), []);
   const light = violationsOf({ base: "flow", overrides: { light: brand } });
-  assert.deepEqual(light.map((violation) => violation.pair), [["--k-brand", "--k-panel"], ["--k-brand", "--k-bg"], ["--k-brand-contrast", "--k-brand"]]);
+  assert.deepEqual(light.map((violation) => violation.pair), [["--k-brand", "--k-panel"], ["--k-brand", "--k-bg"], ["--k-brand", "--k-panel-raised"], ["--k-brand-contrast", "--k-brand"]]);
+});
+
+// Brand as text is rated at 4.5:1 on the page and the raised panel as well as
+// the panel (ui#77), so the runtime rejects what check:contrast rejects. These
+// are the two shipped brands that failed only those pairs, as overrides.
+test("a brand that reads on the panel but not on the page is rejected (survey light #16806f)", () => {
+  const violations = violationsOf({ base: "survey", overrides: { light: { "--k-brand": "#16806f" } } });
+  assert.deepEqual(violations.map((violation) => violation.pair), [["--k-brand", "--k-bg"]]);
+  assert.equal(violations[0].minimum, 4.5);
+  assert.equal(violations[0].ratio.toFixed(2), "4.38");
+  assert.deepEqual(Object.keys(validateBrandOverride({ base: "survey", overrides: { light: { "--k-brand": "#16806f" } } }).accepted), []);
+});
+
+test("a brand that reads on the panel but not on the raised panel is rejected (station dark #9364ff)", () => {
+  const violations = violationsOf({ base: "station", overrides: { dark: { "--k-brand": "#9364ff" } } });
+  assert.deepEqual(violations.map((violation) => violation.pair), [["--k-brand", "--k-panel-raised"]]);
+  assert.equal(violations[0].minimum, 4.5);
+  assert.equal(violations[0].ratio.toFixed(2), "4.31");
+  assert.equal(SHIPPED_THEMES.station.dark["--k-panel-raised"], "#16202d");
 });
 
 test("every shipped theme's own values are accepted", () => {
@@ -130,7 +149,7 @@ test("the exported data cannot be mutated by a consumer", () => {
   assert.ok(BRAND_SLOT_PAIRS.every((pair) => Object.isFrozen(pair)));
 });
 
-test("brand is rated as a UI component on the page", () => {
+test("brand is rated as text on the page", () => {
   // Near-black on the survey dark page (1.06:1). Survey light used to keep
   // this page too (ui#81); every shipped page is now darker than its panel in
   // dark mode and lighter in light mode, so the page pair fails beside the
@@ -138,11 +157,11 @@ test("brand is rated as a UI component on the page", () => {
   const violations = violationsOf({ base: "survey", overrides: { dark: { "--k-brand": "#111111" } } });
   const page = violations.find((violation) => violation.pair.join(" ") === "--k-brand --k-bg");
   assert.ok(page, JSON.stringify(violations.map((violation) => violation.pair)));
-  assert.equal(page.minimum, 3);
+  assert.equal(page.minimum, 4.5);
   assert.ok(page.ratio < 1.1, `ratio ${page.ratio}`);
   // Survey light now rates an override against the light page (ui#81).
   assert.equal(SHIPPED_THEMES.survey.light["--k-bg"], "#f5f4ef");
-  assert.ok(BRAND_SLOT_PAIRS.some((pair) => pair.foreground === "--k-brand" && pair.background === "--k-bg" && pair.minimum === 3));
+  assert.ok(BRAND_SLOT_PAIRS.some((pair) => pair.foreground === "--k-brand" && pair.background === "--k-bg" && pair.minimum === 4.5));
 });
 
 test("a Map, a class instance, or a non-object input is rejected, not inspected", () => {
