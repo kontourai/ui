@@ -365,6 +365,8 @@ import { TrustState } from "@kontourai/ui/react";
   technology as visually hidden text, and an empty label falls back to the default.
 - The element takes its detail from the `detail` attribute, or else from its children. Children
   are read once, on the first render; children added later are not picked up.
+- A string detail is trimmed, and a blank one renders no detail, in React, the element, and
+  `renderTrustStateHtml` alike.
 - `trustStateFor(value)` accepts any casing and surrounding space and returns `null` for
   anything else. An unrecognized state renders as its own text with no state styling or glyph.
 - Chart series can reuse the ink `--k-trust-<state>`. The line token `--k-trust-<state>-line` is a
@@ -396,8 +398,8 @@ panel.innerHTML = renderTrustStateHtml(claim.status, {
 - The module also exports the data the three renderers share. The tables are frozen, so they
   cannot be changed at runtime: `trustStates`, `trustStateLabels`, `trustStateGlyphs` (the SVG
   path per state). It also exports `trustStateFor` and
-  `trustStatePresentation(state, label, className)` (the classes, visible and hidden labels,
-  and glyph for one chip).
+  `trustStatePresentation(state, label, className, detail)` (the classes, visible and hidden
+  labels, glyph, and detail for one chip; a string detail is trimmed, and a blank one is none).
 
 A string consumer must put two things on the page:
 

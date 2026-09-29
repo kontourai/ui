@@ -14,7 +14,7 @@ export interface TrustStateProps {
 }
 
 export function TrustState({ state, label, detail, className }: TrustStateProps) {
-  const view = trustStatePresentation(state, label, className);
+  const view = trustStatePresentation<ReactNode>(state, label, className, detail);
   return (
     <span className={view.className} data-trust-state={view.state ?? undefined}>
       <span className="trust-state__chip">
@@ -26,7 +26,7 @@ export function TrustState({ state, label, detail, className }: TrustStateProps)
         <span className="trust-state__label">{view.label}</span>
         {view.hiddenState ? <span className="trust-state__hidden"> ({view.hiddenState})</span> : null}
       </span>
-      {detail != null && detail !== false && detail !== "" ? <span className="trust-state__detail">{detail}</span> : null}
+      {view.detail != null ? <span className="trust-state__detail">{view.detail}</span> : null}
     </span>
   );
 }

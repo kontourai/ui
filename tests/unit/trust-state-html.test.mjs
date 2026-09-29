@@ -60,3 +60,21 @@ test("glyph and state values are escaped even if a table were writable", async (
   assert.ok(stateHtml.includes(' data-trust-state="x&quot;&gt;&lt;img src=x onerror=alert(1)&gt;"'), stateHtml);
   assert.equal(liveMarkup(stateHtml), false, stateHtml);
 });
+
+// ui#100: the three renderers read the detail from trustStatePresentation, so
+// the trim and the blank-means-none rule live in one place.
+test("trustStatePresentation trims a string detail and drops a blank one", async () => {
+  const module = await load(source);
+  const detail = (value) => module.trustStatePresentation("verified", null, null, value).detail;
+  assert.equal(detail("  padded  "), "padded");
+  assert.equal(detail("   "), null);
+  assert.equal(detail(""), null);
+  assert.equal(detail(null), null);
+  assert.equal(detail(undefined), null);
+  assert.equal(detail(false), null);
+  const node = { type: "a" };
+  assert.equal(detail(node), node);
+  assert.equal(detail(0), 0);
+  assert.equal(module.renderTrustStateHtml("verified", { detail: "   " }).includes("trust-state__detail"), false);
+  assert.ok(module.renderTrustStateHtml("verified", { detail: "  padded  " }).includes('<span class="trust-state__detail">padded</span>'));
+});

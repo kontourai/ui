@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { trustStatesFromSource } from "./trust-states-source.mjs";
 import postcss from "postcss";
 import selectorParser from "postcss-selector-parser";
+import valueParser from "postcss-value-parser";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tokenFiles = {
@@ -190,7 +191,8 @@ for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-them
 // (CHIP_PAINT: color, -webkit-text-fill-color, background, background-color,
 // background-image, and the border shorthands and their color and style
 // longhands), it sets no others; it may also set border widths (CHIP_WIDTH),
-// as disputed's double line does. The list is not exhaustive; the browser
+// as disputed's double line does, but never a zero, none, or hidden width
+// (ui#102), and disputed's widths are exactly DISPUTED_WIDTH. The list is not exhaustive; the browser
 // token spec is the backstop for properties it does not name. A state whose
 // line token moved to another property would otherwise still render dotted
 // through the base rule, and a theme's override of that token would be
@@ -217,6 +219,9 @@ for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-them
 const TRUST_FORBIDDEN = /--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring)\b(?!-)/;
 const CHIP_PAINT = /^(?:color|-webkit-text-fill-color|background(?:-color|-image)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-(?:color|style))?)$/;
 const CHIP_WIDTH = /^border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?-width$/;
+const HIDDEN_WORD = /^(?:none|hidden)$/;
+// Two strokes and a gap: disputed's chip border (see its width rule in react/styles.css).
+const DISPUTED_WIDTH = "calc(var(--k-border-thin) + var(--k-border-thick))";
 const COLOR_PROPERTY = /^(?:color|-webkit-text-fill-color|background(?:-color)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?-color|outline-color|text-decoration-color|fill|stroke)$/;
 const SYSTEM_COLORS = new Set([
   "canvas", "canvastext", "linktext", "buttontext", "buttonborder", "graytext", "highlight", "highlighttext",
@@ -260,7 +265,26 @@ postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
   const widths = rule.nodes.filter((node) => node.type === "decl" && CHIP_WIDTH.test(node.prop.toLowerCase()));
   const state = TRUST_STATES.find((candidate) => sameSelector(parsed, `.trust-state--${candidate} .trust-state__chip`));
   // A state's own chip rule may set border widths (disputed's double line
-  // needs a wider border), in the painting rule or a separate one.
+  // needs a wider border), in the painting rule or a separate one. It may not
+  // hide the line (ui#102): no zero, none, or hidden width, and no none or
+  // hidden border style, since the line style is the state's cue that does
+  // not depend on color. Disputed's widths are pinned to DISPUTED_WIDTH, the
+  // narrowest border that draws its double line as two strokes.
+  if (state && rule.parent?.type === "root") {
+    for (const decl of rule.nodes.filter((node) => node.type === "decl")) {
+      const prop = decl.prop.toLowerCase();
+      const words = valueParser(decl.value).nodes.filter((node) => node.type === "word").map((node) => node.value.toLowerCase());
+      if (CHIP_WIDTH.test(prop) && words.some((word) => HIDDEN_WORD.test(word) || /^[+-]?(?:0+\.?0*|\.0+)(?:[a-z]+)?$/.test(word))) {
+        throw new Error(`${where}: ${decl.prop}: ${decl.value}${decl.important ? " !important" : ""} hides the ${state} line; a state's border width must be greater than zero.`);
+      }
+      if (/^border(?:-[a-z]+)*-style$/.test(prop) && words.some((word) => HIDDEN_WORD.test(word))) {
+        throw new Error(`${where}: ${decl.prop}: ${decl.value} hides the ${state} line; the border style comes from the state's -line token.`);
+      }
+      if (state === "disputed" && CHIP_WIDTH.test(prop) && (decl.important || decl.value.trim() !== DISPUTED_WIDTH)) {
+        throw new Error(`${where}: ${decl.prop}: ${decl.value}${decl.important ? " !important" : ""} must be exactly ${DISPUTED_WIDTH}; a narrower border draws the double line as one.`);
+      }
+    }
+  }
   if (state && rule.parent?.type === "root" && paint.length === 0) return;
   if (state && rule.parent?.type === "root" && paint.length > 0) {
     const expected = chipPaint(state);

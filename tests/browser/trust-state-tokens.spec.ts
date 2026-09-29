@@ -63,3 +63,47 @@ test("every trust chip follows an override of its state's ink, fill, and line to
   }
   expect(errors).toEqual([]);
 });
+
+// A state's own rule may set its border width (disputed needs a wider one),
+// but never hide the line: the line style is the cue that survives without
+// color (ui#102). Every side of every chip keeps a visible border, and
+// disputed's is wide enough to draw its double line as two strokes and a gap.
+const DOUBLE_LINE_MIN_PX = 3;
+
+test("every trust chip draws a visible border, and disputed's is wide enough for a double line", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/docs/gallery.html");
+  await expect(page.locator("[data-theme-matrix] k-trust-state .trust-state").first()).toBeVisible();
+
+  const results = await page.evaluate(async (states) => {
+    const host = document.createElement("div");
+    document.querySelector("main")!.append(host);
+    const elements = states.map((state) => {
+      const element = document.createElement("k-trust-state");
+      element.setAttribute("state", state);
+      host.append(element);
+      return { state, element };
+    });
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return elements.map(({ state, element }) => {
+      const style = getComputedStyle(element.querySelector(".trust-state__chip")!);
+      return {
+        state,
+        style: style.borderTopStyle,
+        widths: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth].map((width) => parseFloat(width)),
+      };
+    });
+  }, STATES);
+
+  expect(results.map((result) => result.state)).toEqual(STATES);
+  for (const result of results) {
+    expect(result.style, `${result.state}: border style`).not.toMatch(/^(?:none|hidden)$/);
+    for (const width of result.widths) expect(width, `${result.state}: border width`).toBeGreaterThan(0);
+  }
+  const disputed = results.find((result) => result.state === "disputed")!;
+  expect(disputed.style).toBe("double");
+  for (const width of disputed.widths) expect(width, "disputed: double-line width").toBeGreaterThanOrEqual(DOUBLE_LINE_MIN_PX);
+  expect(errors).toEqual([]);
+});

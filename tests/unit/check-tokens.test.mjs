@@ -213,6 +213,52 @@ const cases = [
     styles: append("@media (forced-colors: active) { .trust-state__chip { border-width: 0; } }"),
     expect: { selector: ".trust-state__chip (inside @media (forced-colors: active))", says: /sets border-width; inside @media/ },
   },
+  // ui#102: a state's own rules may set its border width, but never hide the line.
+  {
+    name: "a second stale chip rule zeroes the border width",
+    styles: append(".trust-state--stale .trust-state__chip { border-width: 0; }"),
+    expect: { selector: ".trust-state--stale .trust-state__chip", says: /border-width: 0 hides the stale line/ },
+  },
+  {
+    name: "a stale chip rule zeroes one side with !important",
+    styles: append(".trust-state--stale .trust-state__chip { border-top-width: 0 !important; }"),
+    expect: { selector: ".trust-state--stale .trust-state__chip", says: /border-top-width: 0 !important hides the stale line/ },
+  },
+  {
+    name: "a state's painting rule zeroes one side through a multi-value width",
+    styles: editChip("verified", "  color: var(--k-trust-verified);\n  background: var(--k-trust-verified-fill);\n  border-color: var(--k-trust-verified);\n  border-style: var(--k-trust-verified-line);\n  border-width: 2px 0px;"),
+    expect: { selector: ".trust-state--verified .trust-state__chip", says: /border-width: 2px 0px hides the verified line/ },
+  },
+  {
+    name: "a state's border width set to none",
+    styles: append(".trust-state--revoked .trust-state__chip { border-inline-start-width: none; }"),
+    expect: { selector: ".trust-state--revoked .trust-state__chip", says: /border-inline-start-width: none hides the revoked line/ },
+  },
+  {
+    name: "a state's border width set to hidden",
+    styles: append(".trust-state--unknown .trust-state__chip { border-bottom-width: hidden; }"),
+    expect: { selector: ".trust-state--unknown .trust-state__chip", says: /border-bottom-width: hidden hides the unknown line/ },
+  },
+  {
+    name: "a state's painting rule sets border-style: none",
+    styles: editChip("stale", "  color: var(--k-trust-stale);\n  background: var(--k-trust-stale-fill);\n  border-color: var(--k-trust-stale);\n  border-style: none;"),
+    expect: { selector: ".trust-state--stale .trust-state__chip", says: /border-style: none hides the stale line/ },
+  },
+  {
+    name: "a second state rule sets a side's border style to hidden",
+    styles: append(".trust-state--assumed .trust-state__chip { border-top-style: hidden; }"),
+    expect: { selector: ".trust-state--assumed .trust-state__chip", says: /border-top-style: hidden hides the assumed line/ },
+  },
+  {
+    name: "disputed's width set back to the thin border",
+    styles: replaceOnce(pristine, "border-width: calc(var(--k-border-thin) + var(--k-border-thick));", "border-width: var(--k-border-thin);"),
+    expect: { selector: ".trust-state--disputed .trust-state__chip", says: /border-width: var\(--k-border-thin\) must be exactly calc\(var\(--k-border-thin\) \+ var\(--k-border-thick\)\)/ },
+  },
+  {
+    name: "a second disputed rule narrows one side to 1px",
+    styles: append(".trust-state--disputed .trust-state__chip { border-left-width: 1px; }"),
+    expect: { selector: ".trust-state--disputed .trust-state__chip", says: /border-left-width: 1px must be exactly calc/ },
+  },
   // ui#92: basis rules are found by parsing the selector, not by substring.
   {
     name: "[data-basis-state] descendant reads a status tone",
@@ -281,6 +327,7 @@ const accepted = [
   { name: "currentColor on a state's chip in print", styles: append("@media print { .trust-state--stale .trust-state__chip { border-color: currentColor; background: transparent; } }") },
   { name: "ButtonFace and a text fill on the chip under forced colors", styles: append("@media (forced-colors: active) { .trust-state__chip { background: ButtonFace; -webkit-text-fill-color: ButtonText; } }") },
   { name: "a state's own border width in a separate rule", styles: append(".trust-state--verified .trust-state__chip { border-width: var(--k-border-thick); }") },
+  { name: "a state's own fractional border width", styles: append(".trust-state--stale .trust-state__chip { border-width: 0.5px; }") },
   { name: "a system color on the basis line under forced colors", styles: append("@media (forced-colors: active) { .trust-basis { color: CanvasText; } }") },
   { name: "the chip only inside :not()", styles: append(".trust-state span:not(.trust-state__chip) { color: var(--k-text-muted); }") },
   { name: "the chip only inside :has()", styles: append(".trust-state:has(.trust-state__chip) { color: var(--k-text-muted); }") },
