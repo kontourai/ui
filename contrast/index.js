@@ -95,10 +95,10 @@ export const SHIPPED_THEMES = Object.freeze({
   ),
   console: theme(
     slot("#11120f", "#191b16", "#c9ff4a", "#11120f", "#c9ff4a", "#11120f", "#c9ff4a"),
-    slot("#f3f5eb", "#fbfcf7", "#6c9400", "#ffffff", "#6c9400", "#11120f", "#6c9400"),
+    slot("#f3f5eb", "#fbfcf7", "#577800", "#ffffff", "#6c9400", "#11120f", "#6c9400"),
   ),
   flow: theme(
-    slot("#0a0e13", "#111824", "#2f88a6", "#06080b", "#2f88a6", "#06080b", "#2f88a6"),
+    slot("#0a0e13", "#111824", "#3890ae", "#06080b", "#2f88a6", "#06080b", "#2f88a6"),
     slot("#f5f4ef", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88", "#ffffff", "#1f6f88"),
   ),
   station: theme(

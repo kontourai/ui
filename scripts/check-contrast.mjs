@@ -313,16 +313,6 @@ const ROLE_PAIRS = [
   ["--k-focus", "--k-panel-raised", 3.0, "focus ring on raised panels"],
 ];
 
-// Shipped values that already fail a role pair. Recorded, not fixed, because
-// fixing them changes how the theme renders and needs its own decision. An
-// entry that starts passing fails the check too, so a fix removes it here.
-const KNOWN_ROLE_FAILURES = new Map([
-  ["console:light --k-brand-contrast on --k-brand", "white on the light console lime"],
-  ["console:light --k-brand on --k-panel", "light console lime as text"],
-  ["flow:dark --k-brand on --k-panel", "dark flow blue as text"],
-]);
-
-const seenKnown = new Set();
 for (const theme of themes) {
   for (const light of [false, true]) {
     const scope = `${theme || "default"}:${light ? "light" : "dark"}`;
@@ -335,11 +325,6 @@ for (const theme of themes) {
       checked += 1;
       const ratio = contrastRatio(tokens[fg], tokens[bg]);
       const id = `${scope} ${fg} on ${bg}`;
-      if (KNOWN_ROLE_FAILURES.has(id)) {
-        seenKnown.add(id);
-        if (ratio >= minimum) failures.push(`${id} = ${ratio.toFixed(2)}:1 now passes; remove it from KNOWN_ROLE_FAILURES.`);
-        continue;
-      }
       if (ratio < minimum) failures.push(`${id} = ${ratio.toFixed(2)}:1 (needs ${minimum}:1 — ${why})`);
     }
   }
@@ -390,10 +375,6 @@ for (const theme of themes) {
   checked += decorations.length;
 }
 
-for (const id of KNOWN_ROLE_FAILURES.keys()) {
-  if (!seenKnown.has(id)) failures.push(`KNOWN_ROLE_FAILURES entry ${id} matched no resolved pair; remove it.`);
-}
-
 if (checked === 0) {
   // A scan that matched nothing must never read as conformance.
   throw new Error(
@@ -406,6 +387,6 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `Kontour UI contrast check passed: ${checked - KNOWN_ROLE_FAILURES.size} theme/pair combinations meet their thresholds ` +
-    `(${themes.length} themes x 2 modes for the roles; ${KNOWN_ROLE_FAILURES.size} pre-existing brand exceptions recorded).`,
+  `Kontour UI contrast check passed: ${checked} theme/pair combinations meet their thresholds ` +
+    `(${themes.length} themes x 2 modes for the roles).`,
 );

@@ -60,16 +60,7 @@ test("brand as text is rated on the panel of the chosen mode", () => {
   assert.deepEqual(light.map((violation) => violation.pair), [["--k-brand", "--k-panel"], ["--k-brand", "--k-bg"], ["--k-brand-contrast", "--k-brand"]]);
 });
 
-// Shipped values that already fail a brand-slot pair, recorded as
-// KNOWN_ROLE_FAILURES in scripts/check-contrast.mjs. Pinned here, not read
-// from there, so the validator is checked against the list rather than with it.
-const KNOWN_SHIPPED_FAILURES = [
-  "console:light --k-brand on --k-panel",
-  "console:light --k-brand-contrast on --k-brand",
-  "flow:dark --k-brand on --k-panel",
-];
-
-test("every shipped theme's own values are accepted (except the recorded brand exceptions)", () => {
+test("every shipped theme's own values are accepted", () => {
   const seen = [];
   for (const [base, modes] of Object.entries(SHIPPED_THEMES)) {
     for (const mode of MODES) {
@@ -80,7 +71,7 @@ test("every shipped theme's own values are accepted (except the recorded brand e
       }
     }
   }
-  assert.deepEqual(seen.sort(), KNOWN_SHIPPED_FAILURES);
+  assert.deepEqual(seen, []);
   assert.deepEqual(Object.keys(SHIPPED_THEMES).sort(), ["console", "default", "flow", "station", "surface", "survey"]);
 });
 

@@ -60,8 +60,8 @@ test("applies each product theme selector to component behavior and detects a co
   // role split renders exactly as the brand-driven buttons did.
   const expected = {
     "theme-console:dark": { brand: "#c9ff4a", action: "#c9ff4a", background: "#11120f", panel: "#191b16", raised: "#20231e" },
-    "theme-console:light": { brand: "#6c9400", action: "#6c9400", background: "#f3f5eb", panel: "#fbfcf7", raised: "#eef2e6" },
-    "theme-flow:dark": { brand: "#2f88a6", action: "#2f88a6", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
+    "theme-console:light": { brand: "#577800", action: "#6c9400", background: "#f3f5eb", panel: "#fbfcf7", raised: "#eef2e6" },
+    "theme-flow:dark": { brand: "#3890ae", action: "#2f88a6", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-flow:light": { brand: "#1f6f88", action: "#1f6f88", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
     "theme-station:dark": { brand: "#9364ff", action: "#7c3aed", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-station:light": { brand: "#7c3aed", action: "#7c3aed", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },

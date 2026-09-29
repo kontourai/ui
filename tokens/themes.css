@@ -68,8 +68,12 @@
   --k-active-soft: color-mix(in oklab, var(--k-active) 14%, transparent);
 }
 
+/* Flow dark: the brand is the accent lightened (same OKLCH hue and chroma)
+   just enough to read as text at 4.5:1 on bg, panel and raised panel; the
+   action and focus keep the accent, which clears their 3:1 and dark-text
+   pairs. */
 .theme-flow {
-  --k-brand: #2f88a6;
+  --k-brand: #3890ae;
   --k-action: #2f88a6;
   --k-action-contrast: #06080b;
   --k-focus: #2f88a6;
@@ -108,10 +112,14 @@
   --k-focus-ring: var(--k-focus);
 }
 
+/* Console light: the brand is the lime darkened (same OKLCH hue) just enough
+   to read as text at 4.5:1 on bg, panel and raised panel, and it keeps white
+   brand-contrast text (5.1:1; dark text would be 3.7:1). The action and focus
+   keep the brighter lime with dark text. */
 [data-theme="light"].theme-console,
 [data-theme="light"] .theme-console:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *)),
 :where(.theme-console) [data-theme="light"]:where(:not(.theme-survey, .theme-flow, .theme-surface, .theme-station, .theme-console :is(.theme-survey, .theme-flow, .theme-surface, .theme-station) *)) {
-  --k-brand: #6c9400;
+  --k-brand: #577800;
   --k-brand-contrast: #ffffff;
   --k-action: #6c9400;
   --k-action-contrast: #11120f;
@@ -211,7 +219,7 @@
 }
 
 [data-theme="dark"]:where(.theme-flow *):where([data-theme="light"] *):where(:not(.theme-survey, .theme-console, .theme-surface, .theme-station, .theme-flow :is(.theme-survey, .theme-console, .theme-surface, .theme-station) *)) {
-  --k-brand: #2f88a6;
+  --k-brand: #3890ae;
   --k-action: #2f88a6;
   --k-action-contrast: #06080b;
   --k-focus: #2f88a6;

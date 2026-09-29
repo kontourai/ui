@@ -319,8 +319,8 @@ test("nested theme scopes keep a readable primary action under every root theme 
 // derived ring and soft fills. Values are pinned here, not read from the CSS.
 const THEME_VALUES = {
   survey: { dark: ["#5ce0c6", "#5ce0c6", "#06080b", "#5ce0c6"], light: ["#16806f", "#16806f", "#ffffff", "#16806f"] },
-  console: { dark: ["#c9ff4a", "#c9ff4a", "#11120f", "#c9ff4a"], light: ["#6c9400", "#6c9400", "#11120f", "#6c9400"] },
-  flow: { dark: ["#2f88a6", "#2f88a6", "#06080b", "#2f88a6"], light: ["#1f6f88", "#1f6f88", "#ffffff", "#1f6f88"] },
+  console: { dark: ["#c9ff4a", "#c9ff4a", "#11120f", "#c9ff4a"], light: ["#577800", "#6c9400", "#11120f", "#6c9400"] },
+  flow: { dark: ["#3890ae", "#2f88a6", "#06080b", "#2f88a6"], light: ["#1f6f88", "#1f6f88", "#ffffff", "#1f6f88"] },
   surface: { dark: ["#14a37a", "#14a37a", "#06080b", "#14a37a"], light: ["#0f6b52", "#0f6b52", "#ffffff", "#0f6b52"] },
   station: { dark: ["#9364ff", "#7c3aed", "#ffffff", "#9364ff"], light: ["#7c3aed", "#7c3aed", "#ffffff", "#7c3aed"] },
 } as const; // [brand, action, action-contrast, focus]

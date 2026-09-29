@@ -61,8 +61,8 @@ test("a light block that misses a mode token its base block sets fails (ui#81)",
 test("a dark-island block that drifts from its base block fails", () => {
   const island = pristine.indexOf(`[data-theme="dark"]:where(.theme-flow *)`);
   assert.notEqual(island, -1);
-  const drifted = pristine.slice(0, island) + replaceOnce(pristine.slice(island), "  --k-brand: #2f88a6;", "  --k-brand: #2f88a7;");
+  const drifted = pristine.slice(0, island) + replaceOnce(pristine.slice(island), "  --k-brand: #3890ae;", "  --k-brand: #3890af;");
   const result = runCheck(drifted);
   assert.equal(result.status, 1, result.stdout);
-  assert.match(result.stderr, /--k-brand is #2f88a7; the block it mirrors sets #2f88a6/);
+  assert.match(result.stderr, /--k-brand is #3890af; the block it mirrors sets #3890ae/);
 });

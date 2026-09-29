@@ -111,7 +111,7 @@ colors:
   active-console: "#84d8c8"
   status-contrast-console: "#11120f"
   focus-ring-console: "{colors.focus-console}"
-  brand-flow: "#2f88a6"
+  brand-flow: "#3890ae"
   action-flow: "#2f88a6"
   action-contrast-flow: "#06080b"
   focus-flow: "#2f88a6"
@@ -133,7 +133,7 @@ colors:
   action-contrast-survey-light: "#ffffff"
   focus-survey-light: "#16806f"
   focus-ring-survey-light: "{colors.focus-survey-light}"
-  brand-console-light: "#6c9400"
+  brand-console-light: "#577800"
   brand-contrast-console-light: "#ffffff"
   action-console-light: "#6c9400"
   action-contrast-console-light: "#11120f"
@@ -597,7 +597,7 @@ One theme class on a stable root selects the product identity (`docs/consumer-gu
 | Corporate ink | none; dark canvas `--k-bg` = `#0a0e13` | Ink `#0B1220` |
 | Corporate light ground | none; light canvas `--k-bg` (light) = `#f5f4ef` | Stone `#F2EFEA`, White `#FFFFFF` |
 | Station accent | `.theme-station`: `--k-brand` (station) = `#9364ff`, `--k-action` (station) = `#7c3aed`; `--k-brand` (station-light) = `#7c3aed` | `#7C3AED` |
-| Flow accent | `--k-brand` (flow) = `#2f88a6`, `--k-brand` (flow-light) = `#1f6f88` | `#2563EB` |
+| Flow accent | `.theme-flow`: `--k-brand` (flow) = `#3890ae`, `--k-action` (flow) = `#2f88a6`; `--k-brand` (flow-light) = `#1f6f88` | `#2563EB` |
 | Surface accent | `--k-brand` (surface) = `#14a37a`, `--k-brand` (surface-light) = `#0f6b52` | `#14B8A6` |
 | Default brand | `--k-brand` = `#5ce0c6`, `--k-brand` (light) = `#0e7c64` | not specified |
 
@@ -609,6 +609,12 @@ Station ships the owner's draft accent, adjusted only where contrast requires it
 the draft accent remains the action fill with white text; brand text and the focus ring use a
 lighter same-hue accent that reads on the dark panel. In light mode, the draft accent is brand,
 action, and focus. `npm run check:contrast` rates every one of these pairs in both modes.
+
+Flow dark and Console light follow the same rule. Flow's dark brand is its accent lightened at
+the same OKLCH hue and chroma until brand text reads at 4.5:1 on the page, panel, and raised
+panel; the action and focus keep the accent. Console's light brand is its lime darkened at the
+same hue for the same reason. It keeps white brand-contrast text, since dark text on the darker
+lime would fall below 4.5:1, and the action and focus keep the brighter lime with dark text.
 
 **OPEN-10 — Console and Survey themes.** The draft does not cover `theme-console` or
 `theme-survey`. They stay as shipped until the palette work decides their relationship to the
