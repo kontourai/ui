@@ -86,9 +86,7 @@ const slot = (bg, panel, brand, brandContrast, action, actionContrast, focus) =>
  * class and data-theme (`default` is no theme class). check:contrast fails if
  * these drift from tokens/tokens.css and tokens/themes.css. Informational: the
  * values are this package version's, so validate with the same version whose
- * CSS you serve. survey:light keeps the dark page (#06080b) because the survey
- * theme's light block does not reset --k-bg (ui#81); an override is rated
- * against that page until #81 is fixed.
+ * CSS you serve.
  */
 export const SHIPPED_THEMES = Object.freeze({
   default: theme(
@@ -113,7 +111,7 @@ export const SHIPPED_THEMES = Object.freeze({
   ),
   survey: theme(
     slot("#06080b", "#111824", "#5ce0c6", "#06080b", "#5ce0c6", "#06080b", "#5ce0c6"),
-    slot("#06080b", "#ffffff", "#16806f", "#ffffff", "#16806f", "#ffffff", "#16806f"),
+    slot("#f5f4ef", "#ffffff", "#16806f", "#ffffff", "#16806f", "#ffffff", "#16806f"),
   ),
 });
 

@@ -140,11 +140,17 @@ test("the exported data cannot be mutated by a consumer", () => {
 });
 
 test("brand is rated as a UI component on the page", () => {
-  // Readable as text on the white survey-light panel (18.9:1), but survey
-  // light keeps the dark page (ui#81), where it is 1.06:1.
-  const violations = violationsOf({ base: "survey", overrides: { light: { "--k-brand": "#111111" } } });
-  assert.deepEqual(violations.map((violation) => violation.pair), [["--k-brand", "--k-bg"]]);
-  assert.equal(violations[0].minimum, 3);
+  // Near-black on the survey dark page (1.06:1). Survey light used to keep
+  // this page too (ui#81); every shipped page is now darker than its panel in
+  // dark mode and lighter in light mode, so the page pair fails beside the
+  // panel pair rather than alone.
+  const violations = violationsOf({ base: "survey", overrides: { dark: { "--k-brand": "#111111" } } });
+  const page = violations.find((violation) => violation.pair.join(" ") === "--k-brand --k-bg");
+  assert.ok(page, JSON.stringify(violations.map((violation) => violation.pair)));
+  assert.equal(page.minimum, 3);
+  assert.ok(page.ratio < 1.1, `ratio ${page.ratio}`);
+  // Survey light now rates an override against the light page (ui#81).
+  assert.equal(SHIPPED_THEMES.survey.light["--k-bg"], "#f5f4ef");
   assert.ok(BRAND_SLOT_PAIRS.some((pair) => pair.foreground === "--k-brand" && pair.background === "--k-bg" && pair.minimum === 3));
 });
 

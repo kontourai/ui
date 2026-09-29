@@ -101,7 +101,15 @@ const scopeOf = (rule) => {
       let theme = null;
       let light = false;
       let other = false;
+      // :where(:not(...)) tails only narrow where a light block applies (the
+      // nearest theme and mode win, ui#84); what they name is excluded, not
+      // targeted, so nothing inside :not() changes the rule's scope.
+      const excluded = (node) => {
+        for (let parent = node.parent; parent; parent = parent.parent) if (parent.type === "pseudo" && parent.value === ":not") return true;
+        return false;
+      };
       selector.walk((node) => {
+        if (excluded(node) || (node.type === "pseudo" && node.value === ":not")) return;
         if (node.type === "class" && node.value.startsWith("theme-")) theme = node.value.slice("theme-".length);
         else if (node.type === "attribute" && node.attribute === "data-theme" && node.value === "light") light = true;
         else if (node.type === "pseudo" && node.value === ":root") { /* default scope */ }
@@ -146,6 +154,11 @@ const pendingRefs = []; // [group, key, target prop, scope], resolved once every
 
 for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
   postcss.parse(read(file), { from: file }).walkRules((rule) => {
+    // Dark-island rules (every selector starts with [data-theme="dark"], ui#80)
+    // repeat :root or a theme's base block; check:contrast fails when one
+    // differs from the block it mirrors, so the front matter names each value
+    // once, from that block.
+    if (rule.parent?.type === "root" && rule.selectors.every((selector) => selector.trim().startsWith('[data-theme="dark"]'))) return;
     // A token rule inside @media/@supports would override conditionally; the format cannot
     // say "only when", so refuse rather than let it silently win or vanish.
     if (rule.parent?.type !== "root") {

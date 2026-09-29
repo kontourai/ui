@@ -45,6 +45,7 @@ test("applies each product theme selector to component behavior and detects a co
       brand: sampleStyle.getPropertyValue("--k-brand").trim(),
       action: sampleStyle.getPropertyValue("--k-action").trim(),
       background: sampleStyle.getPropertyValue("--k-bg").trim(),
+      text: sampleStyle.getPropertyValue("--k-text").trim(),
       panelToken: sampleStyle.getPropertyValue("--k-panel").trim(),
       raisedToken: sampleStyle.getPropertyValue("--k-panel-raised").trim(),
       panel: sampleStyle.backgroundColor,
@@ -67,7 +68,7 @@ test("applies each product theme selector to component behavior and detects a co
     "theme-surface:dark": { brand: "#14a37a", action: "#14a37a", background: "#0a0e13", panel: "#111824", raised: "#16202d" },
     "theme-surface:light": { brand: "#0f6b52", action: "#0f6b52", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
     "theme-survey:dark": { brand: "#5ce0c6", action: "#5ce0c6", background: "#06080b", panel: "#111824", raised: "#16202d" },
-    "theme-survey:light": { brand: "#16806f", action: "#16806f", background: "#06080b", panel: "#ffffff", raised: "#fbfaf7" },
+    "theme-survey:light": { brand: "#16806f", action: "#16806f", background: "#f5f4ef", panel: "#ffffff", raised: "#fbfaf7" },
   };
   expect(matrix.map((sample) => sample.id).sort()).toEqual(Object.keys(expected).sort());
   for (const sample of matrix) {
@@ -82,6 +83,9 @@ test("applies each product theme selector to component behavior and detects a co
     expect(sample.button).toBe(hexToRgb(tokens.action));
     expect(sample.input).toBe(hexToRgb(tokens.raised));
     expect(sample.toggle).toBe(hexToRgb(tokens.action));
+    // ui#81: text must read on the theme's page in each mode (survey light
+    // used to keep the near-black page under light text, about 1.25:1).
+    expect(contrastHex(sample.text, sample.background), `${sample.id}: text on page`).toBeGreaterThanOrEqual(4.5);
   }
 
   const probe = page.locator("[data-theme-matrix='theme-console:dark']");
@@ -123,6 +127,18 @@ test("applies each product theme selector to component behavior and detects a co
 
   expect(consoleErrors).toEqual([]);
 });
+
+function contrastHex(a: string, b: string): number {
+  const luminance = (hex: string) => {
+    const [r, g, bl] = [1, 3, 5].map((offset) => {
+      const c = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+      return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * bl;
+  };
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
 
 function hexToRgb(value: string): string {
   const hex = value.slice(1);

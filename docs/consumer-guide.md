@@ -26,10 +26,13 @@ Available product classes:
 - `theme-surface`
 
 Use `data-theme="light"` on the same root, an ancestor, or a descendant of the theme root when a
-product needs the light token skin; each resolves to the product's light values. Keep one product
-theme per tree: `data-theme="dark"` does not reset a light ancestor, and a light element below a
-nested second theme class resolves to the outer theme (or by source order), not the nearest one.
-When themes must nest, put `data-theme` on the theme element itself.
+product needs the light token skin; each resolves to the product's light values. Modes and themes
+nest: the nearest `data-theme` picks the mode and the nearest theme class picks the product, so
+`data-theme="dark"` inside a light page restores the dark skin, and a light element below a nested
+theme takes that inner theme's light values. A nested theme class layers over the theme around it.
+One case is not covered: a theme class below a mode that switches back (light, dark, then light
+again above it); put `data-theme` on that theme element. See "Theme and mode scoping" in
+`DESIGN.md`.
 
 ## White-label color
 
@@ -43,15 +46,16 @@ Where to put an override:
 - Declare them in a stylesheet loaded after the tokens, using the theme's own selectors:
 
 ```css
-.theme-flow {
+.theme-flow,
+[data-theme="dark"]:where(.theme-flow *):where([data-theme="light"] *):where(:not(.theme-survey, .theme-console, .theme-surface, .theme-station, .theme-flow :is(.theme-survey, .theme-console, .theme-surface, .theme-station) *)) {
   --k-brand: #f0a868;
   --k-action: #f0a868;
   --k-action-contrast: #06080b;
   --k-focus: #f0a868;
 }
 [data-theme="light"].theme-flow,
-[data-theme="light"] .theme-flow,
-:where(.theme-flow) [data-theme="light"] {
+[data-theme="light"] .theme-flow:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *)),
+:where(.theme-flow) [data-theme="light"]:where(:not(.theme-survey, .theme-console, .theme-surface, .theme-station, .theme-flow :is(.theme-survey, .theme-console, .theme-surface, .theme-station) *)) {
   --k-brand: #9a4418;
   --k-action: #9a4418;
   --k-action-contrast: #ffffff;
@@ -59,8 +63,30 @@ Where to put an override:
 }
 ```
 
+Copy the selectors exactly as `tokens/themes.css` spells them, including the `:where(:not(...))`
+tails that keep a block to the nearest theme and mode. The dark values go on the theme's base
+block and on its dark-island block (the second selector of the first rule, from the end of
+`tokens/themes.css`), which is where a `data-theme="dark"` element inside a light page resolves.
+A browser test loads this example straight from this file.
+
+Without a theme class, override `:root` and `[data-theme="dark"]:where([data-theme="light"] *)`
+together for dark (the second is where a dark element below a light one resets), and
+`[data-theme="light"]` for light.
+
 A declaration on `:root` loses to the theme's light block when a theme class is present, and an
 inline style on `<html>` does not reach a theme class on `<body>`.
+
+> **Migrating overrides.** Dark elements inside a light page now really resolve dark, so an
+> override written with the earlier selectors can misplace values:
+>
+> - `.theme-flow` alone (dark): add the dark-island block. Without it, a
+>   `data-theme="dark"` element below a light one shows the shipped Flow brand, not yours.
+> - `[data-theme="light"] .theme-flow` without its `:where(:not(...))` tail: add the tail.
+>   Without it, a `.theme-flow` element with `data-theme="dark"` on a light page takes your
+>   light values onto dark surfaces.
+> - `:where(.theme-flow) [data-theme="light"]` without its tail: add it, so your light values
+>   stop at a nested theme.
+> - `:root` only (no theme class): add `[data-theme="dark"]:where([data-theme="light"] *)`.
 
 Rules for the values:
 

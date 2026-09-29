@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import postcss from "postcss";
 import { trustStatesFromSource } from "./trust-states-source.mjs";
 // The exported module runtimes validate white-label themes with (ui#83). This
 // check rates the shipped themes through the same functions and pairs, so the
@@ -21,10 +22,92 @@ import { BRAND_SLOT_PAIRS, SHIPPED_THEMES, contrastRatio } from "../contrast/ind
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const css =
-  readFileSync(path.join(root, "tokens/tokens.css"), "utf8") +
-  "\n" +
-  readFileSync(path.join(root, "tokens/themes.css"), "utf8");
+// Token rules are rated below, except the dark-island rules (ui#80): every
+// selector in them starts with [data-theme="dark"], and they only repeat
+// values set elsewhere (the tokens.css reset repeats :root; a theme's island
+// block repeats its base block), so they are checked as mirrors instead.
+// Tokens inside an at-rule would apply conditionally, which nothing here
+// rates, so they fail.
+const failures = [];
+const topRules = [];
+const norm = (text) => text.replace(/\s+/g, " ").trim();
+const declsOf = (rule) => new Map(rule.nodes.filter((node) => node.type === "decl" && node.prop.startsWith("--k-")).map((decl) => [decl.prop, norm(decl.value)]));
+for (const file of ["tokens/tokens.css", "tokens/themes.css"]) {
+  postcss.parse(readFileSync(path.join(root, file), "utf8"), { from: file }).each((node) => {
+    if (node.type === "rule") topRules.push({ file, node, selector: norm(node.selector), selectors: node.selectors.map(norm), decls: declsOf(node) });
+    else if (node.type === "atrule") {
+      let holdsTokens = false;
+      node.walkDecls(/^--k-/, () => { holdsTokens = true; });
+      if (holdsTokens) throw new Error(`${file}: tokens inside @${node.name} ${node.params} are not rated; declare them in a top-level rule.`);
+    }
+  });
+}
+const isIsland = (rule) => rule.selectors.every((selector) => selector.startsWith('[data-theme="dark"]'));
+const css = topRules.filter((rule) => !isIsland(rule)).map((rule) => rule.node.toString()).join("\n");
+
+// Scoping (ui#80, ui#81, ui#84): the nearest data-theme picks the mode and the
+// nearest theme class picks the product. The selectors that implement it are
+// pinned here from the theme list, so a theme added without its exclusions
+// (or a dropped :not()) fails; and a theme's light block must cover every
+// mode-dependent token its base block sets.
+{
+  const top = (selector) => {
+    const rule = topRules.find((candidate) => candidate.selector === selector);
+    if (!rule) throw new Error(`tokens: no rule with the selector ${selector}.`);
+    return rule.decls;
+  };
+  const same = (label, expected, actual) => {
+    for (const [prop, value] of expected) {
+      if (actual.get(prop) !== value) failures.push(`${label}: ${prop} is ${actual.get(prop) ?? "not set"}; the block it mirrors sets ${value}.`);
+    }
+    for (const prop of actual.keys()) if (!expected.has(prop)) failures.push(`${label}: sets ${prop}, which the block it mirrors does not.`);
+  };
+  // The tokens a mode switch resets: exactly those the light block sets.
+  const modeKeys = [...top('[data-theme="light"]').keys()];
+  const pick = (decls) => new Map([...decls].filter(([prop]) => modeKeys.includes(prop)));
+  const RESET = '[data-theme="dark"]:where([data-theme="light"] *)';
+  same(`tokens/tokens.css ${RESET}`, pick(top(":root")), top(RESET));
+
+  const themeNames = [...new Set(topRules.flatMap((rule) => /^\.theme-([a-z0-9-]+)$/.exec(rule.selector)?.slice(1) ?? []))];
+  if (themeNames.length < 5) throw new Error(`tokens/themes.css: found ${themeNames.length} theme base blocks; expected at least 5.`);
+  const islands = new Set([RESET]);
+  for (const theme of themeNames) {
+    const others = themeNames.filter((name) => name !== theme).map((name) => `.theme-${name}`).join(", ");
+    const nearer = `${others}, .theme-${theme} :is(${others}) *`;
+    const lightForms = [
+      `[data-theme="light"].theme-${theme}`,
+      `[data-theme="light"] .theme-${theme}:where(:not([data-theme="dark"], [data-theme="light"] [data-theme="dark"] *))`,
+      `:where(.theme-${theme}) [data-theme="light"]:where(:not(${nearer}))`,
+    ];
+    const island = `[data-theme="dark"]:where(.theme-${theme} *):where([data-theme="light"] *):where(:not(${nearer}))`;
+    const light = topRules.find((rule) => JSON.stringify(rule.selectors) === JSON.stringify(lightForms));
+    if (!light) {
+      failures.push(`tokens/themes.css: .theme-${theme} needs a light block whose selectors are exactly:\n  ${lightForms.join(",\n  ")}`);
+      continue;
+    }
+    const dark = pick(top(`.theme-${theme}`));
+    // A mode-dependent token the base block sets and the light block does not
+    // keeps its dark value in light mode (ui#81: survey's dark canvas under
+    // light text). The reverse is safe for mode tokens: the tokens.css reset
+    // restores their dark default inside a dark island.
+    for (const prop of dark.keys()) if (!light.decls.has(prop)) failures.push(`tokens/themes.css .theme-${theme} sets ${prop} but its light block does not, so light mode keeps the dark value.`);
+    // A light block may set only tokens the dark reset covers (modeKeys). Any
+    // other token (a radius, a font) is inherited unchanged into a dark island
+    // below the light element, so its light value would leak into dark mode;
+    // setting it in the base block too would not help, because the island
+    // inherits from the light element, not from the base block.
+    for (const prop of light.decls.keys()) {
+      if (!modeKeys.includes(prop)) failures.push(`tokens/themes.css .theme-${theme}'s light block sets ${prop}, which the dark reset does not cover, so a dark island below a light .theme-${theme} keeps the light value; set it in the base block only.`);
+    }
+    islands.add(island);
+    const islandRule = topRules.find((rule) => rule.selector === island);
+    if (!islandRule) failures.push(`tokens/themes.css: .theme-${theme} needs a dark-island block: ${island}`);
+    else same(`tokens/themes.css ${island}`, dark, islandRule.decls);
+  }
+  for (const rule of topRules.filter(isIsland)) {
+    if (!islands.has(rule.selector)) failures.push(`${rule.file}: ${rule.selector} is not one of the dark-island blocks this check knows.`);
+  }
+}
 
 // scope selector -> { token: hex }
 const scopes = new Map();
@@ -77,7 +160,6 @@ const PAIRS = [
   ["--k-line", "--k-bg", 1.2, "hairline separation is decorative, not text"],
 ];
 
-const failures = [];
 let checked = 0;
 for (const [selector, tokens] of scopes) {
   for (const [fg, bg, minimum, why] of PAIRS) {
@@ -116,7 +198,7 @@ const TRUST_STATES = ["unknown", "proposed", "assumed", "verified", "stale", "di
   }
 }
 const RATED = new Set([
-  "--k-bg", "--k-panel", "--k-panel-raised", "--k-text", "--k-text-muted",
+  "--k-bg", "--k-panel", "--k-panel-raised", "--k-text", "--k-text-muted", "--k-text-faint",
   "--k-brand", "--k-brand-contrast", "--k-action", "--k-action-contrast", "--k-focus", "--k-status-contrast",
   "--k-positive", "--k-caution", "--k-negative", "--k-active",
   ...TRUST_STATES.flatMap((state) => [`--k-trust-${state}`, `--k-trust-${state}-fill`]),
@@ -214,6 +296,21 @@ const ROLE_PAIRS = [
   // decoration names no color (checked below), so this pair rates both, in
   // every resolved theme and mode.
   ["--k-text-muted", "--k-panel", 4.5, "trust-basis line and caveat underline on panels"],
+  // Text on every surface, per resolved theme and mode: a theme that changes a
+  // surface in one mode only (ui#81) is caught here even though no single
+  // block holds both colors.
+  ["--k-text", "--k-bg", 4.5, "body text on the page"],
+  ["--k-text", "--k-panel", 4.5, "body text on panels"],
+  ["--k-text", "--k-panel-raised", 4.5, "body text on raised panels"],
+  ["--k-text-muted", "--k-bg", 4.5, "secondary text on the page"],
+  ["--k-text-muted", "--k-panel-raised", 4.5, "secondary text on raised panels"],
+  // Faint text (ui#77) carries timestamps, hints and counts: rated as normal
+  // text on every surface rather than exempted as decoration.
+  ["--k-text-faint", "--k-bg", 4.5, "faint text on the page"],
+  ["--k-text-faint", "--k-panel", 4.5, "faint text on panels"],
+  ["--k-text-faint", "--k-panel-raised", 4.5, "faint text on raised panels"],
+  // A button's focus ring is offset onto the surface around it (ui#82).
+  ["--k-focus", "--k-panel-raised", 3.0, "focus ring on raised panels"],
 ];
 
 // Shipped values that already fail a role pair. Recorded, not fixed, because

@@ -16,7 +16,7 @@ colors:
   line-strong: "rgba(150, 180, 210, 0.22)"
   text: "#eef3f8"
   text-muted: "#aebccb"
-  text-faint: "#72869b"
+  text-faint: "#75889d"
   brand: "#5ce0c6"
   brand-contrast: "#06080b"
   action: "#5ce0c6"
@@ -54,7 +54,7 @@ colors:
   line-strong-light: "rgba(36, 40, 46, 0.20)"
   text-light: "#202124"
   text-muted-light: "#5b626b"
-  text-faint-light: "#707782"
+  text-faint-light: "#6a707b"
   brand-light: "#0e7c64"
   brand-contrast-light: "#ffffff"
   action-light: "#0e7c64"
@@ -90,7 +90,7 @@ colors:
   action-survey: "#5ce0c6"
   action-contrast-survey: "#06080b"
   focus-survey: "#5ce0c6"
-  text-faint-survey: "#6f8095"
+  text-faint-survey: "#78889b"
   focus-ring-survey: "{colors.focus-survey}"
   brand-console: "#c9ff4a"
   brand-contrast-console: "#11120f"
@@ -104,7 +104,7 @@ colors:
   line-strong-console: "#8ea36e"
   text-console: "#f2f0e8"
   text-muted-console: "#a6ab9c"
-  text-faint-console: "#747a6c"
+  text-faint-console: "#858b7e"
   positive-console: "#a6d37b"
   caution-console: "#e8c15f"
   negative-console: "#ee776f"
@@ -126,6 +126,8 @@ colors:
   action-contrast-station: "#ffffff"
   focus-station: "#9364ff"
   focus-ring-station: "{colors.focus-station}"
+  bg-survey-light: "#f5f4ef"
+  text-faint-survey-light: "#6a707b"
   brand-survey-light: "#16806f"
   action-survey-light: "#16806f"
   action-contrast-survey-light: "#ffffff"
@@ -144,7 +146,7 @@ colors:
   line-strong-console-light: "#8fa36f"
   text-console-light: "#1e2319"
   text-muted-console-light: "#596250"
-  text-faint-console-light: "#77816d"
+  text-faint-console-light: "#68705f"
   positive-console-light: "#2f7d32"
   caution-console-light: "#8a6500"
   negative-console-light: "#b93a36"
@@ -374,15 +376,10 @@ the computed value. So every scope that sets the focus role redeclares the compa
 `--k-focus-ring` alias, and every scope that sets a status tone redeclares its soft fill
 (`npm run check:tokens` enforces both). Each theme's light block matches the theme class and
 `data-theme="light"` on one element, the class below the attribute, and the attribute below
-the class, so those three placements resolve to the theme's light values. A theme class on a
-light element keeps its own identity under an ancestor carrying another theme. Three things are
-not covered:
+the class, so those three placements resolve to the theme's light values; which of them applies
+when modes or themes nest is set by [Theme and mode scoping](#theme-and-mode-scoping). One
+thing is not covered:
 
-- `data-theme="dark"` does not reset a light ancestor (there is no dark selector).
-- `data-theme="light"` on an element below a nested theme class, with no theme class of its
-  own, resolves to the outer theme's light values or to whichever light block comes last in
-  source order, not to the nearest theme. Keep one product theme per tree, or put
-  `data-theme` on the theme element itself.
 - A local inline override of an input (say, the focus role on one panel) does not update the
   alias on that element's descendants. That is why consumer CSS should read `--k-focus`
   rather than the alias.
@@ -498,7 +495,7 @@ Color roles, not values. The values for each mode and theme are in the front mat
 | `--k-panel-raised` | Raised or inset surface inside a panel (controls, nested regions). |
 | `--k-line`, `--k-line-strong` | Hairline separation; `line-strong` for control borders and emphasis. |
 | `--k-text`, `--k-text-muted` | Primary and secondary text. |
-| `--k-text-faint` | Tertiary, non-essential text only. Meets WCAG AA for normal text on `--k-panel` in the default dark and light skins; it does not on `--k-panel-raised`, on the light `--k-bg`, or in `.theme-console` or `.theme-survey`. Not machine-checked. |
+| `--k-text-faint` | Tertiary text (hints, timestamps, counts). Meets WCAG AA for normal text on `--k-bg`, `--k-panel`, and `--k-panel-raised` in every theme and mode; `npm run check:contrast` rates all three. |
 | `--k-brand`, `--k-brand-contrast` | The product identity slot, and its paired text color when a brand-filled surface is used. |
 | `--k-action`, `--k-action-contrast` | Primary action fill and its text; an independently checked pair. |
 | `--k-focus` | Keyboard focus color, checked against page and panel surfaces. |
@@ -524,9 +521,26 @@ Where an override goes decides whether it applies:
 - Declare them with the same selectors the theme uses, in a stylesheet loaded after the
   tokens: the `.theme-<theme>` base block, and for light mode all three forms of its light
   block (`[data-theme="light"].theme-<theme>`, `[data-theme="light"] .theme-<theme>`,
-  `:where(.theme-<theme>) [data-theme="light"]`). A declaration on `:root` loses to the
+  `:where(.theme-<theme>) [data-theme="light"]`, each with the shipped `:where(:not(...))` tail
+  copied from `tokens/themes.css`), and for a dark element below a light one the theme's
+  dark-island block. A declaration on `:root` loses to the
   theme's light block whenever a theme class is present, and an inline style on `<html>`
   does not reach a theme class placed on `<body>`.
+- With no theme class, override `:root` for dark and `[data-theme="light"]` for light, and
+  add the dark reset `[data-theme="dark"]:where([data-theme="light"] *)` beside `:root`: a
+  dark element below a light one resets there, not to `:root`.
+
+> **Migrating overrides.** Dark islands now resolve dark (ui#80), so an override written with
+> the earlier selectors can misplace values. Change each selector as follows:
+>
+> | Earlier selector | Now |
+> | --- | --- |
+> | `.theme-<theme>` (dark) | keep it, and add the theme's dark-island block `[data-theme="dark"]:where(.theme-<theme> *):where([data-theme="light"] *):where(:not(...))`; without it a dark element below a light one shows the shipped product brand |
+> | `[data-theme="light"] .theme-<theme>` | the same with its `:where(:not(...))` tail; without the tail a dark theme element on a light page takes the light override onto dark surfaces |
+> | `:where(.theme-<theme>) [data-theme="light"]` | the same with its tail, so the override stops at a nested theme |
+> | `:root` (no theme class) | add `[data-theme="dark"]:where([data-theme="light"] *)` |
+>
+> Copy the tails from `tokens/themes.css`; `docs/consumer-guide.md` shows a full example.
 
 Rules for the values:
 
@@ -567,7 +581,8 @@ the status of a claim; never let two different trust states render identically.
 One theme class on a stable root selects the product identity (`docs/consumer-guide.md`):
 
 - `.theme-flow`, `.theme-surface` set brand and interaction colors.
-- `.theme-survey` sets brand and interaction colors plus canvas and faint text.
+- `.theme-survey` sets brand and interaction colors plus canvas and faint text, in each mode
+  (its light canvas is the default light canvas).
 - `.theme-station` sets the draft accent as its base with mode-specific contrast adjustments.
 - `.theme-console` is a full skin: brand, interaction colors, surfaces, lines, text, status,
   radii, and its own font stacks.
@@ -610,6 +625,42 @@ legibility, status semantics, and contrast. Ink may be preferable to pure black.
 status and brand hues are darkened so text clears WCAG AA on light panels; keep that property
 when changing them (`npm run check:contrast`). Fine contour artwork may need optical adjustment
 on dark surfaces. Final dark surface, text, and border ramps are OPEN.
+
+### Theme and mode scoping
+
+**Rule: the nearest `data-theme` picks the mode, and the nearest theme class picks the
+product.** Both are counted from the element itself outward, at any depth, and independently:
+
+- An element with `data-theme` resolves to its mode's contract plus its nearest theme's values
+  for that mode. A theme further out contributes no mode-dependent tokens to it (its
+  mode-independent ones, such as radii and fonts, still inherit).
+- `data-theme="dark"` inside a light element restores the dark contract (surfaces, text,
+  status, trust states, and roles) and its nearest theme's dark values. With no light element
+  above it there is nothing to restore, and it inherits.
+- A theme class with no `data-theme` of its own takes the nearest mode above it. Its values
+  layer over what it inherits, in both modes: `.theme-flow` inside `.theme-console` keeps
+  Console's surfaces and uses Flow's brand and roles.
+- Each theme's light block sets every mode-dependent token its base block sets, so light mode
+  never keeps a dark value, and sets nothing else: a token outside the mode reset (a radius, a
+  font) would carry its light value into a dark island below. `npm run check:contrast` fails
+  either way.
+
+How it is built: plain selectors with `:where(:not(...))` tails. The class-below-attribute
+light form stops at a nearer `data-theme="dark"`; the attribute-below-class form stops at a
+nearer (or its own) other theme class; dark islands have their own blocks that only match below
+a light element. `:where()` keeps every selector's weight as it was, so a white-label override
+written later with the same selectors still wins in every documented placement. Browser support
+is that of `:where()` and complex selectors inside `:not()`: Chromium 88, Firefox 84, and Safari
+14 or later.
+
+`@scope` was considered and not used: a scoped rule outranks an unscoped rule of the same
+weight, so shipped scoped rules would beat existing white-label overrides written with the
+documented selectors, and every value would be declared twice (a scoped copy beside the
+fallback for browsers without `@scope`).
+
+Not covered: the theme class of an element below a mode that switches back (light, then dark,
+then light again above it) matches as if the inner light were absent. Put `data-theme` on that
+theme element. The same holds for a theme nested inside itself through another theme.
 
 ## Typography
 
@@ -1054,7 +1105,7 @@ keyword, not a stroke value, so a chart translates it:
 | --- | --- |
 | solid | no dash array |
 | dashed | a dash pattern, such as `stroke-dasharray: 4 3` |
-| dotted | round caps on a near-zero dash, such as `stroke-dasharray: 0.1 3` with `stroke-linecap: round` |
+| dotted | round caps on zero-length dashes, relative to the stroke width: a dash of `0` and a gap of about twice the width (`stroke-dasharray: 0 3` for a 1.5px stroke), with `stroke-linecap: round`, so each dot is as wide as the stroke |
 | double | no stroke equivalent: draw two parallel strokes, or use the state's glyph as the marker |
 
 Broken/continuous contour logic is allowed only when semantically appropriate. Provide textual
@@ -1071,7 +1122,8 @@ credibility.
 
 ## Accessibility
 
-Accessibility is part of trust. Require keyboard access, visible focus (`--k-focus-ring`),
+Accessibility is part of trust. Require keyboard access, visible focus (`--k-focus-ring`; buttons
+draw it as an outline offset onto the surrounding surface, so it never depends on the button's fill),
 semantic markup, accessible names, sufficient contrast (`npm run check:contrast` enforces WCAG
 AA on the shipped pairs), reduced-motion support, no critical color-only encoding, usable zoom
 and reflow, appropriate target sizes, screen-reader-readable status changes where needed,

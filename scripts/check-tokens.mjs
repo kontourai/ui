@@ -100,7 +100,9 @@ for (const theme of themeNames) {
     throw new Error(`tokens/themes.css: .theme-${theme} has no base block.`);
   }
   const light = [`[data-theme="light"].theme-${theme}`, `[data-theme="light"] .theme-${theme}`, `:where(.theme-${theme}) [data-theme="light"]`];
-  if (!themeSelectors.some((list) => light.every((form) => list.includes(form)))) {
+  // A form may carry a :where(:not(...)) tail that keeps it to the nearest
+  // theme and mode (ui#80, ui#84); check:contrast pins the exact tails.
+  if (!themeSelectors.some((list) => light.every((form) => list.some((part) => part === form || part.startsWith(`${form}:where(:not(`))))) {
     throw new Error(`tokens/themes.css: .theme-${theme} needs a light block matching ${light.join(", ")}.`);
   }
 }

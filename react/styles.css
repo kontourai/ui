@@ -293,7 +293,6 @@
 
 .btn:hover,
 .btn:focus-visible {
-  outline: none;
   transform: translateY(calc(var(--k-space-1) * -1));
 }
 
@@ -303,8 +302,14 @@
   border-color: var(--k-action);
 }
 
+/* The ring is offset onto the surface around the button (ui#82): a primary
+   fill is usually the focus color itself, so a border-only ring vanished on
+   it. Offset, the ring's neighbours on both sides are the surface, the pair
+   check:contrast rates at 3:1. */
 .btn:focus-visible {
   border-color: var(--k-focus);
+  outline: var(--k-focus-ring-width) solid var(--k-focus);
+  outline-offset: var(--k-focus-ring-offset);
 }
 
 .btn-primary {
