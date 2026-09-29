@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { trustStatesFromSource } from "./trust-states-source.mjs";
 import postcss from "postcss";
+import selectorParser from "postcss-selector-parser";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tokenFiles = {
@@ -169,31 +170,75 @@ for (const [selector, parts] of [[":root", ["", "-fill", "-line"]], ['[data-them
 // trust state is not a brand accent, and a white-label brand must not recolor
 // what Kontour can establish. Each state's rules read only its own trust
 // tokens, so one state cannot borrow another's color or line style.
+//
+// Selectors are parsed (postcss-selector-parser), so escaped class names and
+// classes inside :is() / :where() / :not() are recognized by their unescaped
+// value, not by substring.
+//
+// Chip paint (ui#89): the base .trust-state__chip draws a dotted line in
+// neutral colors, so an unrecognized state looks tentative. Each state then
+// has exactly one top-level `.trust-state--<state> .trust-state__chip` rule
+// that sets color, background, border-color, and border-style to exactly
+// that state's tokens, once each and with no other paint longhand. A state
+// whose line token moved to another property would otherwise still render
+// dotted through the base rule, and a theme's override of that token would be
+// silently ignored. No other rule whose subject is the chip may set chip
+// paint. Accepted gap: a selector that reaches the chip without naming
+// .trust-state__chip in its last compound (such as `.trust-state--stale > *`)
+// is not recognized.
 const TRUST_FORBIDDEN = /--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring)\b(?!-)/;
+const CHIP_PAINT = /^(?:color|background(?:-color|-image)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?(?:-(?:color|style))?)$/;
+const chipPaint = (state) => ({
+  color: `var(--k-trust-${state})`,
+  background: `var(--k-trust-${state}-fill)`,
+  "border-color": `var(--k-trust-${state})`,
+  "border-style": `var(--k-trust-${state}-line)`,
+});
 const trustRules = new Map(TRUST_STATES.map((state) => [state, 0]));
 postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
-  if (!/\.trust-state\b/.test(rule.selector)) return;
-  const owner = TRUST_STATES.find((state) => new RegExp(`\\.trust-state--${state}(?![a-z-])`).test(rule.selector));
+  const parsed = parseSelectors(rule.selector);
+  const classes = selectorNodes(parsed).filter((node) => node.type === "class").map((node) => node.value);
+  if (!classes.some((name) => name.startsWith("trust-state"))) return;
+  const where = `react/styles.css ${rule.selector.replace(/\s+/g, " ").trim()}${rule.parent?.type === "atrule" ? ` (inside @${rule.parent.name} ${rule.parent.params})` : ""}`;
+  const owners = new Set(classes.filter((name) => name.startsWith("trust-state--")).map((name) => name.slice("trust-state--".length)));
   rule.walkDecls((decl) => {
     if (TRUST_FORBIDDEN.test(decl.value)) {
-      throw new Error(`react/styles.css ${rule.selector}: ${decl.prop}: ${decl.value} must not read the brand, action, or focus roles; trust states use --k-trust-* tokens.`);
+      throw new Error(`${where}: ${decl.prop}: ${decl.value} must not read the brand, action, or focus roles; trust states use --k-trust-* tokens.`);
     }
     for (const match of decl.value.matchAll(/--k-trust-([a-z-]+?)(?:-fill|-line)?\b(?![a-z-])/g)) {
-      if (match[1] !== owner) throw new Error(`react/styles.css ${rule.selector}: ${decl.prop} reads --k-trust-${match[1]}*, which belongs to another state.`);
+      if (owners.size !== 1 || !owners.has(match[1])) throw new Error(`${where}: ${decl.prop} reads --k-trust-${match[1]}*, which belongs to another state.`);
     }
   });
-  // The rule that paints the state's chip (it sets the text color) must read
-  // all three of the state's tokens.
-  if (owner && /\.trust-state__chip\b/.test(rule.selector) && rule.some((node) => node.type === "decl" && node.prop === "color")) {
-    const values = rule.nodes.filter((node) => node.type === "decl").map((decl) => decl.value).join(" ");
-    for (const part of ["", "-fill", "-line"]) {
-      if (!values.includes(`var(--k-trust-${owner}${part})`)) throw new Error(`react/styles.css ${rule.selector} must read var(--k-trust-${owner}${part}).`);
+  const paint = rule.nodes.filter((node) => node.type === "decl" && CHIP_PAINT.test(node.prop.toLowerCase()));
+  const subjects = parsed.map((selector) => selector.nodes.slice(selector.nodes.findLastIndex((node) => node.type === "combinator") + 1));
+  const isChip = (node) => (node.type === "class" && node.value === "trust-state__chip") || (node.nodes ?? []).some(isChip);
+  const paintsChip = subjects.some((compound) => compound.some(isChip));
+  const state = TRUST_STATES.find((candidate) => sameSelector(parsed, `.trust-state--${candidate} .trust-state__chip`));
+  if (state && rule.parent?.type === "root" && paint.length > 0) {
+    const expected = chipPaint(state);
+    const seen = paint.map((decl) => decl.prop.toLowerCase());
+    for (const decl of paint) {
+      const prop = decl.prop.toLowerCase();
+      if (!(prop in expected)) throw new Error(`${where}: sets ${decl.prop}; a state's chip rule sets only ${Object.keys(expected).join(", ")}, each to the state's own token.`);
+      if (seen.indexOf(prop) !== seen.lastIndexOf(prop)) throw new Error(`${where}: sets ${prop} more than once.`);
+      if (decl.important || decl.value.trim() !== expected[prop]) throw new Error(`${where}: ${prop}: ${decl.value}${decl.important ? " !important" : ""} must be exactly ${expected[prop]}.`);
     }
-    trustRules.set(owner, trustRules.get(owner) + 1);
+    for (const prop of Object.keys(expected)) {
+      if (!seen.includes(prop)) throw new Error(`${where} must set ${prop}: ${expected[prop]}; otherwise the chip keeps the base rule's value and ignores the ${state} token.`);
+    }
+    trustRules.set(state, trustRules.get(state) + 1);
+    return;
   }
+  // The base chip rule may paint the neutral fallback; its specificity is
+  // below every state rule's. No other chip rule may paint.
+  const base = rule.parent?.type === "root" && sameSelector(parsed, ".trust-state__chip");
+  if (paintsChip && paint.length > 0 && !base) {
+    throw new Error(`${where}: sets ${paint.map((decl) => decl.prop).join(", ")} on the chip; only .trust-state__chip and each state's one top-level .trust-state--<state> .trust-state__chip rule may paint the chip.`);
+  }
+  if (base && paint.some((decl) => decl.important)) throw new Error(`${where}: chip paint must not be !important; it would override every state.`);
 });
 for (const [state, count] of trustRules) {
-  if (count === 0) throw new Error(`react/styles.css has no .trust-state--${state} .trust-state__chip rule reading the ${state} tokens.`);
+  if (count !== 1) throw new Error(`react/styles.css must have exactly one top-level .trust-state--${state} .trust-state__chip rule painting the chip with the ${state} tokens; found ${count}.`);
 }
 
 // Trust basis (ui#87): a muted text line after the trust-state chip. It must
@@ -220,45 +265,67 @@ const BASIS_DECORATION_VALUE = /^underline dashed(?: [0-9.]+px)?$/;
 const BASIS_ALLOWED = /^--k-(?:text|text-muted|line|space-[0-9]+|text-(?:xs|sm|md)|leading-[a-z]+|font-(?:ui|mono)|border-thin|basis-caveat-decoration)$/;
 const BASIS_FORBIDDEN = /^--k-(?:brand|brand-contrast|action|action-contrast|focus|focus-ring|status-contrast|positive|caution|negative|active|neutral)(?:-soft)?$|^--k-trust-/;
 const BASIS_CAVEAT_SELECTOR = '.trust-basis__facet[data-caveat="true"]';
+const BASIS_ATTRIBUTES = new Set(["data-caveat", "data-field", "data-code", "data-basis-state"]);
 let basisRules = 0;
 let caveatRules = 0;
-// Any rule that can reach the basis line is scanned: one naming a trust-basis
-// class in any form (.trust-basis*, [class~="trust-basis__facet"]), the
-// k-trust-basis element, or the data-caveat / data-field attributes it sets.
-const BASIS_SELECTOR = /trust-basis|data-caveat|data-field/;
+// A rule is scanned as a basis rule when its parsed selector names, anywhere
+// (pseudo-class arguments included, names unescaped): a class starting with
+// trust-basis, the k-trust-basis element, an attribute the component sets
+// (data-caveat, data-field, data-code, data-basis-state), or a [class]
+// attribute selector whose value mentions "basis". Accepted gap: a selector
+// that reaches the line only through structure or a consumer's own class
+// (such as `k-trust-state + span`) is not recognized.
 postcss.parse(tokenFiles["react/styles.css"]).walkRules((rule) => {
-  if (!BASIS_SELECTOR.test(rule.selector)) return;
+  const parsed = parseSelectors(rule.selector);
+  const nodes = selectorNodes(parsed);
+  const attribute = (node) => node.type === "attribute" && node.attribute.toLowerCase();
+  const isBasis = nodes.some((node) =>
+    (node.type === "class" && node.value.startsWith("trust-basis"))
+    || (node.type === "tag" && node.value.toLowerCase() === "k-trust-basis")
+    || BASIS_ATTRIBUTES.has(attribute(node))
+    || (attribute(node) === "class" && String(node.value ?? "").toLowerCase().includes("basis")));
+  if (!isBasis) return;
   basisRules += 1;
+  const caveat = nodes.some((node) => attribute(node) === "data-caveat");
   const selector = rule.selector.replace(/\s+/g, " ").trim();
+  const where = `react/styles.css ${selector}${rule.parent?.type === "atrule" ? ` (inside @${rule.parent.name} ${rule.parent.params})` : ""}`;
   rule.walkDecls((decl) => {
+    const prop = decl.prop.toLowerCase();
+    // A scoped token override ([data-basis-state]{--k-text-muted: ...})
+    // would recolor the line while every property still reads an allowed token.
+    if (prop.startsWith("--")) throw new Error(`${where}: declares ${decl.prop}; trust-basis rules read tokens and never redefine them.`);
     for (const match of decl.value.matchAll(/var\(\s*(--k-[a-z0-9-]+)/g)) {
       const token = match[1];
-      if (BASIS_FORBIDDEN.test(token)) throw new Error(`react/styles.css ${selector}: ${decl.prop} reads ${token}; trust-basis rules must not read brand, action, focus, status-tone, or trust-state tokens.`);
-      if (!BASIS_ALLOWED.test(token)) throw new Error(`react/styles.css ${selector}: ${decl.prop} reads ${token}, which is not a neutral text, line, or layout token allowed in trust-basis rules.`);
-      if (token === BASIS_DECORATION && selector !== BASIS_CAVEAT_SELECTOR) throw new Error(`react/styles.css ${selector}: only ${BASIS_CAVEAT_SELECTOR} may read ${BASIS_DECORATION}.`);
+      if (BASIS_FORBIDDEN.test(token)) throw new Error(`${where}: ${decl.prop} reads ${token}; trust-basis rules must not read brand, action, focus, status-tone, or trust-state tokens.`);
+      if (!BASIS_ALLOWED.test(token)) throw new Error(`${where}: ${decl.prop} reads ${token}, which is not a neutral text, line, or layout token allowed in trust-basis rules.`);
+      if (token === BASIS_DECORATION && !caveat) throw new Error(`${where}: only ${BASIS_CAVEAT_SELECTOR} may read ${BASIS_DECORATION}.`);
     }
-    if (/^(?:color|background(?:-color)?|border(?:-[a-z]+)*-color|text-decoration-color|outline-color|fill|stroke)$/.test(decl.prop) && !/^var\(--k-(?:text|text-muted|line)\)$|^(?:inherit|currentColor)$/.test(decl.value.trim())) {
-      throw new Error(`react/styles.css ${selector}: ${decl.prop}: ${decl.value} must be --k-text-muted, --k-text, --k-line, or inherited.`);
+    if (/^(?:color|background(?:-color)?|border(?:-[a-z]+)*-color|text-decoration-color|outline-color|fill|stroke)$/.test(prop) && !/^var\(--k-(?:text|text-muted|line)\)$|^(?:inherit|currentColor)$/.test(decl.value.trim())) {
+      throw new Error(`${where}: ${decl.prop}: ${decl.value} must be --k-text-muted, --k-text, --k-line, or inherited.`);
     }
-    if (/^text-decoration(?:-line|-style)?$/.test(decl.prop) && selector !== BASIS_CAVEAT_SELECTOR) {
-      throw new Error(`react/styles.css ${selector}: sets ${decl.prop}; only caveat facets are decorated, through ${BASIS_CAVEAT_SELECTOR}.`);
+    if (/^text-decoration(?:-line|-style)?$/.test(prop) && !caveat) {
+      throw new Error(`${where}: sets ${decl.prop}; only caveat facets are decorated, through ${BASIS_CAVEAT_SELECTOR}.`);
     }
   });
-  if (selector === BASIS_CAVEAT_SELECTOR) {
+  if (caveat) {
     caveatRules += 1;
-    // The caveat rule only draws the underline: no color, weight, or other
-    // styling that would turn the caveat into a second visual channel.
+    // Any rule that references data-caveat only draws the underline: no
+    // color, weight, or other styling that would turn the caveat into a
+    // second visual channel.
     rule.walkDecls((decl) => {
-      if (!["text-decoration", "text-underline-offset"].includes(decl.prop)) {
-        throw new Error(`react/styles.css ${BASIS_CAVEAT_SELECTOR}: ${decl.prop} is not allowed; the caveat rule sets only text-decoration (the token) and text-underline-offset.`);
+      if (!["text-decoration", "text-underline-offset"].includes(decl.prop.toLowerCase())) {
+        throw new Error(`${where}: ${decl.prop} is not allowed; a rule that references data-caveat sets only text-decoration (the token) and text-underline-offset.`);
       }
     });
+    if (rule.parent?.type !== "root" || !sameSelector(parsed, BASIS_CAVEAT_SELECTOR)) {
+      throw new Error(`${where}: the one rule that references data-caveat must be ${BASIS_CAVEAT_SELECTOR}, at the top level.`);
+    }
     const decoration = rule.nodes.find((node) => node.type === "decl" && node.prop === "text-decoration");
-    if (decoration?.value !== `var(${BASIS_DECORATION})`) throw new Error(`react/styles.css ${BASIS_CAVEAT_SELECTOR} must set text-decoration: var(${BASIS_DECORATION}).`);
+    if (decoration?.value !== `var(${BASIS_DECORATION})`) throw new Error(`${where} must set text-decoration: var(${BASIS_DECORATION}).`);
   }
 });
 if (basisRules < 5) throw new Error(`react/styles.css: only ${basisRules} trust-basis rules scanned.`);
-if (caveatRules !== 1) throw new Error(`react/styles.css must have exactly one ${BASIS_CAVEAT_SELECTOR} rule; found ${caveatRules}.`);
+if (caveatRules !== 1) throw new Error(`react/styles.css must have exactly one rule referencing data-caveat (${BASIS_CAVEAT_SELECTOR}); found ${caveatRules}.`);
 
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./tokens.css\";", "Token entrypoint must import base tokens.");
 assertIncludes(tokenFiles["tokens/index.css"], "@import \"./themes.css\";", "Token entrypoint must import themes.");
@@ -334,4 +401,38 @@ function assertExcludes(content, unexpected, message) {
   if (content.includes(unexpected)) {
     throw new Error(message);
   }
+}
+
+// Parses a selector list into its top-level selectors.
+function parseSelectors(text) {
+  const selectors = [];
+  selectorParser((list) => list.each((selector) => selectors.push(selector))).processSync(text);
+  return selectors;
+}
+
+// Every node of the parsed selectors, including those inside :is(), :where(),
+// :not(), and other pseudo-class arguments. Class, tag, and attribute names
+// are unescaped by the parser.
+function selectorNodes(selectors) {
+  const nodes = [];
+  for (const selector of selectors) selector.walk((node) => nodes.push(node));
+  return nodes;
+}
+
+// Structural equality of two selector lists, ignoring whitespace, quoting,
+// escapes, and the case of tag and attribute names.
+function sameSelector(selectors, expected) {
+  const describe = (list) => list.map((selector) => {
+    const parts = [];
+    selector.walk((node) => {
+      if (node.type === "class") parts.push(`.${node.value}`);
+      else if (node.type === "tag") parts.push(`tag:${node.value.toLowerCase()}`);
+      else if (node.type === "attribute") parts.push(`[${node.attribute.toLowerCase()}${node.operator ?? ""}${node.value ?? ""}${node.insensitive ? " i" : ""}]`);
+      else if (node.type === "combinator") parts.push(`combinator:${node.value.trim() || " "}`);
+      else if (node.type === "pseudo") parts.push(`pseudo:${node.value.toLowerCase()}`);
+      else parts.push(`${node.type}:${node.value ?? ""}`);
+    });
+    return parts.join("|");
+  }).join(",");
+  return describe(selectors) === describe(parseSelectors(expected));
 }
