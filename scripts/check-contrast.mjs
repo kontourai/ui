@@ -104,9 +104,10 @@ for (const [selector, tokens] of scopes) {
 // this file.
 // Every token a pair below rates, except --k-line (a translucent rgba()
 // hairline, rated only where a scope spells it in hex).
-// Trust states (ui#73): Surface's TRUST_STATUSES, pinned here rather than read
-// from the source so a state dropped from the tokens and the component
-// together still fails.
+// Trust states (ui#73): Surface's TRUST_STATUSES, pinned here and also read
+// from react/src/trust-states.ts. The pin must equal the source's list, so a
+// state dropped from the tokens and the component together still fails, and a
+// state added to the component fails until its tokens are rated here.
 const TRUST_STATES = ["unknown", "proposed", "assumed", "verified", "stale", "disputed", "superseded", "rejected", "revoked"];
 {
   const fromSource = trustStatesFromSource(root);

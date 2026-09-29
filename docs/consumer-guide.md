@@ -423,7 +423,7 @@ const basis = claimBasisView(claim, bundle.evidence);
   console warning. One malformed facet or detail row is enough: the component never renders a
   partial line, since that could drop a caveat.
 - `density="inspector"` adds one labelled row per detail (How, Support, Results, Derived, Review,
-  Producer rating, Sources) below the line.
+  Producer rating, Calibrated confidence, Sources) below the line.
 - The `basis` property takes precedence over `basis-json`; setting it to `null` or `undefined` falls
   back to the attribute. A `basis` set before the element is defined is kept.
 - Caveat facets are underlined with a dashed line in the text's own color
