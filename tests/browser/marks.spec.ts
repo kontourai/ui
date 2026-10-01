@@ -133,15 +133,15 @@ test.describe("mark files", () => {
       const ink = raster.alpha.reduce((sum, value) => sum + value, 0) / 255 / area;
       expect(ink, `${label}: ink coverage`).toBeLessThanOrEqual(MAX_INK);
 
-      const { spanX, spanY } = span(raster);
-      expect(Math.max(spanX, spanY), `${label}: ink spans the frame`).toBeGreaterThanOrEqual(MIN_SPAN);
-
       for (const [id, pair] of Object.entries(colours)) {
         // A pixel counts when the ink, antialiased onto this surface, still
         // holds 3:1 against it. A hairline stroke never does.
         const legible = raster.alpha.filter((value) => contrastRatio(blend(pair.ink, pair.surface, value / 255), pair.surface) >= MIN_CONTRAST).length / area;
         expect(legible, `${label} on ${id}: share of the frame at ${MIN_CONTRAST}:1 or better`).toBeGreaterThanOrEqual(MIN_LEGIBLE_INK);
       }
+
+      const { spanX, spanY } = span(raster);
+      expect(Math.max(spanX, spanY), `${label}: ink spans the frame`).toBeGreaterThanOrEqual(MIN_SPAN);
     }
   });
 
