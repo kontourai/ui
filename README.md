@@ -17,7 +17,7 @@ with its own design system, you do not need this package.
 Kontour UI ships three layers:
 
 - `@kontourai/ui/tokens` — CSS custom properties for any renderer, no framework required.
-- `@kontourai/ui/react` — class-driven React primitives: display (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `TrustState`, `TrustBasis`, `Empty`, `ProductIcon`), form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`), and overlays/feedback (`Dialog`, `Toast`, `ToastHost`, `Tooltip`, `Popover`) that read the token contract.
+- `@kontourai/ui/react` — class-driven React primitives: display (`Badge`, `Button`, `Panel`, `Metric`, `Progress`, `Skeleton`, `Spinner`, `StatusBadge`, `StatusBar`, `Topbar`, `TrustState`, `TrustBasis`, `Empty`, `ProductIcon`, `BrandMark`), form controls (`Field`, `Input`, `Textarea`, `Select`, `Checkbox`, `Toggle`), and overlays/feedback (`Dialog`, `Toast`, `ToastHost`, `Tooltip`, `Popover`) that read the token contract.
 - `@kontourai/ui/elements` — light-DOM web-component wrappers for vanilla products.
 
 It also exports `@kontourai/ui/contrast`, a dependency-free module for runtimes that apply a
@@ -145,6 +145,7 @@ Products should style components with `--k-*` variables and treat the product th
 
 - `npm run check:tokens` verifies the token/theme contract and keeps React styles token-only.
 - `npm run check:contrast` rates every shipped theme and mode against the WCAG pairs, through the same functions and thresholds `@kontourai/ui/contrast` exports; `npm run test:unit` tests that module.
+- `npm run check:marks` holds every mark in `icons/` to the production gates: generated from the path modules, valid and self-contained SVG, `currentColor` only, no effects, and shape and size ceilings. The browser suite adds the pixel gates (16/24/32px legibility, contrast on the shipped surfaces, favicon rendering, distinctness).
 - `npm run check:exports` builds and verifies package export targets, ESM output, declaration files, package naming, and framework-free element output.
 - `npm run check:readiness` verifies release docs, gallery, package metadata, and adopter contract markers.
 - `npm run check:pack` previews package contents with `npm pack --dry-run`.
