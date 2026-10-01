@@ -668,18 +668,27 @@ Choosing a mode:
 
   ```html
   <script>
-    const prefersLight = matchMedia("(prefers-color-scheme: light)");
-    const applyMode = () => {
-      if (prefersLight.matches) document.documentElement.dataset.theme = "light";
-      else delete document.documentElement.dataset.theme;
-    };
-    applyMode();
-    prefersLight.addEventListener("change", applyMode);
+    (() => {
+      const root = document.documentElement;
+      const prefersLight = matchMedia("(prefers-color-scheme: light)");
+      const applyMode = () => {
+        let stored = null;
+        try { stored = localStorage.getItem("theme"); } catch {}
+        const light = stored === "light" || (stored !== "dark" && prefersLight.matches);
+        if (light) root.dataset.theme = "light";
+        else delete root.dataset.theme;
+      };
+      applyMode();
+      prefersLight.addEventListener("change", applyMode);
+    })();
   </script>
   ```
 
-  If the product also has its own mode switch, the visitor's stored choice wins over the OS
-  preference.
+  A stored choice wins over the OS preference: if the product has its own mode switch, it
+  stores `"light"` or `"dark"` (here under the `theme` key; use your own) and the script applies
+  that value, on load and when the OS preference changes. With nothing stored, the page follows
+  the OS. A strict Content Security Policy blocks inline scripts, so give this one a nonce or
+  load it as an external script placed first in `<head>`.
 
 Dark mode is not inversion. Preserve hierarchy, restraint, product identity, contour
 legibility, status semantics, and contrast. Light-mode status and brand hues are darkened so
@@ -1255,8 +1264,7 @@ record of the decision.
 
 Exact corporate symbol geometry; contour spacing and line weights; final Station vector
 geometry; final Flow and Surface vectors ([#75](https://github.com/kontourai/ui/issues/75));
-final wordmark; complete typography tuning; complete color
-ramps; environment and release-channel colors;
+final wordmark; complete typography tuning; environment and release-channel colors;
 exact motion durations and easing; final breakpoints; final component-library mappings.
 
 ## Final Principle
