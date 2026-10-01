@@ -350,14 +350,17 @@ front matter is a projection of them made before publishing.
 
 Precedence, highest first: approved canonical SVGs and tokens → this file → approved product
 docs → existing, unsuperseded production patterns → reference artwork → generated concepts.
-A shipped value is not an approved one: where a shipped token disagrees with this file, it is
-recorded as OPEN and does not outrank the rule here. Generated images are references, not
-production assets. A generated concept sheet is held privately by the owner; it is reference
-only, never a production source.
+Token values are canonical as shipped (owner decision, 2026-10-01): `tokens/` holds the palette
+and the spacing, radius, and type scales, and this file restates them. Where the earlier draft
+named different values, the draft was not adopted; its values stay in this file only as a
+record of what was considered. Changing a token value is a design-system change and needs its
+own decision. Generated images are references, not production assets. A generated concept sheet
+is held privately by the owner; it is reference only, never a production source.
 
 Anything marked **OPEN** is unresolved. Do not silently resolve it in either direction: an
 OPEN item records what ships today and where the design is headed, and both stay true until
-someone decides. The full register is in [Open Decisions](#open-decisions).
+someone decides. An item marked **Decided** keeps its id and carries the date and who decided.
+The full register is in [Open Decisions](#open-decisions).
 
 ### Reading the token block
 
@@ -413,8 +416,9 @@ product overrides**, and "components consume semantic tokens whenever practical.
 maps onto it only partly:
 
 - **Primitive** (not shipped): there is no separate palette layer; `tokens/tokens.css` assigns
-  literal values straight to semantic names. A named brand palette (Ink, Stone, product
-  accents) is [#74](https://github.com/kontourai/ui/issues/74).
+  literal values straight to semantic names. The draft's named brand palette (Ink, Stone) was
+  not adopted ([#74](https://github.com/kontourai/ui/issues/74), decided 2026-10-01); see
+  [Product themes](#product-themes).
 - **Semantic** (shipped, partly): the `--k-*` structure, text, status, trust-state, action, and
   focus roles.
   `--k-action` and `--k-action-contrast` form the primary action pair; `--k-focus` supplies
@@ -572,12 +576,20 @@ The shared status scale maps product words to five tones: `positive`, `caution`,
 `active`, `neutral` (see `docs/adr/0001-console-kit-token-contract.md`). Never encode critical
 state through color alone; status always carries text, and icon or color reinforces it.
 
-**OPEN-7 — status model.** Shipped: the five tones above, and, separately, the trust states
-(Surface's claim statuses, decided in OPEN-12) as their own tokens, `TrustState`, and
-`k-trust-state` (see [Trust UX](#trust-ux)). Still draft: distinct semantic tokens for success,
-warning, danger, information, pending, and neutral that would replace or extend the five tones.
-The remaining semantic-token work is tracked in [#88](https://github.com/kontourai/ui/issues/88). Use a trust state, not a tone, for
-the status of a claim; never let two different trust states render identically.
+**OPEN-7 — status model. Decided (owner, 2026-10-01): five tones plus the nine trust states.**
+The status model is the five tones above and, separately, the trust states (Surface's claim
+statuses, decided in OPEN-12) with their own tokens, `TrustState`, and `k-trust-state` (see
+[Trust UX](#trust-ux)). The draft's separate semantic tokens for success, warning, danger,
+information, pending, and neutral are not adopted. A review of the token consumers (Station,
+Surface, Survey, and Flow) found none that reads a status token outside the five tones
+([#88](https://github.com/kontourai/ui/issues/88)). Product words map onto the five tones
+through `toneForValue` or a product's own mapping: success is positive, warning and pending
+are caution, error is negative.
+
+**A new tone needs a named consumer:** a shipped product surface with a status that none of the
+five tones and none of the nine trust states can express, recorded in an issue before any
+token is added. Use a trust state, not a tone, for the status of a claim; never let two
+different trust states render identically.
 
 ### Product themes
 
@@ -590,9 +602,11 @@ One theme class on a stable root selects the product identity (`docs/consumer-gu
 - `.theme-console` is a full skin: brand, interaction colors, surfaces, lines, text, status,
   radii, and its own font stacks.
 
-**OPEN-6 — brand palette and product accents.** Shipped vs draft direction:
+**OPEN-6 — brand palette and product accents. Decided (owner, 2026-10-01): the shipped values
+are the palette.** No token changed with this decision. The draft's values are listed beside
+them as a record only:
 
-| Role | Shipped | Draft direction |
+| Role | Canonical (shipped) | Draft value, not adopted |
 | --- | --- | --- |
 | Corporate ink | none; dark canvas `--k-bg` = `#0a0e13` | Ink `#0B1220` |
 | Corporate light ground | none; light canvas `--k-bg` (light) = `#f5f4ef` | Stone `#F2EFEA`, White `#FFFFFF` |
@@ -601,9 +615,12 @@ One theme class on a stable root selects the product identity (`docs/consumer-gu
 | Surface accent | `--k-brand` (surface) = `#14a37a`, `--k-brand` (surface-light) = `#0f6b52` | `#14B8A6` |
 | Default brand | `--k-brand` = `#5ce0c6`, `--k-brand` (light) = `#0e7c64` | not specified |
 
-The draft's values are a palette, not tokens: do not add `--kontour-*` custom properties.
-Migration to the brand palette is [#74](https://github.com/kontourai/ui/issues/74); final ramps
-and dark-mode colors are also open.
+The draft's Ink, Stone, and Flow and Surface accent values are not adopted, so the palette
+migration ([#74](https://github.com/kontourai/ui/issues/74)) closes without a value change.
+There is no separate palette layer: do not add `--kontour-*` custom properties. Dark-mode
+colors are the shipped `:root` values. No color ramps ship; adding one would be a new decision.
+Changing any value above is a design-system change: it needs its own decision and must keep
+`npm run check:contrast` passing.
 
 Station ships the owner's draft accent, adjusted only where contrast requires it. In dark mode,
 the draft accent remains the action fill with white text; the focus ring uses a lighter
@@ -621,24 +638,63 @@ would fall below 4.5:1, and the action and focus keep the brighter lime with dar
 Survey's light brand is its accent darkened at the same hue and chroma just enough to read on
 the light canvas; the action and focus keep the accent, and brand-contrast stays white.
 
-**OPEN-10 — Console and Survey themes.** The draft does not cover `theme-console` or
-`theme-survey`. They stay as shipped until the palette work decides their relationship to the
-brand palette.
+**OPEN-10 — Console and Survey themes. Decided with OPEN-6 (2026-10-01).** The draft did not
+cover `theme-console` or `theme-survey`. Their shipped values are canonical like every other
+token value, so nothing about them waits on a palette migration.
 
-**OPEN-11 — marketing-site palette.** The relationship between these product tokens and the
-marketing-site palette is undecided.
+**OPEN-11 — marketing-site palette. Decided (owner, 2026-10-01): a documented exception, for
+now.** The marketing site (kontourai.io) keeps its own palette and is not required to use these
+product tokens or themes. The exception covers that site only; product interfaces keep to the
+`--k-*` tokens. Nothing here schedules a convergence: moving the site onto these tokens would be
+a new decision.
 
 ### Modes
 
-**OPEN-5 — default mode.** Shipped: dark is the default (`:root`, `color-scheme: dark`) and
-light is opt-in with `[data-theme="light"]`. Draft direction: light Stone/Ink as the default.
-Until decided, keep the shipped contract and design every surface for both modes.
+**OPEN-5 — default mode. Decided (owner, 2026-10-01): dark is the default.** `:root` carries the
+dark contract (`color-scheme: dark`), and light is opt-in with `[data-theme="light"]`. The
+draft's light Stone/Ink default is not adopted. Design every surface for both modes.
+
+Choosing a mode:
+
+- **Dark (the default).** Set nothing: a page with no `data-theme` renders dark.
+  `data-theme="dark"` only has an effect below a light element, where it restores the dark
+  contract.
+- **Light.** Put `data-theme="light"` on the root element (`<html data-theme="light">`), or on
+  any element to make that subtree light.
+- **Follow the OS preference.** The tokens ship no `prefers-color-scheme` rule, so a page that
+  sets nothing stays dark whatever the OS prefers. To follow the OS, the page sets the
+  attribute from the media query. Run this inline in `<head>`, before the first paint, so a
+  light-preferring visitor does not see a dark flash:
+
+  ```html
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const prefersLight = matchMedia("(prefers-color-scheme: light)");
+      const applyMode = () => {
+        let stored = null;
+        try { stored = localStorage.getItem("theme"); } catch {}
+        const light = stored === "light" || (stored !== "dark" && prefersLight.matches);
+        if (light) root.dataset.theme = "light";
+        else delete root.dataset.theme;
+      };
+      applyMode();
+      prefersLight.addEventListener("change", applyMode);
+    })();
+  </script>
+  ```
+
+  A stored choice wins over the OS preference: if the product has its own mode switch, it
+  stores `"light"` or `"dark"` (here under the `theme` key; use your own) and the script applies
+  that value, on load and when the OS preference changes. With nothing stored, the page follows
+  the OS. A strict Content Security Policy blocks inline scripts, so give this one a nonce or
+  load it as an external script placed first in `<head>`.
 
 Dark mode is not inversion. Preserve hierarchy, restraint, product identity, contour
-legibility, status semantics, and contrast. Ink may be preferable to pure black. Light-mode
-status and brand hues are darkened so text clears WCAG AA on light panels; keep that property
-when changing them (`npm run check:contrast`). Fine contour artwork may need optical adjustment
-on dark surfaces. Final dark surface, text, and border ramps are OPEN.
+legibility, status semantics, and contrast. Light-mode status and brand hues are darkened so
+text clears WCAG AA on light panels; keep that property when changing them
+(`npm run check:contrast`). Fine contour artwork may need optical adjustment on dark surfaces.
+The dark surface, text, and line values are the shipped `:root` values (decided with OPEN-6).
 
 ### Theme and mode scoping
 
@@ -690,18 +746,21 @@ Typography is precise, contemporary, calm, intelligent, slightly human, and high
 Avoid sci-fi, techno, novelty-map, excessively geometric, and generic rounded SaaS faces.
 Identifiers and technical values use the mono role and must wrap and copy gracefully.
 
-**OPEN-4 — typefaces.** Shipped: Fraunces (display), Hanken Grotesk (UI), and IBM Plex Mono,
-self-hosted in `tokens/fonts/`; `.theme-console` swaps display and UI for a condensed stack.
-Draft direction: a humanist or restrained neo-grotesk with open counters, strong numerals,
-excellent UI rendering, useful weights, and enough character to avoid sameness; final family
-undecided. Generated concept typography is not a production font and not a wordmark.
+**OPEN-4 — typefaces. Decided (owner, 2026-10-01): keep the shipped families.** Fraunces
+(display), Hanken Grotesk (UI), and IBM Plex Mono (mono), self-hosted in `tokens/fonts/`;
+`.theme-console` swaps display and UI for a condensed stack. The draft asked for a humanist or
+restrained neo-grotesk with open counters, strong numerals, excellent UI rendering, useful
+weights, and enough character to avoid sameness, and left the family undecided; this decision
+closes that search. Generated concept typography is not a production font and not a wordmark;
+the wordmark is a separate decision (see [Wordmark](#wordmark)).
 
-**OPEN-3 — type scale.** Shipped steps run from `--k-text-xs` = `11px` to
+**OPEN-3 — type scale. Decided (owner, 2026-10-01): the shipped scale is canonical.**
+Shipped steps run from `--k-text-xs` = `11px` to
 `--k-text-2xl` = `clamp(26px, 3.4vw, 38px)`; the top step is fluid, and the front matter records
-its upper bound. Draft direction, named levels (not shipped; do not
+its upper bound. The draft's named levels are not adopted and are kept as a record only (do not
 create these tokens):
 
-| Draft level | Size / line | Use |
+| Draft level (not adopted) | Size / line | Use |
 | --- | --- | --- |
 | display-xl | 64 / 68 | major hero |
 | display-lg | 48 / 52 | page hero |
@@ -732,9 +791,11 @@ Fraunces (decided, owner, 2026-10-01); see [Production assets](#production-asset
 
 Use a 4px base rhythm, and only the spacing tokens.
 
-> **OPEN-1 — spacing scale. Danger: the same step numbers mean different sizes.**
+> **OPEN-1 — spacing scale. Decided (owner, 2026-10-01): the shipped six steps are canonical.**
+> The draft numbered its steps differently and is not adopted. Danger when reading older
+> layouts: the same step numbers mean different sizes.
 >
-> | Shipped | Draft |
+> | Canonical (shipped) | Draft, not adopted |
 > | --- | --- |
 > | `--k-space-1` = `4px` | `space-1`: 4px |
 > | `--k-space-2` = `8px` | `space-2`: 8px |
@@ -791,9 +852,10 @@ Shipped `.panel` sets no radius: panels are square-cornered, so do not assume co
 rounded. `.theme-console` sets `--k-radius-sm` (console) = `0`, `--k-radius-md` (console) = `0`,
 `--k-radius-control` (console) = `0`, and `--k-radius-overlay` (console) = `0`.
 
-**OPEN-2 — radius scale.** Shipped: `--k-radius-sm` = `9px`, `--k-radius-md` = `14px`,
+**OPEN-2 — radius scale. Decided (owner, 2026-10-01): the shipped radii are canonical.**
+They are `--k-radius-sm` = `9px`, `--k-radius-md` = `14px`,
 `--k-radius-control` = `4px`, `--k-radius-overlay` = `10px`.
-Draft direction: 6 / 10 / 16 / 24px as `radius-sm` / `md` / `lg` / `xl`.
+The draft's 6 / 10 / 16 / 24px as `radius-sm` / `md` / `lg` / `xl` is not adopted.
 The names overlap and the values do not; do not add `--radius-*` properties.
 
 ## Components
@@ -1226,31 +1288,31 @@ as first-class trust UX.
 ## Open Decisions
 
 Do **not** silently resolve these. When one is decided, update this file and the canonical
-assets and tokens together, in the same change.
+assets and tokens together, in the same change. A decided row stays in the register as the
+record of the decision.
 
 ### Draft vs shipped tokens
 
-| ID | Item | Shipped today | Draft direction | Tracking |
-| --- | --- | --- | --- | --- |
-| OPEN-1 | Spacing scale | `--k-space-5` = `24px`, `--k-space-6` = `32px` | 20px / 24px at steps 5 / 6; steps up to 96px | [#74](https://github.com/kontourai/ui/issues/74) |
-| OPEN-2 | Radius scale | `--k-radius-sm` = `9px`, `--k-radius-md` = `14px`, `--k-radius-control` = `4px`, `--k-radius-overlay` = `10px` | 6 / 10 / 16 / 24px | [#74](https://github.com/kontourai/ui/issues/74) |
-| OPEN-3 | Type scale | `--k-text-xs` = `11px` to `--k-text-2xl` = `clamp(26px, 3.4vw, 38px)` | ten named levels, 12px to 64px | [#74](https://github.com/kontourai/ui/issues/74) |
-| OPEN-4 | Typefaces | Fraunces / Hanken Grotesk / IBM Plex Mono | humanist or restrained neo-grotesk; undecided | — |
-| OPEN-5 | Default mode | dark default, `[data-theme="light"]` opt-in | light Stone/Ink default | — |
-| OPEN-6 | Palette and product accents | per-theme `--k-brand`; `.theme-station` ships with a contrast-adjusted dark brand | Ink, Stone, final Flow and Surface accents | [#74](https://github.com/kontourai/ui/issues/74) |
-| OPEN-7 | Status model | five tones; the nine trust states (Surface's statuses) as separate tokens and a primitive | semantic status tokens beyond the five tones | [#88](https://github.com/kontourai/ui/issues/88) |
-| OPEN-8 | Primary action and focus | resolved by [#79](https://github.com/kontourai/ui/pull/79): `--k-action` and `--k-focus` roles, independent of the brand slot | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
-| OPEN-9 | Flow endorsement form and product tiering | Station and Surface: "`<Product>` by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
-| OPEN-10 | Console and Survey themes | shipped | not covered by the draft | — |
-| OPEN-11 | Marketing-site palette relationship | — | undecided | — |
-| OPEN-12 | Trust-state vocabulary | resolved (owner, 2026-09-27): Surface's claim statuses and display names, checked against `@kontourai/surface` | — | [#73](https://github.com/kontourai/ui/issues/73) |
+| ID | Item | Status | Shipped | Draft direction | Tracking |
+| --- | --- | --- | --- | --- | --- |
+| OPEN-1 | Spacing scale | Decided (owner, 2026-10-01): shipped scale is canonical | `--k-space-5` = `24px`, `--k-space-6` = `32px` | not adopted: 20px / 24px at steps 5 / 6; steps up to 96px | [#74](https://github.com/kontourai/ui/issues/74) |
+| OPEN-2 | Radius scale | Decided (owner, 2026-10-01): shipped radii are canonical | `--k-radius-sm` = `9px`, `--k-radius-md` = `14px`, `--k-radius-control` = `4px`, `--k-radius-overlay` = `10px` | not adopted: 6 / 10 / 16 / 24px | [#74](https://github.com/kontourai/ui/issues/74) |
+| OPEN-3 | Type scale | Decided (owner, 2026-10-01): shipped scale is canonical | `--k-text-xs` = `11px` to `--k-text-2xl` = `clamp(26px, 3.4vw, 38px)` | not adopted: ten named levels, 12px to 64px | [#74](https://github.com/kontourai/ui/issues/74) |
+| OPEN-4 | Typefaces | Decided (owner, 2026-10-01): keep the shipped families | Fraunces / Hanken Grotesk / IBM Plex Mono | humanist or restrained neo-grotesk, family undecided; closed by this decision | — |
+| OPEN-5 | Default mode | Decided (owner, 2026-10-01): dark is the default | dark default, `[data-theme="light"]` opt-in; following the OS preference is the consumer's script (see [Modes](#modes)) | not adopted: light Stone/Ink default | — |
+| OPEN-6 | Palette and product accents | Decided (owner, 2026-10-01): shipped values are the palette | per-theme `--k-brand`; `.theme-station` ships with a contrast-adjusted dark brand | not adopted: Ink, Stone, the draft's Flow and Surface accents | [#74](https://github.com/kontourai/ui/issues/74) |
+| OPEN-7 | Status model | Decided (owner, 2026-10-01): five tones plus the nine trust states; a new tone needs a named consumer | five tones; the nine trust states (Surface's statuses) as separate tokens and a primitive | not adopted: semantic status tokens beyond the five tones | [#88](https://github.com/kontourai/ui/issues/88) |
+| OPEN-8 | Primary action and focus | Resolved by [#79](https://github.com/kontourai/ui/pull/79) | `--k-action` and `--k-focus` roles, independent of the brand slot | accent is not automatically the action color | [#72](https://github.com/kontourai/ui/issues/72) |
+| OPEN-9 | Flow endorsement form and product tiering | **OPEN** | Station and Surface: "`<Product>` by Kontour AI" (decided) | Flow: "Flow" or "Flow Agents"; tiering of other products | — |
+| OPEN-10 | Console and Survey themes | Decided with OPEN-6 (2026-10-01): shipped values are canonical | shipped | not covered by the draft | — |
+| OPEN-11 | Marketing-site palette relationship | Decided (owner, 2026-10-01): the marketing site keeps its own palette, as a documented exception for now | — | — | — |
+| OPEN-12 | Trust-state vocabulary | Resolved (owner, 2026-09-27) | Surface's claim statuses and display names, checked against `@kontourai/surface` | — | [#73](https://github.com/kontourai/ui/issues/73) |
 
 ### Brand decisions still open
 
 Contour-derived Station, Flow, and Surface vectors (the shipped product marks are flat UI
-icons); stacked and per-product lockups; final corporate and UI typeface; complete typography
-tuning; complete color
-ramps; semantic status palette; dark-mode palette; environment and release-channel colors;
+icons); stacked and per-product lockups; complete typography tuning; environment and
+release-channel colors;
 exact motion durations and easing; final breakpoints; final component-library mappings.
 
 ## Final Principle

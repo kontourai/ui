@@ -34,6 +34,10 @@ One case is not covered: a theme class below a mode that switches back (light, d
 again above it); put `data-theme` on that theme element. See "Theme and mode scoping" in
 `DESIGN.md`.
 
+Dark is the default mode: a page that sets no `data-theme` renders dark, and the tokens ship no
+`prefers-color-scheme` rule. To follow the OS preference, set `data-theme="light"` from the media
+query yourself; "Modes" in `DESIGN.md` has the script.
+
 ## White-label color
 
 The token layer keeps the product identity slot (`--k-brand`) separate from the interaction
