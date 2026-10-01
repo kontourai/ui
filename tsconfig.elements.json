@@ -14,5 +14,5 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true
   },
-  "include": ["elements/**/*.ts", "react/src/tones.ts", "react/src/trust-states.ts", "react/src/trust-basis.ts", "react/src/product-icon-paths.ts"]
+  "include": ["elements/**/*.ts", "react/src/tones.ts", "react/src/trust-states.ts", "react/src/trust-basis.ts", "react/src/product-icon-paths.ts", "react/src/brand-mark-paths.ts"]
 }

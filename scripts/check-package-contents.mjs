@@ -68,6 +68,12 @@ try {
     "icons/survey.svg",
     "icons/console.svg",
     "icons/flow-agents.svg",
+    // Corporate marks (ui#75), in both shipped forms.
+    "icons/kontour-symbol.svg",
+    "icons/kontour-wordmark.svg",
+    "icons/kontour-lockup-horizontal.svg",
+    "dist/react/BrandMark.js",
+    "dist/react/BrandMark.d.ts",
     "dist/elements/elements/src/index.js",
     "dist/elements/elements/src/index.d.ts",
     // White-label runtimes validate a theme with this before applying it (ui#83).

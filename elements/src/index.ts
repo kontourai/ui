@@ -1,5 +1,6 @@
 import { defineElement } from "./base.js";
 import { KBadge } from "./k-badge.js";
+import { KBrandMark } from "./k-brand-mark.js";
 import { KButton } from "./k-button.js";
 import { KCheckbox } from "./k-checkbox.js";
 import { KDialog } from "./k-dialog.js";
@@ -24,6 +25,7 @@ import { KTrustState } from "./k-trust-state.js";
 import { KTopbar } from "./k-topbar.js";
 
 defineElement("k-badge", KBadge);
+defineElement("k-brand-mark", KBrandMark);
 defineElement("k-button", KButton);
 defineElement("k-checkbox", KCheckbox);
 defineElement("k-dialog", KDialog);
@@ -48,6 +50,7 @@ defineElement("k-trust-state", KTrustState);
 defineElement("k-topbar", KTopbar);
 
 export { KBadge } from "./k-badge.js";
+export { KBrandMark } from "./k-brand-mark.js";
 export { KButton } from "./k-button.js";
 export { KCheckbox } from "./k-checkbox.js";
 export { KDialog } from "./k-dialog.js";

@@ -105,6 +105,39 @@
         gap: var(--k-space-2);
       }
 
+      .marks-surface {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--k-space-3) var(--k-space-4);
+        border: 1px solid var(--k-line);
+        border-radius: var(--k-radius-md);
+        padding: var(--k-space-3);
+        color: var(--k-text);
+      }
+
+      .marks-surface--bg {
+        background: var(--k-bg);
+      }
+
+      .marks-surface--panel {
+        background: var(--k-panel);
+      }
+
+      .marks-surface .label {
+        flex-basis: 100%;
+      }
+
+      .marks-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--k-space-2);
+      }
+
+      .marks-cell > * {
+        display: inline-flex;
+      }
+
       @media (max-width: 820px) {
         main {
           width: min(100% - var(--k-space-4), 1180px);
@@ -163,6 +196,41 @@
         const target = entry.playground?.split(":")[1];
         if (target?.startsWith("k-")) card.append(createPlayground(target, entry.name));
         explorer.append(card);
+      }
+      // Every mark at 16, 24 and 32px, on the page and panel surfaces, in both
+      // modes. tests/browser/marks.spec.ts reads the ink and surface colours
+      // from here, so the legibility gates rate what this page shows.
+      const { productIconSlugs } = await import("../dist/react/product-icon-paths.js");
+      const { brandMarkSlugs } = await import("../dist/react/brand-mark-paths.js");
+      const marksGallery = document.getElementById("marks-gallery");
+      for (const mode of ["light", "dark"]) for (const surface of ["bg", "panel"]) {
+        const sample = document.createElement("div");
+        sample.className = `marks-surface marks-surface--${surface}`;
+        sample.dataset.theme = mode;
+        sample.dataset.marksSurface = `${mode}:${surface}`;
+        const title = document.createElement("span");
+        title.className = "label";
+        title.textContent = `${mode} on --k-${surface}`;
+        sample.append(title);
+        const cell = (tag, attribute, slug) => {
+          const group = document.createElement("span");
+          group.className = "marks-cell";
+          group.dataset.mark = slug;
+          for (const size of [16, 24, 32]) {
+            const mark = document.createElement(tag);
+            mark.setAttribute(attribute, slug);
+            mark.setAttribute("size", String(size));
+            // One named specimen per mark; the other sizes repeat it, so they are decorative.
+            if (size === 24) mark.setAttribute("title", slug);
+            else if (tag === "k-brand-mark") mark.setAttribute("decorative", "");
+            mark.dataset.size = String(size);
+            group.append(mark);
+          }
+          return group;
+        };
+        for (const slug of brandMarkSlugs) sample.append(cell("k-brand-mark", "mark", slug));
+        for (const slug of productIconSlugs) sample.append(cell("k-product-icon", "product", slug));
+        marksGallery.append(sample);
       }
       const matrix = document.getElementById("theme-matrix");
       for (const theme of manifest.themes) for (const mode of ["light", "dark"]) {
@@ -371,6 +439,15 @@
               <k-trust-state state="assumed"></k-trust-state>
               <k-trust-basis density="inspector" basis-json='{"state":"not-recorded","label":"Basis not recorded","detail":[{"label":"Producer rating","value":"Weak support (producer-rated)"}]}'></k-trust-basis>
             </div>
+          </div>
+        </k-panel>
+      </section>
+
+      <section aria-labelledby="marks-title" data-marks-gallery>
+        <k-panel title="Marks" count="corporate and product">
+          <div class="stack">
+            <span id="marks-title" class="label">Every production mark at 16, 24 and 32px, light and dark, on the page and panel surfaces</span>
+            <div id="marks-gallery" class="stack"></div>
           </div>
         </k-panel>
       </section>
