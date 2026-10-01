@@ -34,6 +34,21 @@ const MAX_INK = 0.6;
 // shipped minimum is 0.63): a mark shrunk into a corner is not legible even
 // when its pixel count is.
 const MIN_SPAN = 0.5;
+// Structure. Coverage alone cannot tell a drawing from a grey wash (fine
+// hatching antialiases to an even half-tone that clears every bound above), or
+// from an empty box drawn round the frame edge. A drawing has ink and empty
+// space side by side, and has something in the middle:
+// - at least this share of the frame is empty (shipped marks: 0.50 to 0.85; a wash: 0)
+const MIN_CLEAR = 0.3;
+// - the alpha values vary at least this much (standard deviation, alpha as 0..1;
+//   shipped marks: 0.26 to 0.42; a wash: 0.12 at most)
+const MIN_ALPHA_DEVIATION = 0.18;
+// - at least this share of the central half of the frame is solid ink
+//   (shipped marks: 0.16 to 0.59; a frame-only outline: 0)
+const MIN_INTERIOR_INK = 0.06;
+// These rate ink, not meaning: a mark that passes is drawn clearly enough to be
+// seen, and whether it is recognisable is a person's judgement (DESIGN.md).
+
 // Two marks must differ in at least this share of the frame's pixels. The
 // closest shipped pair (cli and console) differs in 0.11.
 const MIN_DIFFERENCE = 0.03;
@@ -142,6 +157,11 @@ test.describe("mark files", () => {
 
       const { spanX, spanY } = span(raster);
       expect(Math.max(spanX, spanY), `${label}: ink spans the frame`).toBeGreaterThanOrEqual(MIN_SPAN);
+
+      const structure = structureOf(raster);
+      expect(structure.clear, `${label}: share of the frame that is empty (a wash has none)`).toBeGreaterThanOrEqual(MIN_CLEAR);
+      expect(structure.deviation, `${label}: variation in alpha (a wash is uniform)`).toBeGreaterThanOrEqual(MIN_ALPHA_DEVIATION);
+      expect(structure.interior, `${label}: solid ink in the central half of the frame (a frame-only outline has none)`).toBeGreaterThanOrEqual(MIN_INTERIOR_INK);
     }
   });
 
@@ -196,10 +216,42 @@ test.describe("corporate marks", () => {
     await expect(lockup).toHaveAttribute("height", "32");
     await expect(lockup).toHaveAttribute("width", "136.32");
 
-    const labelled = page.locator('#brand-marks-mount k-brand-mark[mark="kontour-symbol"] svg');
-    await expect(labelled).toHaveAttribute("role", "img");
-    await expect(labelled).toHaveAttribute("aria-label", "Kontour");
-    await expect(page.locator('#brand-marks-mount k-brand-mark[mark="kontour-wordmark"] svg')).toHaveAttribute("aria-hidden", "true");
+    // The wordmark names itself, so a header showing only it still announces the company.
+    const wordmark = page.locator('#brand-marks-mount k-brand-mark[mark="kontour-wordmark"] svg');
+    await expect(wordmark).toHaveAttribute("role", "img");
+    await expect(wordmark).toHaveAttribute("aria-label", "Kontour");
+    await expect(wordmark.locator("title")).toHaveText("Kontour");
+    await expect(page.getByRole("img", { name: "Kontour", exact: true })).toHaveCount(1);
+    // A title renames a mark; the symbol has no default name and needs one to be exposed.
+    const symbol = page.locator('#brand-marks-mount k-brand-mark[mark="kontour-symbol"] svg');
+    await expect(symbol).toHaveAttribute("aria-label", "Kontour symbol");
+    // decorative hides a mark that would otherwise name itself, and wins over a default name.
+    await expect(lockup).toHaveAttribute("aria-hidden", "true");
+    await expect(lockup).not.toHaveAttribute("role", "img");
+    expect(await lockup.locator("title").count()).toBe(0);
+    const states = await page.evaluate(() => {
+      const probe = (attributes: Record<string, string>) => {
+        const element = document.createElement("k-brand-mark");
+        for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+        document.body.append(element);
+        const svg = element.querySelector("svg");
+        const state = svg ? { label: svg.getAttribute("aria-label"), hidden: svg.getAttribute("aria-hidden") } : "nothing";
+        element.remove();
+        return state;
+      };
+      return {
+        lockup: probe({ mark: "kontour-lockup-horizontal" }),
+        symbol: probe({ mark: "kontour-symbol" }),
+        symbolDecorative: probe({ mark: "kontour-symbol", title: "Kontour", decorative: "" }),
+        unknown: probe({ mark: "kontour-mascot" }),
+      };
+    });
+    expect(states).toEqual({
+      lockup: { label: "Kontour", hidden: null },
+      symbol: { label: null, hidden: "true" },
+      symbolDecorative: { label: null, hidden: "true" },
+      unknown: "nothing",
+    });
     // The wordmark is outlines: no text node, so no font is needed to draw it.
     expect(await page.locator("#brand-marks-mount k-brand-mark svg text").count()).toBe(0);
     expect(consoleErrors).toEqual([]);
@@ -210,7 +262,7 @@ test.describe("corporate marks", () => {
     const results = await page.evaluate(async (marks) => {
       const mod = await import("../dist/react/BrandMark.js");
       return marks.map((mark) => {
-        const element = mod.BrandMark({ mark, title: mark, size: 48 });
+        const element = mod.BrandMark({ mark, size: 48 });
         const children = Array.isArray(element.props.children) ? element.props.children : [element.props.children];
         const group = children.find((child: { type?: string } | null) => child && child.type === "g");
         const rendered = document.querySelector(`#brand-marks-mount k-brand-mark[mark="${mark}"] svg > g`);
@@ -221,17 +273,26 @@ test.describe("corporate marks", () => {
           mark,
           viewBox: element.props.viewBox,
           height: element.props.height,
-          role: element.props.role,
-          keyed: mod.brandMarks[mark].displayName,
+          label: element.props["aria-label"] ?? null,
+          hidden: element.props["aria-hidden"] ?? null,
+          decorative: mod.BrandMark({ mark, decorative: true }).props["aria-hidden"],
+          titled: mod.BrandMark({ mark, title: "Kontour AI" }).props["aria-label"],
+          keyed: mod.brandMarks[mark].name,
           sameMarkup: parsed.innerHTML.length > 0 && parsed.innerHTML === rendered?.innerHTML,
         };
       });
     }, BRAND);
     expect(results).toEqual([
-      { mark: "kontour-lockup-horizontal", viewBox: "0 0 102.24 24", height: 48, role: "img", keyed: "KontourLockup", sameMarkup: true },
-      { mark: "kontour-symbol", viewBox: "0 0 24 24", height: 48, role: "img", keyed: "KontourSymbol", sameMarkup: true },
-      { mark: "kontour-wordmark", viewBox: "0 0 72.24 24", height: 48, role: "img", keyed: "KontourWordmark", sameMarkup: true },
+      { mark: "kontour-lockup-horizontal", viewBox: "0 0 102.24 24", height: 48, label: "Kontour", hidden: null, decorative: true, titled: "Kontour AI", keyed: "KontourLockup", sameMarkup: true },
+      { mark: "kontour-symbol", viewBox: "0 0 24 24", height: 48, label: null, hidden: true, decorative: true, titled: "Kontour AI", keyed: "KontourSymbol", sameMarkup: true },
+      { mark: "kontour-wordmark", viewBox: "0 0 72.24 24", height: 48, label: "Kontour", hidden: null, decorative: true, titled: "Kontour AI", keyed: "KontourWordmark", sameMarkup: true },
     ]);
+    // An unknown mark renders nothing instead of throwing, as the element does.
+    const unknown = await page.evaluate(async () => {
+      const mod = await import("../dist/react/BrandMark.js");
+      return mod.BrandMark({ mark: "kontour-mascot" as never });
+    });
+    expect(unknown).toBeNull();
     expect(consoleErrors).toEqual([]);
   });
 });
@@ -267,6 +328,22 @@ function span(raster: Raster) {
   });
   if (maxX < 0) return { spanX: 0, spanY: 0 };
   return { spanX: (maxX - minX + 1) / raster.width, spanY: (maxY - minY + 1) / raster.height };
+}
+
+function structureOf(raster: Raster) {
+  const count = raster.alpha.length;
+  const mean = raster.alpha.reduce((sum, value) => sum + value, 0) / 255 / count;
+  const deviation = Math.sqrt(raster.alpha.reduce((sum, value) => sum + (value / 255 - mean) ** 2, 0) / count);
+  let interiorPixels = 0;
+  let interiorInk = 0;
+  raster.alpha.forEach((value, index) => {
+    const x = index % raster.width;
+    const y = Math.floor(index / raster.width);
+    if (x < raster.width * 0.25 || x >= raster.width * 0.75 || y < raster.height * 0.25 || y >= raster.height * 0.75) return;
+    interiorPixels += 1;
+    if (value >= 128) interiorInk += 1;
+  });
+  return { clear: raster.alpha.filter((value) => value <= 25).length / count, deviation, interior: interiorInk / interiorPixels };
 }
 
 /** `ink` at `alpha` over `surface`, composited in sRGB as a browser does. */

@@ -81,6 +81,39 @@ test("rejects a document that is not a valid, scalable, self-contained SVG", () 
   rejects(runCheck((dir) => writeFileSync(path.join(dir, "icons/bearing.svg"), "")), /not a valid SVG document: the file is empty/);
 });
 
+test("rejects attribute values that are not plain, in-frame geometry", () => {
+  const circle = (attributes) => withBearing(`<circle cx="12" cy="12" r="8.5" ${attributes}/>`);
+  // Values that parse as SVG but draw nothing, or draw something else, while still counting as a painted shape.
+  rejects(runCheck(circle('stroke-width="0"')), /stroke-width="0" on <circle> must be a plain number from 1 to 3/);
+  rejects(runCheck(circle('stroke-width="0.84"')), /stroke-width="0.84" on <circle> must be a plain number from 1 to 3/);
+  rejects(runCheck(circle('stroke-width="12"')), /stroke-width="12" on <circle> must be a plain number from 1 to 3/);
+  rejects(runCheck(circle('stroke-width="var(--x)"')), /stroke-width="var\(--x\)" on <circle>: var\(\), url\(\) and data: values are not allowed/);
+  rejects(runCheck(circle('stroke-width="1.75px"')), /stroke-width="1.75px" on <circle> must be a plain number/);
+  rejects(runCheck(withBearing('<circle cx="12" cy="12" r="0"/>')), /r="0" on <circle> must be a plain number above 0 to 24/);
+  rejects(runCheck(withBearing('<circle cx="12" cy="12" r="50%"/>')), /r="50%" on <circle> must be a plain number/);
+  rejects(runCheck(withBearing('<circle cx="9999" cy="12" r="8.5"/>')), /cx="9999" on <circle> must be a plain number from 0 to 24/);
+  rejects(runCheck(withBearing('<rect x="-40" y="4" width="16" height="16"/>')), /x="-40" on <rect> must be a plain number from 0 to 24/);
+  rejects(runCheck(withBearing('<rect x="4" y="4" width="0" height="16"/>')), /width="0" on <rect> must be a plain number above 0/);
+  rejects(runCheck(withBearing(`<g transform="translate(9999 9999)">${CIRCLE}</g>`)), /transform="translate\(9999 9999\)": only translate\(x y\) with offsets from 0 to 24/);
+  rejects(runCheck(withBearing(`<g transform="scale(0)">${CIRCLE}</g>`)), /transform="scale\(0\)": only translate/);
+  rejects(runCheck(withBearing('<path d="M9999 9999h4"/>')), /path data on <path> has a coordinate beyond the frame's extent \(24\)/);
+  rejects(runCheck(withBearing('<path d="M4 4h1e9"/>')), /path data on <path> contains characters that are not path commands/);
+  rejects(runCheck(withBearing('<polyline points="4,4 9999,12"/>')), /points on <polyline> must be plain numbers within the frame's extent/);
+  rejects(runCheck(circle('stroke-linecap="url(#a)"')), /stroke-linecap="url\(#a\)" on <circle>: var\(\), url\(\) and data: values/);
+  rejects(runCheck(circle('stroke-linejoin="arcs"')), /stroke-linejoin="arcs" on <circle> must be one of round, miter, bevel/);
+  rejects(runCheck(circle('fill-rule="data:x"')), /fill-rule="data:x" on <circle>: var\(\), url\(\) and data: values/);
+  // In-range values the marks really use stay accepted: only the sync gate objects to this edited file.
+  const accepted = runCheck(withBearing('<circle cx="12" cy="12" r="8.5" stroke-width="2" stroke-linecap="butt"/><rect x="0" y="0" width="24" height="24" rx="0"/>'));
+  assert.doesNotMatch(accepted.stderr, /must be|not allowed|beyond/);
+  assert.match(accepted.stderr, /differs from the markup in the path modules/);
+});
+
+test("rejects a namespace declared below the root", () => {
+  // The subtree leaves the SVG namespace: it would count as two shapes and draw nothing.
+  rejects(runCheck(withBearing(`<g xmlns="urn:x">${CIRCLE}<path d="M15 9l-2 4.5L9 15l2-4.5Z"/></g>`)), /bearing\.svg: xmlns on <g> is not allowed: only the root declares a namespace/);
+  rejects(runCheck(withBearing('<circle xmlns="http://www.w3.org/1999/xhtml" cx="12" cy="12" r="8.5"/>')), /xmlns on <circle> is not allowed/);
+});
+
 test("rejects a mark that draws nothing or exceeds its ceilings", () => {
   rejects(runCheck(withBearing("")), /bearing\.svg: draws nothing/);
   rejects(runCheck(withBearing(CIRCLE.repeat(13))), /13 shapes; the ceiling for a square mark is 12/);

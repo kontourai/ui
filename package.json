@@ -5,6 +5,10 @@
   "type": "module",
   "private": false,
   "license": "Apache-2.0",
+  "sideEffects": [
+    "**/*.css",
+    "./dist/elements/elements/src/index.js"
+  ],
   "scripts": {
     "build": "node scripts/clean-dist.mjs && tsc -p tsconfig.json && tsc -p tsconfig.elements.json",
     "prepack": "npm run build",
@@ -17,12 +21,14 @@
     "check:explorer": "node scripts/check-explorer.mjs",
     "check:design": "node scripts/generate-design-md.mjs --check",
     "check:trust-state-css": "node scripts/generate-trust-state-css.mjs --check",
-    "check": "npm run check:tokens && npm run check:contrast && npm run check:marks && npm run test:unit && npm run check:design && npm run check:trust-state-css && npm run check:exports && npm run check:surface-parity && npm run check:readiness && npm run check:explorer",
+    "check": "npm run check:tokens && npm run check:contrast && npm run check:marks && npm run test:unit && npm run check:design && npm run check:trust-state-css && npm run check:exports && npm run check:tree-shaking && npm run check:surface-parity && npm run check:readiness && npm run check:explorer",
     "verify": "npm run check && npm run check:pack && npm run test:browser",
     "workflow:sidecar": "flow-agents-workflow-sidecar",
     "workflow:validate-artifacts": "flow-agents-validate-artifacts",
     "check:contrast": "node scripts/check-contrast.mjs",
     "check:marks": "node scripts/check-marks.mjs",
+    "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
+    "check:wordmark": "python3 scripts/generate-wordmark.py --check",
     "test:unit": "node --test \"tests/unit/*.test.mjs\""
   },
   "peerDependencies": {
@@ -33,6 +39,7 @@
     "@kontourai/surface": "3.3.0",
     "@playwright/test": "^1.60.0",
     "@types/react": "^19.2.7",
+    "esbuild": "0.28.1",
     "postcss": "^8.5.26",
     "postcss-selector-parser": "^7.1.5",
     "postcss-value-parser": "^4.2.0",

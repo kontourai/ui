@@ -1,15 +1,15 @@
-import { BRAND_MARK_HEIGHT, brandMarkPaths, type BrandMarkSlug } from "../react/brand-mark-paths.js";
-import { appendClasses, numberAttribute, textAttribute } from "./base.js";
+import { BRAND_MARK_HEIGHT, brandMarkAccessibleName, brandMarkPaths, isBrandMarkSlug } from "../react/brand-mark-paths.js";
+import { appendClasses, booleanAttribute, numberAttribute, textAttribute } from "./base.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-function isBrandMarkSlug(value: string): value is BrandMarkSlug {
-  return Object.prototype.hasOwnProperty.call(brandMarkPaths, value);
-}
-
-/** A Kontour corporate mark. `size` is the height in px; the width follows from the mark. */
+/**
+ * A Kontour corporate mark. `size` is the height in px; the width follows from
+ * the mark. The wordmark and lockup are named "Kontour" for assistive tech
+ * unless `title` renames them or `decorative` hides them.
+ */
 export class KBrandMark extends HTMLElement {
-  static observedAttributes = ["mark", "size", "title"];
+  static observedAttributes = ["mark", "size", "title", "decorative"];
 
   connectedCallback() {
     this.render();
@@ -27,7 +27,7 @@ export class KBrandMark extends HTMLElement {
     }
     const { width, inner } = brandMarkPaths[mark];
     const size = numberAttribute(this, "size", BRAND_MARK_HEIGHT) || BRAND_MARK_HEIGHT;
-    const title = this.getAttribute("title");
+    const title = brandMarkAccessibleName(mark, this.getAttribute("title"), booleanAttribute(this, "decorative"));
 
     const svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("viewBox", `0 0 ${width} ${BRAND_MARK_HEIGHT}`);

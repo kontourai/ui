@@ -40,6 +40,19 @@ const ATTRIBUTES = new Set([
   "d", "x", "y", "rx", "ry", "cx", "cy", "r", "x1", "y1", "x2", "y2", "points", "transform",
 ]);
 const PAINTS = new Set(["none", "currentColor"]);
+const KEYWORDS = {
+  "stroke-linecap": new Set(["round", "butt", "square"]),
+  "stroke-linejoin": new Set(["round", "miter", "bevel"]),
+  "fill-rule": new Set(["nonzero", "evenodd"]),
+};
+// Attributes whose value is one plain number. `positive` ones size a shape, so
+// zero would draw nothing; the rest are positions and corner radii.
+const POSITIONS = new Set(["x", "y", "cx", "cy", "x1", "y1", "x2", "y2", "rx", "ry"]);
+const POSITIVE = new Set(["r", "width", "height"]);
+const NUMBER = /^-?(?:\d+\.?\d*|\.\d+)$/;
+// Stroke weights a mark may use, in viewBox units. The marks are drawn at 1.75;
+// below 1 a stroke is under a pixel at 16px, and above 3 it closes the counters.
+const STROKE_WIDTH = { min: 1, max: 3 };
 // Why a rejected name is rejected, for the message. The allowlist decides; this only explains.
 const REASONS = [
   [/^(script|foreignObject|iframe|a)$|^on/, "marks carry no scripts, links or embedded documents"],
@@ -140,13 +153,34 @@ for (const [slug, mark] of expected) {
     }
     if (element.name === "svg" && depth > 0) fail("nested <svg> is not allowed.");
     const paint = { ...inherited };
+    // Geometry must stay on the frame: a shape placed far outside it draws
+    // nothing while still counting as a painted shape.
+    const reach = Math.max(box?.[0] ?? HEIGHT, HEIGHT);
     for (const [name, value] of element.attributes) {
       if (!ATTRIBUTES.has(name)) fail(`attribute ${name} on <${element.name}> is not allowed: ${explain(name)}.`);
-      else if (name === "fill" || name === "stroke") {
+      // A namespace declaration below the root moves the subtree out of SVG: it would parse, count as shapes, and draw nothing.
+      else if (name === "xmlns" && depth > 0) fail(`xmlns on <${element.name}> is not allowed: only the root declares a namespace.`);
+      else if (/var\(|url\(|data:/i.test(value)) fail(`${name}="${value}" on <${element.name}>: var(), url() and data: values are not allowed; a mark refers to nothing outside itself.`);
+      else if (element.name === "svg" && depth === 0 && (name === "width" || name === "height" || name === "viewBox" || name === "xmlns")) continue; // rated above
+      else if (name in KEYWORDS) {
+        if (!KEYWORDS[name].has(value)) fail(`${name}="${value}" on <${element.name}> must be one of ${[...KEYWORDS[name]].join(", ")}.`);
+      } else if (name === "stroke-width") {
+        if (!NUMBER.test(value) || Number(value) < STROKE_WIDTH.min || Number(value) > STROKE_WIDTH.max) fail(`stroke-width="${value}" on <${element.name}> must be a plain number from ${STROKE_WIDTH.min} to ${STROKE_WIDTH.max}.`);
+      } else if (POSITIONS.has(name) || POSITIVE.has(name)) {
+        const least = POSITIVE.has(name) ? Number.MIN_VALUE : 0;
+        if (!NUMBER.test(value) || Number(value) < least || Number(value) > reach) fail(`${name}="${value}" on <${element.name}> must be a plain number ${POSITIVE.has(name) ? "above 0" : "from 0"} to ${reach}, the frame's extent.`);
+      } else if (name === "points") {
+        if (!/^[\d.,\s-]+$/.test(value) || value.split(/[\s,]+/).filter(Boolean).some((part) => !NUMBER.test(part) || Math.abs(Number(part)) > reach)) fail(`points on <${element.name}> must be plain numbers within the frame's extent (${reach}).`);
+      } else if (name === "fill" || name === "stroke") {
         if (PAINTS.has(value)) paint[name] = value;
         else fail(`${name}="${value}" on <${element.name}>: a mark's only paint is currentColor (or none), so it takes one colour from its context.`);
-      } else if (name === "transform" && !/^translate\(-?\d+(?:\.\d+)?(?: -?\d+(?:\.\d+)?)?\)$/.test(value)) fail(`transform="${value}": only translate(x y) is allowed.`);
-      else if (name === "d" && !/^[MmLlHhVvCcSsQqTtAaZz0-9eE+\-.,\s]+$/.test(value)) fail(`path data on <${element.name}> contains characters that are not path commands.`);
+      } else if (name === "transform") {
+        const offsets = /^translate\((\d+(?:\.\d+)?)(?: (\d+(?:\.\d+)?))?\)$/.exec(value)?.slice(1).filter((part) => part !== undefined).map(Number);
+        if (!offsets || offsets.some((offset) => offset > reach)) fail(`transform="${value}": only translate(x y) with offsets from 0 to ${reach} is allowed.`);
+      } else if (name === "d") {
+        if (!/^[MmLlHhVvCcSsQqTtAaZz0-9+\-.,\s]+$/.test(value)) fail(`path data on <${element.name}> contains characters that are not path commands.`);
+        else if ((value.match(/\d+\.?\d*|\.\d+/g) ?? []).some((part) => Number(part) > reach)) fail(`path data on <${element.name}> has a coordinate beyond the frame's extent (${reach}).`);
+      }
     }
     if (SHAPES.has(element.name)) {
       shapes += 1;

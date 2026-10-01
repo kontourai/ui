@@ -146,9 +146,10 @@
 
         <k-panel title="Corporate Marks" count="symbol, wordmark, lockup">
           <div class="row" id="brand-marks-mount">
-            <k-brand-mark mark="kontour-symbol" title="Kontour"></k-brand-mark>
+            <!-- The wordmark names itself ("Kontour"). The symbol needs a title to be exposed; the lockup here is decorative because the wordmark beside it already says the name. -->
+            <k-brand-mark mark="kontour-symbol" title="Kontour symbol"></k-brand-mark>
             <k-brand-mark mark="kontour-wordmark"></k-brand-mark>
-            <k-brand-mark mark="kontour-lockup-horizontal" size="32"></k-brand-mark>
+            <k-brand-mark mark="kontour-lockup-horizontal" size="32" decorative></k-brand-mark>
           </div>
         </k-panel>
 

@@ -145,7 +145,9 @@ Products should style components with `--k-*` variables and treat the product th
 
 - `npm run check:tokens` verifies the token/theme contract and keeps React styles token-only.
 - `npm run check:contrast` rates every shipped theme and mode against the WCAG pairs, through the same functions and thresholds `@kontourai/ui/contrast` exports; `npm run test:unit` tests that module.
-- `npm run check:marks` holds every mark in `icons/` to the production gates: generated from the path modules, valid and self-contained SVG, `currentColor` only, no effects, and shape and size ceilings. The browser suite adds the pixel gates (16/24/32px legibility, contrast on the shipped surfaces, favicon rendering, distinctness).
+- `npm run check:marks` holds every mark in `icons/` to the static gates: generated from the path modules, valid and self-contained SVG, plain in-frame geometry, `currentColor` only, no effects, and shape and size ceilings. The browser suite adds the pixel gates (ink at 16/24/32px that holds 3:1 on the shipped surfaces, ink structure, favicon rendering, distinctness). These measure ink, not whether a mark is recognisable; that is a human review (see `DESIGN.md`).
+- `npm run check:tree-shaking` bundles the built package with esbuild and fails if importing one primitive pulls in the brand marks, or if a side-effect import of the elements entry stops registering them.
+- `npm run check:wordmark` (opt-in; needs Python with fontTools and brotli) re-derives the wordmark outline from the vendored Fraunces file and compares it with the committed path data. `npm run test:unit` runs the same comparison when that tooling is present and skips it otherwise.
 - `npm run check:exports` builds and verifies package export targets, ESM output, declaration files, package naming, and framework-free element output.
 - `npm run check:readiness` verifies release docs, gallery, package metadata, and adopter contract markers.
 - `npm run check:pack` previews package contents with `npm pack --dry-run`.
