@@ -951,6 +951,11 @@
   ],
   "exclusions": [
     {
+      "id": "react:BrandMark",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
       "id": "react:ConsoleIcon",
       "owner": "kontourai/ui",
       "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
@@ -977,6 +982,21 @@
     },
     {
       "id": "react:FlowIcon",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:KontourLockup",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:KontourSymbol",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:KontourWordmark",
       "owner": "kontourai/ui",
       "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
     },
@@ -1066,6 +1086,11 @@
       "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
     },
     {
+      "id": "react:brandMarks",
+      "owner": "kontourai/ui",
+      "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
       "id": "react:normalizedClassSuffix",
       "owner": "kontourai/ui",
       "reason": "Public utility or TypeScript contract; no standalone interactive playground."
@@ -1104,6 +1129,11 @@
       "id": "react:trustStates",
       "owner": "kontourai/ui",
       "reason": "Public utility or TypeScript contract; no standalone interactive playground."
+    },
+    {
+      "id": "element:k-brand-mark",
+      "owner": "kontourai/ui",
+      "reason": "No truthful default fixture is authored yet; excluded until its interactive states are curated."
     },
     {
       "id": "element:k-dialog",

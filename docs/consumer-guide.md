@@ -462,6 +462,36 @@ const basis = claimBasisView(claim, bundle.evidence);
   (`--k-basis-caveat-decoration`). Style the line with neutral tokens only; do not color it by
   status or caveat.
 
+## Marks
+
+Product marks: `ProductIcon` (or `StationIcon`, `FlowIcon`, …) in React, `<k-product-icon
+product="station">` as an element, and `@kontourai/ui/icons/<name>.svg` as files. Corporate
+marks: `BrandMark` (`KontourSymbol`, `KontourWordmark`, `KontourLockup`), `<k-brand-mark
+mark="kontour-lockup-horizontal">`, and the `kontour-*.svg` files. The owner decided the
+corporate symbol and the "Kontour" wordmark on 2026-10-05. The lockup, the wordmark's cut and
+the usage rules were adopted with them as proposed; `DESIGN.md` records which is which.
+
+Every mark paints with `currentColor`, so it takes the surrounding text color. `size` is the
+height in px.
+
+```tsx
+<KontourLockup size={32} />                      {/* announced as the image "Kontour" */}
+<KontourLockup size={32} decorative />           {/* hidden: visible text beside it says the name */}
+<KontourSymbol size={24} title="Kontour" />      {/* the symbol needs a title to be announced */}
+```
+
+```html
+<k-brand-mark mark="kontour-wordmark"></k-brand-mark>
+<k-brand-mark mark="kontour-lockup-horizontal" decorative></k-brand-mark>
+```
+
+The wordmark and lockup spell the company name, so they are named "Kontour" for assistive tech
+unless you pass `title` or `decorative`. The symbol and the product marks are hidden unless
+given a `title`. An unknown `mark` renders nothing.
+
+The package declares `sideEffects`, so a bundler drops the marks you do not import; importing
+`@kontourai/ui/elements` for its effect still registers every element.
+
 ## Tone Mapping
 
 Product-specific domain words should map to the shared semantic scale:

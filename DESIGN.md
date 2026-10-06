@@ -784,7 +784,16 @@ changes it.
 ### Wordmark
 
 Primary naming: **Kontour AI**. Generated concept typography is not a production font or a
-custom wordmark; production needs an approved family or a finalized vector wordmark (OPEN).
+custom wordmark.
+
+**Decided (owner, 2026-10-05) — wordmark.** The wordmark spells "Kontour", not "Kontour AI".
+That decides the word on the wordmark only: the company name and the endorsement text in
+[Brand hierarchy](#brand-hierarchy) ("`<Product>` by Kontour AI") are unchanged.
+
+**Adopted with it, as proposed in [#114](https://github.com/kontourai/ui/pull/114).** The cut
+of `icons/kontour-wordmark.svg`, outlined from Fraunces at weight 600 and optical size 144 (see
+[Production assets](#production-assets)), is in force. It was not separately put to the owner,
+so changing it does not reverse an owner decision.
 
 ## Layout
 
@@ -947,6 +956,24 @@ Never add Station's S-river, a compass rose, a literal mountain, a location pin,
 shield, lock, brain, neural nodes, circuitry, AI sparkles, a robot, a chat bubble, a generic
 hexagon, or an infinity loop to the corporate mark.
 
+**Decided (owner, 2026-10-05) — corporate symbol.** The owner kept the proposed symbol,
+`icons/kontour-symbol.svg`, as shipped: three nested circular contours whose centres step down
+and to the left, the outer one continuous around the lower left and broken into two dashes and
+a dot at the upper right, on the product marks' 24-unit frame and stroke weight.
+
+It departs from the direction above in three ways. They were listed in the proposal
+([#114](https://github.com/kontourai/ui/pull/114)) and are accepted with the symbol rather than
+open:
+
+- it has three nested contours, not 4–6; the dashes and dot are pieces of the outer contour,
+  not further contours
+- every contour is a perfect circular arc, so there is no organic variation; only the offset
+  centres keep it from being concentric
+- at 16px the contours close up and the broken section stops reading; it reads from 24px, which
+  is why the [usage rules](#usage) prefer 24px or more for it
+
+The direction above still guides other contour artwork; it does not reopen the symbol.
+
 ### Station
 
 A river or path forming a subtle **S** through a contour environment; the S emerges from the
@@ -990,13 +1017,93 @@ states, and selective launch or loading moments, not behind every card.
 
 ### Production assets
 
-Canonical SVG sources are planned ([#75](https://github.com/kontourai/ui/issues/75)):
-`kontour-symbol.svg`, `kontour-wordmark.svg`, `kontour-lockup-horizontal.svg`,
-`kontour-lockup-stacked.svg`, and a `<product>-symbol.svg` plus `<product>-lockup.svg` for
-Station, Flow, and Surface. The product icons shipped in `icons/` today
-are the current UI marks. Raster exports derive from SVG; never use generated concept images as
-production logo sources. Every finalized mark must pass monochrome, ~24px recognition,
-favicon and app-icon, light-mode, dark-mode, no-effects, and applicable contrast tests.
+The marks ship in `icons/`, each as an SVG file (`@kontourai/ui/icons/<name>.svg`) and as a
+component. Every shipped mark is in force; what the owner decided and what was adopted with it
+differ:
+
+| Marks | Status |
+| --- | --- |
+| The 22 product icons | **Decided (owner, 2026-10-01; [#75](https://github.com/kontourai/ui/issues/75)):** promoted to production marks as drawn, having passed the gates below. |
+| `kontour-symbol.svg` | **Decided (owner, 2026-10-05)**, as shipped. See [Corporate mark](#corporate-mark). |
+| `kontour-wordmark.svg` | The word "Kontour": **decided (owner, 2026-10-05)**. The cut: adopted with it, as proposed. See [Wordmark](#wordmark). |
+| `kontour-lockup-horizontal.svg` | **Adopted with the decided marks, as proposed**: symbol, then wordmark, at the shipped gap. Not separately decided. Composed from the other two, never drawn separately. |
+
+The product marks are flat UI icons. They do not implement the contour-derived directions
+above for Station, Flow, and Surface, and redrawing toward those directions stays open. The
+owner decided (2026-10-05) that no such redraw is published until the owner has seen it
+rendered at real sizes (the contact sheet below, at 16, 24, and 32px). A stacked lockup and
+per-product lockups do not exist.
+
+Components: `ProductIcon` and `<k-product-icon>` for product marks; `BrandMark`
+(`KontourSymbol`, `KontourWordmark`, `KontourLockup`) and `<k-brand-mark>` for the corporate
+marks. The path modules under `react/src/` are the source; `node scripts/check-marks.mjs
+--write` regenerates the files. The wordmark is outlines, so drawing it needs no font;
+`scripts/generate-wordmark.py --check` re-derives it from the vendored Fraunces file. Raster
+exports derive from the SVGs; never use generated concept images as production logo sources,
+and never trace one.
+
+**Accessible name.** The wordmark and the lockup are exposed to assistive tech as an image
+named "Kontour" by default, so a header that shows only the lockup still announces the company.
+Pass `title` to rename one, or `decorative` to hide it where visible text beside it already
+says the name. The symbol and the product marks have no default name: they are hidden unless
+given a `title`.
+
+#### Gates
+
+Enforced for every mark by `npm run check:marks` and the browser suite. A mark that fails one is
+fixed or not shipped.
+
+- a valid, self-contained SVG with a `viewBox`: only shape elements, and only plain numeric
+  geometry inside the frame; no scripts, raster embeds, external references, styles, or live text
+- `currentColor` as the only paint; no filters, gradients, masks, or opacity
+- at 16, 24, and 32px, rendered alone: enough ink that still holds 3:1 after antialiasing on
+  the page and panel surfaces in light and dark; not more ink than a drawing has; ink and
+  empty space both present, with ink in the middle of the frame
+- no two marks render alike
+- shape-count and file-size ceilings
+- for the square marks: renders standalone, square, at 16 and 32px, as a favicon does
+
+**What the gates do not establish.** They measure ink: how much, how dark against the surface,
+and how it is distributed. They do not measure whether anyone can tell what a mark is.
+Compared with the requirements this section carried before:
+
+- "~24px recognition" is not automated. The ink measurements do not stand in for it; they
+  catch blank, hairline, washed-out, frame-only, and duplicated marks. **Recognition stays a human review
+  requirement:** before a mark is approved, a person looks at it at 16, 24, and 32px on the
+  contact sheet (`node scripts/render-marks-sheet.mjs <out.png>`) and confirms it reads as
+  what it is and is not mistaken for a neighbouring mark.
+- The app-icon test is not covered. No gate renders a mark as an app icon (masked, padded, on
+  a filled tile); that needs its own review when an app icon is made.
+- The favicon gate proves the file renders alone at favicon sizes. It does not prove it reads
+  in a real tab strip.
+
+#### Usage
+
+Adopted with the decided corporate marks, as proposed in
+[#114](https://github.com/kontourai/ui/pull/114). These rules are in force, but they were not
+separately put to the owner, so changing one does not reverse an owner decision.
+
+- **Color.** One color, from the surrounding text color. Use a text or brand role that holds
+  3:1 on the surface behind it. Never color parts of a mark differently.
+- **Clear space.** Keep a margin of one quarter of the mark's rendered height on every side,
+  free of text, other marks, and container edges.
+- **Minimum size.** 16px high for every mark. Prefer 24px or more for the symbol, the
+  wordmark, and the lockup.
+- **Which mark.** The lockup where the company is introduced; the symbol where space is tight
+  or the name is already present; the wordmark where a symbol would repeat. Product marks
+  identify products and never stand in for the corporate mark.
+- **Favicons.** The square marks render as SVG favicons. A standalone SVG has no text color to
+  inherit, so `currentColor` draws black: for a dark tab strip, ship a copy with the color
+  set, generated from the canonical file.
+
+Don't:
+
+- stretch, rotate, skew, outline, or crop a mark
+- add a gradient, shadow, glow, texture, or container shape to a flat mark
+- retype the wordmark as live text, in Fraunces or any other face
+- pair the symbol and wordmark in an arrangement other than the shipped lockup
+- place a mark on a photo or a surface where it falls under 3:1
+- redraw a mark outside an explicit identity task
 
 ## Motion
 
@@ -1262,10 +1369,11 @@ record of the decision.
 
 ### Brand decisions still open
 
-Exact corporate symbol geometry; contour spacing and line weights; final Station vector
-geometry; final Flow and Surface vectors ([#75](https://github.com/kontourai/ui/issues/75));
-final wordmark; complete typography tuning; environment and release-channel colors;
-exact motion durations and easing; final breakpoints; final component-library mappings.
+Contour spacing and line weights; contour-derived Station, Flow, and Surface vectors (the
+shipped product marks are flat UI icons, [#75](https://github.com/kontourai/ui/issues/75); none
+is published before the owner sees it at real sizes); stacked and per-product lockups; app-icon
+treatments; complete typography tuning; environment and release-channel colors; exact motion
+durations and easing; final breakpoints; final component-library mappings.
 
 ## Final Principle
 

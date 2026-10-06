@@ -48,6 +48,8 @@ assertIncludes(reactIndex, "Badge", "React index should export Badge.");
 assertIncludes(reactIndex, "StatusBadge", "React index should export StatusBadge.");
 assertIncludes(reactIndex, "ProductIcon", "React index should export ProductIcon.");
 assertIncludes(reactIndex, "productIcons", "React index should export the productIcons map.");
+assertIncludes(reactIndex, "BrandMark", "React index should export BrandMark.");
+assertIncludes(reactIndex, "brandMarks", "React index should export the brandMarks map.");
 assertIncludes(elementsIndex, "k-badge", "Elements index should register k-badge.");
 assertIncludes(elementsIndex, "k-topbar", "Elements index should register k-topbar.");
 assertNoLegacyScope(reactIndex, "dist/react/index.js");
@@ -225,7 +227,7 @@ globalThis.customElements = {
   }
 };
 await import("@kontourai/ui/elements");
-for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon", "k-trust-state", "k-trust-basis"]) {
+for (const tag of ["k-badge", "k-panel", "k-status-badge", "k-metric", "k-progress", "k-empty", "k-button", "k-topbar", "k-product-icon", "k-brand-mark", "k-trust-state", "k-trust-basis"]) {
   assert.ok(registry.has(tag), `${tag} should be registered.`);
 }
 
