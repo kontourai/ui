@@ -145,8 +145,8 @@ for (const [slug, mark] of expected) {
 
   let shapes = 0;
   const paints = new Set();
-  walk(svg, { fill: "black", stroke: "none" }, 0);
-  function walk(element, inherited, depth) {
+  walk(svg, { fill: "black", stroke: "none" }, 0, [0, 0]);
+  function walk(element, inherited, depth, inheritedOffset) {
     if (!ELEMENTS.has(element.name)) {
       fail(`<${element.name}> is not allowed: ${explain(element.name)}.`);
       return;
@@ -156,6 +156,10 @@ for (const [slug, mark] of expected) {
     // Geometry must stay on the frame: a shape placed far outside it draws
     // nothing while still counting as a painted shape.
     const reach = Math.max(box?.[0] ?? HEIGHT, HEIGHT);
+    // A translate on this element moves its own path data and its children;
+    // a malformed one is reported below and contributes no offset.
+    const ownOffset = /^translate\((\d+(?:\.\d+)?)(?: (\d+(?:\.\d+)?))?\)$/.exec(element.attributes.get("transform") ?? "");
+    const offset = ownOffset ? [inheritedOffset[0] + Number(ownOffset[1]), inheritedOffset[1] + Number(ownOffset[2] ?? 0)] : inheritedOffset;
     for (const [name, value] of element.attributes) {
       if (!ATTRIBUTES.has(name)) fail(`attribute ${name} on <${element.name}> is not allowed: ${explain(name)}.`);
       // A namespace declaration below the root moves the subtree out of SVG: it would parse, count as shapes, and draw nothing.
@@ -180,17 +184,22 @@ for (const [slug, mark] of expected) {
       } else if (name === "d") {
         if (!/^[MmLlHhVvCcSsQqTtAaZz0-9+\-.,\s]+$/.test(value)) fail(`path data on <${element.name}> contains characters that are not path commands.`);
         else {
-          let parameters;
+          let extent;
           try {
-            parameters = pathParameters(value);
+            extent = pathExtent(value);
           } catch (error) {
             fail(`path data on <${element.name}> is malformed: ${error.message}.`);
             continue;
           }
-          // Only coordinates are bounded by the frame. An arc's radii and
-          // rotation are not positions: a radius larger than the frame draws a
-          // shallow curve inside it, and a rotation is in degrees.
-          if (parameters.some(({ role, number }) => role === "coordinate" && Math.abs(number) > reach)) fail(`path data on <${element.name}> has a coordinate beyond the frame's extent (${reach}).`);
+          // Bounded by where the path actually draws: absolute positions after
+          // relative moves accumulate, arcs and curves by their true extent.
+          const [width, height] = [box?.[0] ?? HEIGHT, HEIGHT];
+          const [minX, maxX, minY, maxY] = [extent.minX + offset[0], extent.maxX + offset[0], extent.minY + offset[1], extent.maxY + offset[1]];
+          const EPSILON = 1e-6;
+          if (minX < -EPSILON || minY < -EPSILON || maxX > width + EPSILON || maxY > height + EPSILON) {
+            const round = (number) => Math.round(number * 100) / 100;
+            fail(`path data on <${element.name}> draws beyond the ${width}x${height} frame: x from ${round(minX)} to ${round(maxX)}, y from ${round(minY)} to ${round(maxY)}.`);
+          }
         }
       }
     }
@@ -203,7 +212,7 @@ for (const [slug, mark] of expected) {
       else paints.add(paint.fill === "currentColor" && paint.stroke === "currentColor" ? "fill+stroke" : paint.fill === "currentColor" ? "fill" : "stroke");
       if (element.children.length) fail(`<${element.name}> must be empty.`);
     }
-    for (const child of element.children) walk(child, paint, depth + 1);
+    for (const child of element.children) walk(child, paint, depth + 1, offset);
   }
 
   const limits = square ? LIMITS.square : LIMITS.wide;
@@ -224,46 +233,172 @@ if (failures.length) {
 }
 console.log(`Marks check passed: ${rows.length} marks (${rows.filter((row) => row.family === "product").length} product, ${rows.filter((row) => row.family === "brand").length} brand) are valid, self-contained, single-colour, effect-free and within their ceilings.`);
 
-// Reads path data into its numeric parameters, each with its role, by the
-// SVG grammar: commands repeat implicitly, and an arc's two flags are single
-// "0"/"1" characters that may be written without separators ("a8 8 0 0116 0").
-// Throws on anything the grammar does not allow, so a value the bounds above
-// never see cannot slip through as an unread number.
-function pathParameters(data) {
+// Reads path data by the SVG path grammar and returns the box it draws in.
+// Enforced: the data starts with a moveto; every command has its full
+// argument count (implicit repeats included); at most one comma separates two
+// arguments, and none follows a command letter, precedes one, or ends the
+// data; an arc's flags are single "0"/"1" characters, which may be written
+// without separators ("a8 8 0 0116 0"). The box follows the current point
+// through relative commands and covers each segment's true extent: the
+// extrema of quadratic and cubic Béziers, and of arcs after the SVG 2
+// endpoint-to-centre conversion (radii scaled up when too small, rotation
+// applied). Stroke width is not added. It does not judge whether a path draws
+// anything visible: a single moveto parses.
+function pathExtent(data) {
   const ARITY = { m: 2, l: 2, t: 2, h: 1, v: 1, c: 6, s: 4, q: 4, a: 7, z: 0 };
-  const ARC_ROLES = ["radius", "radius", "rotation", "flag", "flag", "coordinate", "coordinate"];
   const number = /[+-]?(?:\d+\.?\d*|\.\d+)/y;
-  const parameters = [];
   let at = 0;
+  const space = () => { while (at < data.length && /\s/.test(data[at])) at += 1; };
+  const segments = [];
+  space();
+  if (data[at] !== "M" && data[at] !== "m") throw new Error("path data must start with a moveto (M or m)");
   let command = null;
-  const skip = () => { while (at < data.length && /[\s,]/.test(data[at])) at += 1; };
-  for (skip(); at < data.length; skip()) {
+  let afterComma = false;
+  for (;;) {
+    space();
+    if (at >= data.length) {
+      if (afterComma) throw new Error("a comma ends the path data");
+      break;
+    }
     if (/[A-Za-z]/.test(data[at])) {
-      command = data[at].toLowerCase();
+      if (afterComma) throw new Error(`a comma precedes the command at offset ${at}`);
+      if (!(data[at].toLowerCase() in ARITY)) throw new Error(`"${data[at]}" is not a path command`);
+      command = data[at];
       at += 1;
-      if (command === "z") continue;
-    } else if (command === null || command === "z") {
+      if (command.toLowerCase() === "z") { segments.push({ command, args: [] }); continue; }
+    } else if (command === null || command.toLowerCase() === "z") {
       throw new Error(`a number at offset ${at} follows no command`);
     }
-    for (let index = 0; index < ARITY[command]; index += 1) {
-      skip();
-      const role = command === "a" ? ARC_ROLES[index] : "coordinate";
-      if (role === "flag") {
+    const lower = command.toLowerCase();
+    const args = [];
+    for (let index = 0; index < ARITY[lower]; index += 1) {
+      space();
+      if (index > 0 && data[at] === ",") { at += 1; space(); }
+      if (lower === "a" && (index === 3 || index === 4)) {
         if (data[at] !== "0" && data[at] !== "1") throw new Error(`an arc flag must be 0 or 1 (offset ${at})`);
+        args.push(Number(data[at]));
         at += 1;
-        parameters.push({ role, number: Number(data[at - 1]) });
         continue;
       }
       number.lastIndex = at;
       const match = number.exec(data);
-      if (!match) throw new Error(`"${command}" needs ${ARITY[command]} numbers (offset ${at})`);
+      if (!match) throw new Error(`"${command}" needs ${ARITY[lower]} numbers (offset ${at})`);
       at += match[0].length;
-      parameters.push({ role, number: Number(match[0]) });
+      args.push(Number(match[0]));
     }
-    // After a moveto's first pair, further pairs are linetos.
-    if (command === "m") command = "l";
+    segments.push({ command, args });
+    space();
+    afterComma = data[at] === ",";
+    if (afterComma) at += 1;
+    // After a moveto's first pair, further pairs are linetos of the same kind.
+    if (lower === "m") command = command === "m" ? "l" : "L";
   }
-  return parameters;
+
+  const box = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+  const include = (x, y) => {
+    box.minX = Math.min(box.minX, x); box.maxX = Math.max(box.maxX, x);
+    box.minY = Math.min(box.minY, y); box.maxY = Math.max(box.maxY, y);
+  };
+  let [x, y] = [0, 0];
+  let start = [0, 0];
+  let previous = null; // { kind: "c" | "q", control: [x, y] } for S and T reflection
+  for (const { command, args } of segments) {
+    const lower = command.toLowerCase();
+    const relative = command === lower && lower !== "z";
+    const point = (index) => [args[index] + (relative ? x : 0), args[index + 1] + (relative ? y : 0)];
+    let next;
+    if (lower === "m") { [x, y] = point(0); start = [x, y]; include(x, y); previous = null; continue; }
+    if (lower === "z") { [x, y] = start; previous = null; continue; }
+    if (lower === "l") next = point(0);
+    else if (lower === "h") next = [args[0] + (relative ? x : 0), y];
+    else if (lower === "v") next = [x, args[0] + (relative ? y : 0)];
+    else if (lower === "c" || lower === "s") {
+      const first = lower === "c" ? point(0) : previous?.kind === "c" ? [2 * x - previous.control[0], 2 * y - previous.control[1]] : [x, y];
+      const second = point(lower === "c" ? 2 : 0);
+      next = point(lower === "c" ? 4 : 2);
+      for (const [px, py] of cubicExtrema([x, y], first, second, next)) include(px, py);
+      previous = { kind: "c", control: second };
+    } else if (lower === "q" || lower === "t") {
+      const control = lower === "q" ? point(0) : previous?.kind === "q" ? [2 * x - previous.control[0], 2 * y - previous.control[1]] : [x, y];
+      next = point(lower === "q" ? 2 : 0);
+      for (const [px, py] of quadraticExtrema([x, y], control, next)) include(px, py);
+      previous = { kind: "q", control };
+    } else if (lower === "a") {
+      next = point(5);
+      for (const [px, py] of arcExtrema([x, y], args[0], args[1], args[2], args[3], args[4], next)) include(px, py);
+    }
+    if (lower !== "c" && lower !== "s" && lower !== "q" && lower !== "t") previous = null;
+    include(x, y);
+    [x, y] = next;
+    include(x, y);
+  }
+  return box;
+}
+
+// Points on a quadratic Bézier where x or y is extreme within 0 < t < 1.
+function quadraticExtrema(p0, p1, p2) {
+  const points = [];
+  for (const axis of [0, 1]) {
+    const denominator = p0[axis] - 2 * p1[axis] + p2[axis];
+    if (denominator === 0) continue;
+    const t = (p0[axis] - p1[axis]) / denominator;
+    if (t > 0 && t < 1) points.push([0, 1].map((k) => (1 - t) ** 2 * p0[k] + 2 * (1 - t) * t * p1[k] + t ** 2 * p2[k]));
+  }
+  return points;
+}
+
+// Points on a cubic Bézier where x or y is extreme within 0 < t < 1.
+function cubicExtrema(p0, p1, p2, p3) {
+  const points = [];
+  for (const axis of [0, 1]) {
+    const [d0, d1, d2] = [p1[axis] - p0[axis], p2[axis] - p1[axis], p3[axis] - p2[axis]];
+    const [a, b, c] = [d0 - 2 * d1 + d2, 2 * (d1 - d0), d0];
+    const roots = [];
+    if (Math.abs(a) < 1e-12) { if (b !== 0) roots.push(-c / b); }
+    else {
+      const discriminant = b * b - 4 * a * c;
+      if (discriminant >= 0) roots.push((-b + Math.sqrt(discriminant)) / (2 * a), (-b - Math.sqrt(discriminant)) / (2 * a));
+    }
+    for (const t of roots) {
+      if (t > 0 && t < 1) points.push([0, 1].map((k) => (1 - t) ** 3 * p0[k] + 3 * (1 - t) ** 2 * t * p1[k] + 3 * (1 - t) * t ** 2 * p2[k] + t ** 3 * p3[k]));
+    }
+  }
+  return points;
+}
+
+// Points on an elliptical arc where x or y is extreme, by the SVG 2
+// endpoint-to-centre conversion (implementation notes, B.2.4 and B.2.5).
+function arcExtrema([x1, y1], rxIn, ryIn, degrees, largeArc, sweep, [x2, y2]) {
+  if (x1 === x2 && y1 === y2) return []; // the arc is omitted
+  let [rx, ry] = [Math.abs(rxIn), Math.abs(ryIn)];
+  if (rx === 0 || ry === 0) return []; // drawn as a straight line; the endpoints bound it
+  const phi = (degrees * Math.PI) / 180;
+  const [cos, sin] = [Math.cos(phi), Math.sin(phi)];
+  const [dx, dy] = [(x1 - x2) / 2, (y1 - y2) / 2];
+  const [x1p, y1p] = [cos * dx + sin * dy, -sin * dx + cos * dy];
+  const lambda = (x1p * x1p) / (rx * rx) + (y1p * y1p) / (ry * ry);
+  if (lambda > 1) { rx *= Math.sqrt(lambda); ry *= Math.sqrt(lambda); }
+  const numerator = rx * rx * ry * ry - rx * rx * y1p * y1p - ry * ry * x1p * x1p;
+  const denominator = rx * rx * y1p * y1p + ry * ry * x1p * x1p;
+  const coefficient = (largeArc !== sweep ? 1 : -1) * Math.sqrt(Math.max(0, numerator / denominator));
+  const [cxp, cyp] = [(coefficient * rx * y1p) / ry, (-coefficient * ry * x1p) / rx];
+  const [cx, cy] = [cos * cxp - sin * cyp + (x1 + x2) / 2, sin * cxp + cos * cyp + (y1 + y2) / 2];
+  const angle = (ux, uy, vx, vy) => Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy);
+  const theta1 = angle(1, 0, (x1p - cxp) / rx, (y1p - cyp) / ry);
+  let delta = angle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry);
+  if (!sweep && delta > 0) delta -= 2 * Math.PI;
+  if (sweep && delta < 0) delta += 2 * Math.PI;
+  const thetaX = Math.atan2(-ry * sin, rx * cos);
+  const thetaY = Math.atan2(ry * cos, rx * sin);
+  const TAU = 2 * Math.PI;
+  const swept = (theta) => {
+    const offset = delta >= 0 ? ((theta - theta1) % TAU + TAU) % TAU : -((((theta1 - theta) % TAU) + TAU) % TAU);
+    return delta >= 0 ? offset <= delta : offset >= delta;
+  };
+  return [thetaX, thetaX + Math.PI, thetaY, thetaY + Math.PI].filter(swept).map((theta) => [
+    cx + rx * cos * Math.cos(theta) - ry * sin * Math.sin(theta),
+    cy + rx * sin * Math.cos(theta) + ry * cos * Math.sin(theta),
+  ]);
 }
 
 // A strict reader for the subset of XML a mark may use: elements and quoted

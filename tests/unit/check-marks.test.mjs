@@ -96,7 +96,7 @@ test("rejects attribute values that are not plain, in-frame geometry", () => {
   rejects(runCheck(withBearing('<rect x="4" y="4" width="0" height="16"/>')), /width="0" on <rect> must be a plain number above 0/);
   rejects(runCheck(withBearing(`<g transform="translate(9999 9999)">${CIRCLE}</g>`)), /transform="translate\(9999 9999\)": only translate\(x y\) with offsets from 0 to 24/);
   rejects(runCheck(withBearing(`<g transform="scale(0)">${CIRCLE}</g>`)), /transform="scale\(0\)": only translate/);
-  rejects(runCheck(withBearing('<path d="M9999 9999h4"/>')), /path data on <path> has a coordinate beyond the frame's extent \(24\)/);
+  rejects(runCheck(withBearing('<path d="M9999 9999h4"/>')), /path data on <path> draws beyond the 24x24 frame: x from 9999 to 10003, y from 9999 to 9999/);
   rejects(runCheck(withBearing('<path d="M4 4h1e9"/>')), /path data on <path> contains characters that are not path commands/);
   rejects(runCheck(withBearing('<polyline points="4,4 9999,12"/>')), /points on <polyline> must be plain numbers within the frame's extent/);
   rejects(runCheck(circle('stroke-linecap="url(#a)"')), /stroke-linecap="url\(#a\)" on <circle>: var\(\), url\(\) and data: values/);
@@ -188,9 +188,16 @@ test("a mark that deviates from a passing one by a single property fails on exac
   const valid = '<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3"/>';
   assert.equal(runCheckWithBearingSource(valid).status, 0, "the baseline must pass for the deviations to mean anything");
   const deviations = [
-    ['<path d="M4 16A30 30 0 0 1 9999 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> has a coordinate beyond the frame's extent \(24\)/],
+    ['<path d="M4 16A30 30 0 0 1 9999 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from 4 to 9999/],
+    // Negative reach: a relative move back past the left edge.
+    ['<path d="M4 16h-30"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from -26 to 4/],
+    // Relative moves accumulate: each delta is in range, the position is not.
+    ['<path d="M0 16l20 0l20 0"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from 0 to 40/],
+    ['<path d="M-5 16L20 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from -5 to 20/],
+    // A group's translate moves the path data inside it.
+    ['<g transform="translate(20 0)"><path d="M0 16h10"/></g><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from 20 to 30/],
     ['<path d="M4 16A30 30 0 2 1 20 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> is malformed: an arc flag must be 0 or 1/],
-    ['<path d="M4 16A30 30 0 0 1 20"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> is malformed: "a" needs 7 numbers/],
+    ['<path d="M4 16A30 30 0 0 1 20"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> is malformed: "A" needs 7 numbers/],
     ['<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3" opacity="0.5"/>', /bearing\.svg: attribute opacity on <circle> is not allowed/],
     ['<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3" stroke="#5ce0c6"/>', /bearing\.svg: stroke="#5ce0c6" on <circle>: a mark's only paint is currentColor/],
     ['<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3" stroke-width="0.5"/>', /bearing\.svg: stroke-width="0.5" on <circle> must be a plain number from 1 to 3/],
@@ -200,4 +207,44 @@ test("a mark that deviates from a passing one by a single property fails on exac
     rejects(result, pattern);
     assert.equal(failureLines(result).length, 1, `exactly one failure expected for ${inner}:\n${result.stderr}`);
   }
+});
+
+test("bounds an arc by where it draws, not by its parameters", () => {
+  // Large-arc 1 with a radius beyond the frame: the long way round a big circle (Chromium bbox x -18..42, y -42.91..16).
+  rejects(runCheckWithBearingSource('<path d="M4 16A30 30 0 1 1 20 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from -18 to 42, y from -42.91 to 16/);
+  rejects(runCheckWithBearingSource('<path d="M4 16A300 300 0 1 1 20 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from -288 to 312, y from -583.89 to 16/);
+  // Radius within the frame, endpoints on it, but the arc overshoots the top edge (Chromium bbox y -11..1).
+  rejects(runCheckWithBearingSource('<path d="M0 1A12 12 0 1 1 24 1"/>'), /path data on <path> draws beyond the 24x24 frame: x from 0 to 24, y from -11 to 1/);
+  // Radii too small for the endpoints are scaled up, as SVG draws them: radius 1 becomes a half circle of radius 5 over the top edge.
+  rejects(runCheckWithBearingSource('<path d="M2 3A1 1 0 0 1 12 3"/>'), /path data on <path> draws beyond the 24x24 frame: x from 2 to 12, y from -2 to 3/);
+  // The same arc lower down stays inside, and curves whose control points leave the frame but whose ink does not are accepted.
+  for (const d of ["M2 12A1 1 0 0 1 12 12", "M4 12C4 -4 20 -4 20 12", "M4 12Q12 -8 20 12", "M12 2a10 10 0 0 1 0 20 10 10 0 0 1 0-20"]) {
+    const result = runCheckWithBearingSource(`<path d="${d}"/>`);
+    assert.equal(result.status, 0, `${d}\n${result.stderr}`);
+  }
+});
+
+test("reads path data by the grammar: a moveto first, no stray commas", () => {
+  for (const [d, pattern] of [
+    ["c1 1 1 1 1 1", /is malformed: path data must start with a moveto \(M or m\)/],
+    ["Z", /is malformed: path data must start with a moveto/],
+    ["M1,,1L5 5", /is malformed: "M" needs 2 numbers/],
+    ["M1 1,", /is malformed: a comma ends the path data/],
+    ["M2 2,l2 2", /is malformed: a comma precedes the command/],
+    ["M2 2L4 4 6", /is malformed: "L" needs 2 numbers/],
+    ["M4 16A8 8 0 2 1 20 16", /is malformed: an arc flag must be 0 or 1/],
+  ]) rejects(runCheckWithBearingSource(`<path d="${d}"/><circle cx="12" cy="9" r="3"/>`), new RegExp(`bearing\\.svg: path data on <path> ${pattern.source}`));
+  // Separators the grammar allows: one comma between arguments, implicit repeats, compact flags.
+  const accepted = runCheckWithBearingSource('<path d="M2,2 4,4,6,6 L8 8, 10 10Z m1 1 l1-1"/><circle cx="12" cy="9" r="3"/>');
+  assert.equal(accepted.status, 0, accepted.stderr);
+});
+
+test("bounds a Bézier curve by its extrema, not its endpoints", () => {
+  // Endpoints inside, the curve bulging over the top edge (Chromium bbox y -6..12 and -4..12).
+  rejects(runCheckWithBearingSource('<path d="M4 12C4 -12 20 -12 20 12"/>'), /path data on <path> draws beyond the 24x24 frame: x from 4 to 20, y from -6 to 12/);
+  rejects(runCheckWithBearingSource('<path d="M4 12Q12 -20 20 12"/>'), /path data on <path> draws beyond the 24x24 frame: x from 4 to 20, y from -4 to 12/);
+  // Smooth continuations reflect the previous control point, which pulls these below the bottom edge
+  // (Chromium bbox y 1..25.85 and 6..26); without the reflection both would stay inside.
+  rejects(runCheckWithBearingSource('<path d="M2 16C2 -4 10 -4 10 16S18 20 18 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from 2 to 18, y from 1 to 25.85/);
+  rejects(runCheckWithBearingSource('<path d="M2 16Q6 -4 10 16T18 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from 2 to 18, y from 6 to 26/);
 });
