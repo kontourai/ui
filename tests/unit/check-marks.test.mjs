@@ -158,3 +158,46 @@ test("refuses to pass when no marks are declared", () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /No marks are declared/);
 });
+
+// Writes `inner` as bearing's markup in the path module and regenerates the
+// files, so the sync gate is satisfied and only the markup itself is judged.
+function runCheckWithBearingSource(inner) {
+  const generated = runCheck((dir) => {
+    const file = path.join(dir, PRODUCT_PATHS);
+    const source = readFileSync(file, "utf8");
+    const from = '<circle cx="12" cy="12" r="8.5"/><path d="M15 9l-2 4.5L9 15l2-4.5Z"/>';
+    assert.equal(source.split(from).length, 2, "bearing's markup anchor must appear once");
+    writeFileSync(file, source.replace(from, inner));
+  }, ["--write"]);
+  assert.equal(generated.status, 0, generated.stderr);
+  return spawnSync(process.execPath, [path.join(generated.dir, "scripts/check-marks.mjs")], { encoding: "utf8" });
+}
+const failureLines = (result) => result.stderr.split("\n").filter((line) => line.startsWith("  - "));
+
+test("accepts arcs whose radii or rotation exceed the frame, and compact arc flags", () => {
+  // A radius of 30 draws a shallow curve wholly inside the 24-unit frame; the
+  // rotation is in degrees; "0116" is the flags 0, 1 and the x coordinate 16.
+  for (const d of ["M4 16A30 30 0 0 1 20 16", "M4 16A8 5 45 0 1 20 16", "M4 16a8 8 0 0116 0"]) {
+    const result = runCheckWithBearingSource(`<path d="${d}"/>`);
+    assert.equal(result.status, 0, `${d}\n${result.stderr}`);
+    assert.match(result.stdout, /Marks check passed: 25 marks/);
+  }
+});
+
+test("a mark that deviates from a passing one by a single property fails on exactly that property", () => {
+  const valid = '<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3"/>';
+  assert.equal(runCheckWithBearingSource(valid).status, 0, "the baseline must pass for the deviations to mean anything");
+  const deviations = [
+    ['<path d="M4 16A30 30 0 0 1 9999 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> has a coordinate beyond the frame's extent \(24\)/],
+    ['<path d="M4 16A30 30 0 2 1 20 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> is malformed: an arc flag must be 0 or 1/],
+    ['<path d="M4 16A30 30 0 0 1 20"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> is malformed: "a" needs 7 numbers/],
+    ['<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3" opacity="0.5"/>', /bearing\.svg: attribute opacity on <circle> is not allowed/],
+    ['<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3" stroke="#5ce0c6"/>', /bearing\.svg: stroke="#5ce0c6" on <circle>: a mark's only paint is currentColor/],
+    ['<path d="M4 16A30 30 0 0 1 20 16"/><circle cx="12" cy="9" r="3" stroke-width="0.5"/>', /bearing\.svg: stroke-width="0.5" on <circle> must be a plain number from 1 to 3/],
+  ];
+  for (const [inner, pattern] of deviations) {
+    const result = runCheckWithBearingSource(inner);
+    rejects(result, pattern);
+    assert.equal(failureLines(result).length, 1, `exactly one failure expected for ${inner}:\n${result.stderr}`);
+  }
+});

@@ -467,8 +467,8 @@ const basis = claimBasisView(claim, bundle.evidence);
 Product marks: `ProductIcon` (or `StationIcon`, `FlowIcon`, …) in React, `<k-product-icon
 product="station">` as an element, and `@kontourai/ui/icons/<name>.svg` as files. Corporate
 marks: `BrandMark` (`KontourSymbol`, `KontourWordmark`, `KontourLockup`), `<k-brand-mark
-mark="kontour-lockup-horizontal">`, and the `kontour-*.svg` files. The corporate marks are
-proposed, pending owner review; see `DESIGN.md`.
+mark="kontour-lockup-horizontal">`, and the `kontour-*.svg` files. The corporate marks were
+decided by the owner on 2026-10-05; usage rules are in `DESIGN.md`.
 
 Every mark paints with `currentColor`, so it takes the surrounding text color. `size` is the
 height in px.

@@ -179,7 +179,19 @@ for (const [slug, mark] of expected) {
         if (!offsets || offsets.some((offset) => offset > reach)) fail(`transform="${value}": only translate(x y) with offsets from 0 to ${reach} is allowed.`);
       } else if (name === "d") {
         if (!/^[MmLlHhVvCcSsQqTtAaZz0-9+\-.,\s]+$/.test(value)) fail(`path data on <${element.name}> contains characters that are not path commands.`);
-        else if ((value.match(/\d+\.?\d*|\.\d+/g) ?? []).some((part) => Number(part) > reach)) fail(`path data on <${element.name}> has a coordinate beyond the frame's extent (${reach}).`);
+        else {
+          let parameters;
+          try {
+            parameters = pathParameters(value);
+          } catch (error) {
+            fail(`path data on <${element.name}> is malformed: ${error.message}.`);
+            continue;
+          }
+          // Only coordinates are bounded by the frame. An arc's radii and
+          // rotation are not positions: a radius larger than the frame draws a
+          // shallow curve inside it, and a rotation is in degrees.
+          if (parameters.some(({ role, number }) => role === "coordinate" && Math.abs(number) > reach)) fail(`path data on <${element.name}> has a coordinate beyond the frame's extent (${reach}).`);
+        }
       }
     }
     if (SHAPES.has(element.name)) {
@@ -211,6 +223,48 @@ if (failures.length) {
   process.exit(1);
 }
 console.log(`Marks check passed: ${rows.length} marks (${rows.filter((row) => row.family === "product").length} product, ${rows.filter((row) => row.family === "brand").length} brand) are valid, self-contained, single-colour, effect-free and within their ceilings.`);
+
+// Reads path data into its numeric parameters, each with its role, by the
+// SVG grammar: commands repeat implicitly, and an arc's two flags are single
+// "0"/"1" characters that may be written without separators ("a8 8 0 0116 0").
+// Throws on anything the grammar does not allow, so a value the bounds above
+// never see cannot slip through as an unread number.
+function pathParameters(data) {
+  const ARITY = { m: 2, l: 2, t: 2, h: 1, v: 1, c: 6, s: 4, q: 4, a: 7, z: 0 };
+  const ARC_ROLES = ["radius", "radius", "rotation", "flag", "flag", "coordinate", "coordinate"];
+  const number = /[+-]?(?:\d+\.?\d*|\.\d+)/y;
+  const parameters = [];
+  let at = 0;
+  let command = null;
+  const skip = () => { while (at < data.length && /[\s,]/.test(data[at])) at += 1; };
+  for (skip(); at < data.length; skip()) {
+    if (/[A-Za-z]/.test(data[at])) {
+      command = data[at].toLowerCase();
+      at += 1;
+      if (command === "z") continue;
+    } else if (command === null || command === "z") {
+      throw new Error(`a number at offset ${at} follows no command`);
+    }
+    for (let index = 0; index < ARITY[command]; index += 1) {
+      skip();
+      const role = command === "a" ? ARC_ROLES[index] : "coordinate";
+      if (role === "flag") {
+        if (data[at] !== "0" && data[at] !== "1") throw new Error(`an arc flag must be 0 or 1 (offset ${at})`);
+        at += 1;
+        parameters.push({ role, number: Number(data[at - 1]) });
+        continue;
+      }
+      number.lastIndex = at;
+      const match = number.exec(data);
+      if (!match) throw new Error(`"${command}" needs ${ARITY[command]} numbers (offset ${at})`);
+      at += match[0].length;
+      parameters.push({ role, number: Number(match[0]) });
+    }
+    // After a moveto's first pair, further pairs are linetos.
+    if (command === "m") command = "l";
+  }
+  return parameters;
+}
 
 // A strict reader for the subset of XML a mark may use: elements and quoted
 // attributes. Declarations, doctypes (and so entities), comments, CDATA,

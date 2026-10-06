@@ -784,15 +784,13 @@ changes it.
 ### Wordmark
 
 Primary naming: **Kontour AI**. Generated concept typography is not a production font or a
-custom wordmark; production needs a finalized vector wordmark.
+custom wordmark.
 
-**OPEN — wordmark.** Proposed, pending owner review of the contact sheet: "Kontour" outlined
-from Fraunces (`icons/kontour-wordmark.svg`; see [Production assets](#production-assets)). Two
-things are undecided and neither is settled by the file existing:
-
-- **The word.** The proposed wordmark spells "Kontour"; the primary naming above is "Kontour
-  AI". Whether the wordmark carries "AI" is open.
-- **The cut.** Weight 600 at optical size 144 was chosen for the proposal, not approved.
+**Decided (owner, 2026-10-05) — wordmark.** The wordmark is `icons/kontour-wordmark.svg` as
+shipped: "Kontour", outlined from Fraunces at weight 600 and optical size 144 (see
+[Production assets](#production-assets)). It spells "Kontour", not "Kontour AI". This decides
+the wordmark only: the company name and the endorsement text in
+[Brand hierarchy](#brand-hierarchy) ("`<Product>` by Kontour AI") are unchanged.
 
 ## Layout
 
@@ -955,19 +953,22 @@ Never add Station's S-river, a compass rose, a literal mountain, a location pin,
 shield, lock, brain, neural nodes, circuitry, AI sparkles, a robot, a chat bubble, a generic
 hexagon, or an infinity loop to the corporate mark.
 
-**OPEN — corporate symbol geometry.** Proposed, pending owner review of the contact sheet
-(`icons/kontour-symbol.svg`): three nested circular contours whose centres step down and to the
-left, the outer one continuous around the lower left and broken into two dashes and a dot at
-the upper right, on the product marks' 24-unit frame and stroke weight.
+**Decided (owner, 2026-10-05) — corporate symbol.** The symbol is `icons/kontour-symbol.svg`
+as shipped: three nested circular contours whose centres step down and to the left, the outer
+one continuous around the lower left and broken into two dashes and a dot at the upper right,
+on the product marks' 24-unit frame and stroke weight.
 
-The proposal departs from the direction above, and that is an open point rather than a settled
-trade:
+It departs from the direction above in three ways, all put to the owner with the contact sheet
+before the decision, so they are accepted for this symbol rather than open:
 
 - it has three nested contours, not 4–6; the dashes and dot are pieces of the outer contour,
   not further contours
 - every contour is a perfect circular arc, so there is no organic variation; only the offset
   centres keep it from being concentric
-- at 16px the contours close up and the broken section stops reading; it reads from 24px
+- at 16px the contours close up and the broken section stops reading; it reads from 24px, which
+  is why the [usage rules](#usage) prefer 24px or more for it
+
+The direction above still guides other contour artwork; it does not reopen the symbol.
 
 ### Station
 
@@ -1013,21 +1014,20 @@ states, and selective launch or loading moments, not behind every card.
 ### Production assets
 
 The marks ship in `icons/`, each as an SVG file (`@kontourai/ui/icons/<name>.svg`) and as a
-component. Their status differs:
+component. Every shipped mark is decided:
 
 | Marks | Status |
 | --- | --- |
 | The 22 product icons | **Decided (owner, 2026-10-01; [#75](https://github.com/kontourai/ui/issues/75)):** promoted to production marks as drawn, having passed the gates below. |
-| `kontour-symbol.svg` | **Proposed**, pending owner review of the contact sheet. See [Corporate mark](#corporate-mark). |
-| `kontour-wordmark.svg` | **Proposed**, pending owner review of the contact sheet. See [Wordmark](#wordmark). |
-| `kontour-lockup-horizontal.svg` | **Proposed**, pending owner review of the contact sheet, including its order (symbol, then wordmark) and the gap between them. Composed from the other two, never drawn separately. |
-
-The proposed marks are in the package so they can be reviewed in place; they are not approved
-identity until the owner signs off, and this table is updated in the same change.
+| `kontour-symbol.svg` | **Decided (owner, 2026-10-05)**, as shipped. See [Corporate mark](#corporate-mark). |
+| `kontour-wordmark.svg` | **Decided (owner, 2026-10-05)**, as shipped: "Kontour". See [Wordmark](#wordmark). |
+| `kontour-lockup-horizontal.svg` | **Decided (owner, 2026-10-05)**, as shipped: symbol, then wordmark, at the shipped gap. Composed from the other two, never drawn separately. |
 
 The product marks are flat UI icons. They do not implement the contour-derived directions
-above for Station, Flow, and Surface, and redrawing toward those directions stays open. A
-stacked lockup and per-product lockups do not exist.
+above for Station, Flow, and Surface, and redrawing toward those directions stays open. The
+owner decided (2026-10-05) that no such redraw is published until the owner has seen it
+rendered at real sizes (the contact sheet below, at 16, 24, and 32px). A stacked lockup and
+per-product lockups do not exist.
 
 Components: `ProductIcon` and `<k-product-icon>` for product marks; `BrandMark`
 (`KontourSymbol`, `KontourWordmark`, `KontourLockup`) and `<k-brand-mark>` for the corporate
@@ -1072,10 +1072,9 @@ Compared with the requirements this section carried before:
 - The favicon gate proves the file renders alone at favicon sizes. It does not prove it reads
   in a real tab strip.
 
-#### Usage (proposed)
+#### Usage
 
-Proposed with the corporate marks and pending the same owner review; treat as guidance, not
-settled rules.
+Decided with the corporate marks (owner, 2026-10-05).
 
 - **Color.** One color, from the surrounding text color. Use a text or brand role that holds
   3:1 on the surface behind it. Never color parts of a mark differently.
@@ -1090,7 +1089,7 @@ settled rules.
   inherit, so `currentColor` draws black: for a dark tab strip, ship a copy with the color
   set, generated from the canonical file.
 
-Don't (proposed):
+Don't:
 
 - stretch, rotate, skew, outline, or crop a mark
 - add a gradient, shadow, glow, texture, or container shape to a flat mark
@@ -1363,11 +1362,9 @@ record of the decision.
 
 ### Brand decisions still open
 
-Exact corporate symbol geometry; contour spacing and line weights; final wordmark, including
-whether it spells "Kontour" or "Kontour AI"; the horizontal lockup; mark usage rules (clear
-space, minimum size, which mark where); contour-derived Station, Flow, and Surface vectors
-(the shipped product marks are flat UI icons, [#75](https://github.com/kontourai/ui/issues/75));
-stacked and per-product lockups; app-icon treatments; complete typography tuning; environment
+Contour spacing and line weights; contour-derived Station, Flow, and Surface vectors
+(the shipped product marks are flat UI icons, [#75](https://github.com/kontourai/ui/issues/75);
+none is published before the owner sees it at real sizes); stacked and per-product lockups; app-icon treatments; complete typography tuning; environment
 and release-channel colors;
 exact motion durations and easing; final breakpoints; final component-library mappings.
 
