@@ -194,6 +194,8 @@ test("a mark that deviates from a passing one by a single property fails on exac
     // Relative moves accumulate: each delta is in range, the position is not.
     ['<path d="M0 16l20 0l20 0"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from 0 to 40/],
     ['<path d="M-5 16L20 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from -5 to 20/],
+    // Z returns to the subpath start, so the relative moveto after it starts from (2, 2) and reaches x -8.
+    ['<path d="M2 2h20Z m-10 0 h5"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from -8 to 22/],
     // A group's translate moves the path data inside it.
     ['<g transform="translate(20 0)"><path d="M0 16h10"/></g><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> draws beyond the 24x24 frame: x from 20 to 30/],
     ['<path d="M4 16A30 30 0 2 1 20 16"/><circle cx="12" cy="9" r="3"/>', /bearing\.svg: path data on <path> is malformed: an arc flag must be 0 or 1/],
