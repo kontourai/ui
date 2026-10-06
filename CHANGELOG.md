@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.0](https://github.com/kontourai/ui/compare/v1.18.0...v1.19.0) (2026-10-06)
+
+
+### Features
+
+* **marks:** production marks, corporate symbol and wordmark, with gates ([#114](https://github.com/kontourai/ui/issues/114)) ([e46da8c](https://github.com/kontourai/ui/commit/e46da8c1d9f5c7529926d929aa8bc5c8d070094b)), closes [#75](https://github.com/kontourai/ui/issues/75)
+
+
+### Documentation
+
+* **design:** record owner decisions on the open design items ([#111](https://github.com/kontourai/ui/issues/111)) ([b3ca560](https://github.com/kontourai/ui/commit/b3ca5605d2e7bdc4021d1d1135481b0e0df5cafa))
+
 ## [1.18.0](https://github.com/kontourai/ui/compare/v1.17.2...v1.18.0) (2026-09-29)
 
 
