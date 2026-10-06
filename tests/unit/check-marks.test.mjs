@@ -215,6 +215,9 @@ test("bounds an arc by where it draws, not by its parameters", () => {
   rejects(runCheckWithBearingSource('<path d="M4 16A300 300 0 1 1 20 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from -288 to 312, y from -583.89 to 16/);
   // Radius within the frame, endpoints on it, but the arc overshoots the top edge (Chromium bbox y -11..1).
   rejects(runCheckWithBearingSource('<path d="M0 1A12 12 0 1 1 24 1"/>'), /path data on <path> draws beyond the 24x24 frame: x from 0 to 24, y from -11 to 1/);
+  // Rotation decides it: the same ellipse unrotated stays inside (y to 21); rotated 45 degrees it reaches y 24.9.
+  rejects(runCheckWithBearingSource('<path d="M4 16A8 5 45 1 0 20 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from 4 to 20.9, y from 16 to 24.9/);
+  assert.equal(runCheckWithBearingSource('<path d="M4 16A8 5 0 1 0 20 16"/>').status, 0);
   // Radii too small for the endpoints are scaled up, as SVG draws them: radius 1 becomes a half circle of radius 5 over the top edge.
   rejects(runCheckWithBearingSource('<path d="M2 3A1 1 0 0 1 12 3"/>'), /path data on <path> draws beyond the 24x24 frame: x from 2 to 12, y from -2 to 3/);
   // The same arc lower down stays inside, and curves whose control points leave the frame but whose ink does not are accepted.
