@@ -14,3 +14,4 @@ react/src/*.js.map
 .flow-agents/
 *.tgz
 .kontourai/
+dist-pages/
