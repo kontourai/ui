@@ -14,6 +14,7 @@ across every product surface.
 - Broad verification: `npm run verify`.
 - Token contract: `tokens/` (CSS custom properties; per-product accents live in `themes.css`).
 - React primitives: `react/`; light-DOM wrappers: `elements/`; docs in `docs/`.
+- Docs are published with docs-kit: `docs-kit.json` lists the published docs and MCP topics, `npm run docs:check` is the gate, and when you change code a document `covers`, update that document.
 - `dist/` is generated.
 
 ## Match Checks To Change Type
