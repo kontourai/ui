@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "product": "ui",
+  "title": "Kontour UI",
+  "tagline": "The shared design tokens, React primitives, and web components for Kontour product interfaces.",
+  "repo": "kontourai/ui",
+  "landing": "README.md",
+  "documents": [
+    { "source": "CONTEXT.md", "section": "Start Here" },
+    {
+      "source": "docs/consumer-guide.md",
+      "section": "Guides",
+      "covers": [
+        "contrast/**",
+        "react/src/trust-states.ts",
+        "react/src/trust-basis.ts",
+        "react/src/TrustState.tsx",
+        "react/src/TrustBasis.tsx"
+      ]
+    },
+    { "source": "DESIGN.md", "section": "Concepts" },
+    { "source": "docs/adr/0001-console-kit-token-contract.md", "section": "Concepts" },
+    {
+      "source": "tokens/fonts/README.md",
+      "section": "Reference",
+      "covers": ["tokens/fonts/**", "scripts/vendor-fonts.mjs"]
+    },
+    { "source": "docs/release-readiness.md", "section": "Reference" },
+    { "source": "CONTRIBUTING.md", "section": "Contribute" },
+    { "source": "SECURITY.md", "section": "Contribute" },
+    { "source": "CODE_OF_CONDUCT.md", "section": "Contribute" }
+  ],
+  "topics": [
+    { "id": "token-import", "title": "Importing the token layer", "source": "README.md#token-import" },
+    { "id": "theme-boundary", "title": "Product theme classes and the theme boundary", "source": "docs/consumer-guide.md#theme-boundary" },
+    { "id": "modes", "title": "Dark and light modes", "source": "DESIGN.md#modes" },
+    { "id": "white-label", "title": "White-label color and contrast validation", "source": "docs/consumer-guide.md#white-label-color" },
+    { "id": "react", "title": "Using the React primitives", "source": "docs/consumer-guide.md#react-consumer" },
+    { "id": "custom-elements", "title": "Using the light-DOM custom elements", "source": "docs/consumer-guide.md#custom-elements-consumer" },
+    { "id": "static-html", "title": "Vendoring assets into static HTML consoles", "source": "docs/consumer-guide.md#static-html-consumer" },
+    { "id": "trust-states", "title": "Trust states (Surface claim statuses)", "source": "docs/consumer-guide.md#trust-states" },
+    { "id": "trust-basis", "title": "Trust basis line", "source": "docs/consumer-guide.md#trust-basis" },
+    { "id": "tone-mapping", "title": "Mapping product status words to tones", "source": "docs/consumer-guide.md#tone-mapping" },
+    { "id": "marks", "title": "Product marks and brand mark", "source": "docs/consumer-guide.md#marks" },
+    { "id": "fonts", "title": "Self-hosted brand fonts", "source": "README.md#fonts" },
+    { "id": "design-rules", "title": "Design do's and don'ts for agents", "source": "DESIGN.md#dos-and-donts" },
+    { "id": "checks", "title": "Package checks and what each one catches", "source": "README.md#checks" },
+    { "id": "adopter-checks", "title": "Adopter verification matrix", "source": "docs/release-readiness.md#adopter-checks" }
+  ],
+  "exclude": ["docs/audits/**"]
+}
