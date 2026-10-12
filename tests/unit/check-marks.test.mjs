@@ -33,12 +33,14 @@ const rejects = (result, pattern) => {
 };
 const CIRCLE = '<circle cx="12" cy="12" r="8.5"/>';
 
-test("the shipped marks pass, and the count is the pinned 22 product + 3 brand", () => {
+test("the shipped marks pass, and the count is the pinned 22 product + 3 badge + 6 brand, 3 of them hero/lockup tier", () => {
   const result = runCheck();
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /Marks check passed: 25 marks \(22 product, 3 brand\)/);
+  assert.match(result.stdout, /Marks check passed: 31 marks \(22 product, 3 product badge, 6 brand; 3 of them in the hero\/lockup tier\)/);
   // Pinned separately from the path modules the check derives its list from.
-  assert.equal(readdirSync(path.join(root, "icons")).length, 25);
+  assert.equal(readdirSync(path.join(root, "icons")).length, 31);
+  for (const slug of ["kontour-symbol-lockup", "kontour-symbol-hero", "kontour-lockup-large"]) assert.match(result.stdout, new RegExp(`^ok +${slug} +brand +hero +`, "m"));
+  for (const slug of ["kontour-symbol", "kontour-lockup-horizontal", "station-badge", "flow-badge", "surface-badge"]) assert.match(result.stdout, new RegExp(`^ok +${slug} +\\w+ +small +`, "m"));
 });
 
 test("rejects gradients, filters and other effects", () => {
@@ -180,7 +182,7 @@ test("accepts arcs whose radii or rotation exceed the frame, and compact arc fla
   for (const d of ["M4 16A30 30 0 0 1 20 16", "M4 16A8 5 45 0 1 20 16", "M4 16a8 8 0 0116 0"]) {
     const result = runCheckWithBearingSource(`<path d="${d}"/>`);
     assert.equal(result.status, 0, `${d}\n${result.stderr}`);
-    assert.match(result.stdout, /Marks check passed: 25 marks/);
+    assert.match(result.stdout, /Marks check passed: 31 marks/);
   }
 });
 
@@ -253,3 +255,71 @@ test("bounds a Bézier curve by its extrema, not its endpoints", () => {
   rejects(runCheckWithBearingSource('<path d="M2 16C2 -4 10 -4 10 16S18 20 18 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from 2 to 18, y from 1 to 25.85/);
   rejects(runCheckWithBearingSource('<path d="M2 16Q6 -4 10 16T18 16"/>'), /path data on <path> draws beyond the 24x24 frame: x from 2 to 18, y from 6 to 26/);
 });
+
+// The hero/lockup tier (the large cuts on a 96-unit frame). Its marks are
+// gated by every rule above, with their own frame, ceilings and stroke range.
+const HERO_FILE = "icons/kontour-symbol-hero.svg";
+/** Rewrites one hero mark's file with `edit(contents)`. */
+const withHero = (edit, file = HERO_FILE) => (dir) => writeFileSync(path.join(dir, file), edit(readFileSync(path.join(dir, file), "utf8")));
+/** Removes a mark from the hero tier the check pins, so the small tier's rules apply to it. */
+const unpinHero = (slug) => (dir) => {
+  const file = path.join(dir, "scripts/check-marks.mjs");
+  const source = readFileSync(file, "utf8");
+  const entry = `  ["${slug}", 64],\n`;
+  assert.equal(source.split(entry).length, 2, `the hero pin for ${slug} must appear once`);
+  writeFileSync(file, source.replace(entry, ""));
+};
+
+test("the hero/lockup-tier cuts fail the small tier: placed in it, each is rejected for its frame and size", () => {
+  for (const [slug, frame, bytes] of [["kontour-symbol-hero", "96x24", /\d+ bytes; the ceiling for a square mark is 1024/], ["kontour-symbol-lockup", "96x24", /\d+ bytes; the ceiling for a square mark is 1024/], ["kontour-lockup-large", "408.96x24", null]]) {
+    const result = runCheck(unpinHero(slug));
+    rejects(result, new RegExp(`${slug}\\.svg: viewBox height is 96; every mark uses a 24-unit-high frame`));
+    assert.match(result.stderr, new RegExp(`${slug}\\.svg: path data on <path> draws beyond the ${frame.replace(".", "\\.")} frame`));
+    if (bytes) assert.match(result.stderr, new RegExp(`${slug}\\.svg: ${bytes.source}`));
+    // Only the unpinned mark fails.
+    assert.ok(failureLines(result).every((line) => line.includes(`${slug}.svg`)), result.stderr);
+  }
+});
+
+test("rejects a hero/lockup-tier mark that breaks the shared rules", () => {
+  rejects(runCheck(withHero((svg) => svg.replace('stroke="currentColor"', 'stroke="#5ce0c6"'))), /kontour-symbol-hero\.svg: stroke="#5ce0c6" on <g>: a mark's only paint is currentColor/);
+  rejects(runCheck(withHero((svg) => svg.replace("<path ", '<path opacity="0.5" '))), /kontour-symbol-hero\.svg: attribute opacity on <path> is not allowed/);
+  rejects(runCheck(withHero((svg) => svg.replace("</g>", '</g><image href="https://example.com/a.png"/>'))), /kontour-symbol-hero\.svg: <image> is not allowed: marks carry no raster embeds/);
+  rejects(runCheck(withHero((svg) => svg.replace(' xmlns="http://www.w3.org/2000/svg"', ""))), /kontour-symbol-hero\.svg: the root needs xmlns=/);
+  rejects(runCheck(withHero((svg) => svg.replace("</g>", '<path d="M90 90h20"/></g>'))), /kontour-symbol-hero\.svg: path data on <path> draws beyond the 96x96 frame: x from 90 to 110/);
+  rejects(runCheck(withHero((svg) => svg.replace("</g>", '<text x="2" y="12"/></g>'))), /kontour-symbol-hero\.svg: <text> is not allowed: marks carry no live text/);
+});
+
+test("holds the hero/lockup tier to its own frame, ceilings and stroke range", () => {
+  // Frame: 96 units high.
+  rejects(runCheck(withHero((svg) => svg.replace('viewBox="0 0 96 96" width="96" height="96"', 'viewBox="0 0 48 48" width="48" height="48"'))), /kontour-symbol-hero\.svg: viewBox height is 48; every hero\/lockup-tier mark uses a 96-unit-high frame/);
+  // Size: 6 KB for a square cut, 16 KB for the large lockup.
+  rejects(runCheck(withHero((svg) => svg.replace("</g>", `<path d="M10 10${" L20 20".repeat(300)}"/></g>`))), /kontour-symbol-hero\.svg: \d+ bytes; the ceiling for a hero\/lockup-tier square mark is 6144/);
+  rejects(runCheck(withHero((svg) => svg.replace("</g>", `<path d="M10 10${" L20 20".repeat(1000)}"/></g>`), "icons/kontour-lockup-large.svg")), /kontour-lockup-large\.svg: \d+ bytes; the ceiling for a hero\/lockup-tier wide mark is 16384/);
+  rejects(runCheck(withHero((svg) => svg.replace("</g>", `${'<path d="M10 10h1"/>'.repeat(7)}</g>`))), /kontour-symbol-hero\.svg: 13 shapes; the ceiling for a hero\/lockup-tier square mark is 12/);
+  // Stroke: no finer than the small tier's 16px floor once drawn at 64px (1 unit), no heavier than an eighth of the frame (12).
+  rejects(runCheck(withHero((svg) => svg.replace('stroke-width="1.3"', 'stroke-width="0.9"'))), /kontour-symbol-hero\.svg: stroke-width="0.9" on <g> must be a plain number from 1 to 12/);
+  rejects(runCheck(withHero((svg) => svg.replace('stroke-width="1.3"', 'stroke-width="12.5"'))), /kontour-symbol-hero\.svg: stroke-width="12.5" on <g> must be a plain number from 1 to 12/);
+  // In-range values the small tier would refuse are accepted here: only the sync gate objects to the edited file.
+  const accepted = runCheck(withHero((svg) => svg.replace('stroke-width="1.3"', 'stroke-width="6"')));
+  assert.equal(failureLines(accepted).length, 1, accepted.stderr);
+  assert.match(accepted.stderr, /kontour-symbol-hero\.svg: differs from the markup in the path modules/);
+});
+
+test("rejects a stated minimum size that is not the size the tier rates", () => {
+  const restate = (from, to) => (dir) => {
+    const file = path.join(dir, "react/src/brand-mark-paths.ts");
+    const source = readFileSync(file, "utf8");
+    assert.equal(source.split(from).length, 2, `${from} must appear once`);
+    writeFileSync(file, source.replace(from, to));
+  };
+  rejects(runCheck(restate("const LARGE_MIN_SIZE = 64;", "const LARGE_MIN_SIZE = 48;")), /kontour-symbol-hero\.svg: the path module states a minimum size of 48px, but its tier rates it at 64px/);
+  rejects(runCheck(restate('"kontour-symbol": { width: 24, inner: SYMBOL }', '"kontour-symbol": { width: 24, minSize: 64, inner: SYMBOL }')), /kontour-symbol\.svg: the path module states a minimum size of 64px, but its tier rates it at 16px/);
+});
+
+test("gates the product badges as product marks", () => {
+  rejects(runCheck(withHero((svg) => svg.replace('stroke="currentColor"', 'stroke="#5ce0c6"'), "icons/station-badge.svg")), /station-badge\.svg: stroke="#5ce0c6" on <svg>: a mark's only paint is currentColor/);
+  rejects(runCheck((dir) => rmSync(path.join(dir, "icons/flow-badge.svg"))), /flow-badge\.svg: declared in the path modules but missing/);
+  rejects(runCheck(withHero((svg) => svg.replace('viewBox="0 0 24 24" width="24"', 'viewBox="0 0 48 24" width="48"'), "icons/surface-badge.svg")), /surface-badge\.svg: a product mark must be square/);
+});
+

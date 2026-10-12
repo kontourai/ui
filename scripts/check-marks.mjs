@@ -19,17 +19,47 @@ import ts from "typescript";
 // What needs pixels (legibility at 16/24/32px, contrast on the shipped
 // surfaces, standalone favicon rendering, distinctness) is in
 // tests/browser/marks.spec.ts.
+//
+// Two tiers. Every rule above applies to both; they differ in frame, ceilings
+// and stroke range (DESIGN.md "Gates"):
+// - small: every mark drawn for UI sizes, on a 24-unit-high frame, legible
+//   from 16px. Everything not pinned to the hero tier is held to it.
+// - hero/lockup: the large cuts of the corporate symbol and the large lockup,
+//   on a 96-unit-high frame, drawn for a stated minimum size of 64px or more.
+//   Their fine lines are not drawn to hold at 16px, so they are kept out of
+//   the small tier by its frame and ceilings, and rated at their own minimum
+//   size by the browser suite.
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SVG_NS = "http://www.w3.org/2000/svg";
 const HEIGHT = 24;
 
-// Ceilings, with headroom over what ships: the largest square mark has 6
-// shapes and is under 500 bytes; the lockup has 7 shapes and is about 6.6 KB,
-// nearly all of it the outlined wordmark.
+// Ceilings. The most shapes a square mark has is 5; the largest is the
+// corporate symbol at 1017 bytes, 7 under the ceiling: its contours are long
+// cubic runs, so a redraw that adds detail has to shed it elsewhere. The
+// lockup has 4 shapes and is about 7.1 KB, nearly all of it the outlined
+// wordmark.
 const LIMITS = {
   square: { shapes: 12, bytes: 1024 },
   wide: { shapes: 16, bytes: 12 * 1024 },
+};
+
+// The hero/lockup tier, pinned here with each mark's minimum rendered height
+// in px, not read from the path modules, so no mark joins the larger-frame
+// tier without this list changing. tests/browser/marks.spec.ts pins the same
+// list and rates each mark at that size.
+const HERO = new Map([
+  ["kontour-symbol-lockup", 64],
+  ["kontour-symbol-hero", 64],
+  ["kontour-lockup-large", 64],
+]);
+const HERO_HEIGHT = 96;
+// Ceilings with headroom over what ships: the square cuts have 5 and 6 shapes
+// at 3.5 and 4.5 KB; the large lockup has 6 shapes at about 10 KB, two thirds
+// of it the wordmark.
+const HERO_LIMITS = {
+  square: { shapes: 12, bytes: 6 * 1024 },
+  wide: { shapes: 16, bytes: 16 * 1024 },
 };
 
 const SHAPES = new Set(["path", "rect", "circle", "ellipse", "line", "polyline", "polygon"]);
@@ -53,6 +83,13 @@ const NUMBER = /^-?(?:\d+\.?\d*|\.\d+)$/;
 // Stroke weights a mark may use, in viewBox units. The marks are drawn at 1.75;
 // below 1 a stroke is under a pixel at 16px, and above 3 it closes the counters.
 const STROKE_WIDTH = { min: 1, max: 3 };
+// The hero tier keeps the same two bounds, as rendered sizes: no thinner than
+// the small tier's floor is at 16px (1/24 of 16px) once drawn at the mark's
+// minimum size, and no heavier than an eighth of the frame.
+const heroStrokeWidth = (minSize) => ({
+  min: Math.round(((STROKE_WIDTH.min * 16) / HEIGHT) * (HERO_HEIGHT / minSize) * 100) / 100,
+  max: (STROKE_WIDTH.max * HERO_HEIGHT) / HEIGHT,
+});
 // Why a rejected name is rejected, for the message. The allowlist decides; this only explains.
 const REASONS = [
   [/^(script|foreignObject|iframe|a)$|^on/, "marks carry no scripts, links or embedded documents"],
@@ -69,29 +106,41 @@ async function loadModule(file) {
   return import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
 }
 
-const { productIconPaths } = await loadModule("react/src/product-icon-paths.ts");
+const { productIconPaths, productBadgePaths } = await loadModule("react/src/product-icon-paths.ts");
 const { brandMarkPaths, BRAND_MARK_HEIGHT } = await loadModule("react/src/brand-mark-paths.ts");
 if (BRAND_MARK_HEIGHT !== HEIGHT) throw new Error(`BRAND_MARK_HEIGHT is ${BRAND_MARK_HEIGHT}; this check expects ${HEIGHT}.`);
 
 // slug -> the file the path modules say should exist.
 const expected = new Map();
+const productFile = (inner) => `<svg xmlns="${SVG_NS}" viewBox="0 0 ${HEIGHT} ${HEIGHT}" width="${HEIGHT}" height="${HEIGHT}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>\n`;
 for (const [slug, inner] of Object.entries(productIconPaths)) {
-  expected.set(slug, {
-    family: "product",
-    width: HEIGHT,
-    contents: `<svg xmlns="${SVG_NS}" viewBox="0 0 ${HEIGHT} ${HEIGHT}" width="${HEIGHT}" height="${HEIGHT}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>\n`,
-  });
+  expected.set(slug, { family: "product", width: HEIGHT, contents: productFile(inner) });
+}
+// A badge is the same product's mark inside a ring, so it is a product mark in
+// every respect and ships beside it as <product>-badge.svg.
+for (const [product, inner] of Object.entries(productBadgePaths ?? {})) {
+  const slug = `${product}-badge`;
+  if (!Object.hasOwn(productIconPaths, product)) throw new Error(`"${product}" has a badge but no product mark.`);
+  if (expected.has(slug)) throw new Error(`"${slug}" is both a product mark and a product badge.`);
+  expected.set(slug, { family: "badge", width: HEIGHT, contents: productFile(inner) });
 }
 for (const [slug, mark] of Object.entries(brandMarkPaths)) {
   if (expected.has(slug)) throw new Error(`"${slug}" is both a product mark and a brand mark.`);
+  const height = mark.height ?? HEIGHT;
   expected.set(slug, {
     family: "brand",
     width: mark.width,
-    contents: `<svg xmlns="${SVG_NS}" viewBox="0 0 ${mark.width} ${HEIGHT}" width="${mark.width}" height="${HEIGHT}" fill="none">${mark.inner}</svg>\n`,
+    contents: `<svg xmlns="${SVG_NS}" viewBox="0 0 ${mark.width} ${height}" width="${mark.width}" height="${height}" fill="none">${mark.inner}</svg>\n`,
   });
 }
+// The minimum size a path module states is what consumers and the gallery
+// read; it must be the size the mark's tier rates it at.
+const statedMinSize = new Map(Object.entries(brandMarkPaths).map(([slug, mark]) => [slug, mark.minSize ?? 16]));
 // An empty scan would otherwise read as every mark passing.
 if (expected.size === 0) throw new Error("No marks are declared in react/src/product-icon-paths.ts or brand-mark-paths.ts.");
+for (const slug of HERO.keys()) {
+  if (expected.get(slug)?.family !== "brand") throw new Error(`"${slug}" is pinned to the hero/lockup tier but is not a brand mark in react/src/brand-mark-paths.ts.`);
+}
 
 const iconsDir = path.join(root, "icons");
 if (process.argv.includes("--write")) {
@@ -116,7 +165,13 @@ for (const [slug, mark] of expected) {
   }
   const contents = readFileSync(path.join(iconsDir, `${slug}.svg`), "utf8");
   const before = failures.length;
+  const minSize = HERO.get(slug);
+  const tier = minSize === undefined
+    ? { name: "small", height: HEIGHT, limits: LIMITS, stroke: STROKE_WIDTH, frameRule: `every mark uses a ${HEIGHT}-unit-high frame` }
+    : { name: "hero", height: HERO_HEIGHT, limits: HERO_LIMITS, stroke: heroStrokeWidth(minSize), frameRule: `every hero/lockup-tier mark uses a ${HERO_HEIGHT}-unit-high frame` };
   const fail = (message) => failures.push(`${file}: ${message}`);
+  const stated = statedMinSize.get(slug) ?? 16;
+  if (stated !== (minSize ?? 16)) fail(`the path module states a minimum size of ${stated}px, but its tier rates it at ${minSize ?? 16}px; change both together.`);
   if (contents !== mark.contents) fail("differs from the markup in the path modules; run node scripts/check-marks.mjs --write, or correct the path module.");
 
   let svg;
@@ -134,14 +189,14 @@ for (const [slug, mark] of expected) {
   if (viewBox === undefined) fail("the root has no viewBox, so the mark cannot scale.");
   else if (!box || box[0] <= 0 || box[1] <= 0) fail(`viewBox "${viewBox}" must be "0 0 <width> <height>" with a positive size.`);
   else {
-    if (box[1] !== HEIGHT) fail(`viewBox height is ${box[1]}; every mark uses a ${HEIGHT}-unit-high frame.`);
+    if (box[1] !== tier.height) fail(`viewBox height is ${box[1]}; ${tier.frameRule}.`);
     for (const [name, size] of [["width", box[0]], ["height", box[1]]]) {
       if (svg.attributes.get(name) !== String(size)) fail(`${name}="${svg.attributes.get(name)}" must equal the viewBox ${name} (${size}), the intrinsic size an <img> or favicon uses.`);
     }
   }
   const square = Boolean(box) && box[0] === box[1];
   // Product marks render in a shared square frame and double as favicons.
-  if (mark.family === "product" && box && !square) fail("a product mark must be square.");
+  if (mark.family !== "brand" && box && !square) fail("a product mark must be square.");
 
   let shapes = 0;
   const paints = new Set();
@@ -155,7 +210,7 @@ for (const [slug, mark] of expected) {
     const paint = { ...inherited };
     // Geometry must stay on the frame: a shape placed far outside it draws
     // nothing while still counting as a painted shape.
-    const reach = Math.max(box?.[0] ?? HEIGHT, HEIGHT);
+    const reach = Math.max(box?.[0] ?? tier.height, tier.height);
     // A translate on this element moves its own path data and its children;
     // a malformed one is reported below and contributes no offset.
     const ownOffset = /^translate\((\d+(?:\.\d+)?)(?: (\d+(?:\.\d+)?))?\)$/.exec(element.attributes.get("transform") ?? "");
@@ -169,7 +224,7 @@ for (const [slug, mark] of expected) {
       else if (name in KEYWORDS) {
         if (!KEYWORDS[name].has(value)) fail(`${name}="${value}" on <${element.name}> must be one of ${[...KEYWORDS[name]].join(", ")}.`);
       } else if (name === "stroke-width") {
-        if (!NUMBER.test(value) || Number(value) < STROKE_WIDTH.min || Number(value) > STROKE_WIDTH.max) fail(`stroke-width="${value}" on <${element.name}> must be a plain number from ${STROKE_WIDTH.min} to ${STROKE_WIDTH.max}.`);
+        if (!NUMBER.test(value) || Number(value) < tier.stroke.min || Number(value) > tier.stroke.max) fail(`stroke-width="${value}" on <${element.name}> must be a plain number from ${tier.stroke.min} to ${tier.stroke.max}.`);
       } else if (POSITIONS.has(name) || POSITIVE.has(name)) {
         const least = POSITIVE.has(name) ? Number.MIN_VALUE : 0;
         if (!NUMBER.test(value) || Number(value) < least || Number(value) > reach) fail(`${name}="${value}" on <${element.name}> must be a plain number ${POSITIVE.has(name) ? "above 0" : "from 0"} to ${reach}, the frame's extent.`);
@@ -193,7 +248,7 @@ for (const [slug, mark] of expected) {
           }
           // Bounded by where the path actually draws: absolute positions after
           // relative moves accumulate, arcs and curves by their true extent.
-          const [width, height] = [box?.[0] ?? HEIGHT, HEIGHT];
+          const [width, height] = [box?.[0] ?? tier.height, tier.height];
           const [minX, maxX, minY, maxY] = [extent.minX + offset[0], extent.maxX + offset[0], extent.minY + offset[1], extent.maxY + offset[1]];
           const EPSILON = 1e-6;
           if (minX < -EPSILON || minY < -EPSILON || maxX > width + EPSILON || maxY > height + EPSILON) {
@@ -215,23 +270,27 @@ for (const [slug, mark] of expected) {
     for (const child of element.children) walk(child, paint, depth + 1, offset);
   }
 
-  const limits = square ? LIMITS.square : LIMITS.wide;
+  const limits = square ? tier.limits.square : tier.limits.wide;
+  const kind = `${tier.name === "hero" ? "hero/lockup-tier " : ""}${square ? "square" : "wide"} mark`;
   const bytes = Buffer.byteLength(contents);
   if (shapes === 0) fail("draws nothing: it contains no shape elements.");
-  if (shapes > limits.shapes) fail(`${shapes} shapes; the ceiling for a ${square ? "square" : "wide"} mark is ${limits.shapes}. A mark that needs more will not hold at 16px.`);
-  if (bytes > limits.bytes) fail(`${bytes} bytes; the ceiling for a ${square ? "square" : "wide"} mark is ${limits.bytes}.`);
+  if (shapes > limits.shapes) fail(`${shapes} shapes; the ceiling for a ${kind} is ${limits.shapes}. A mark that needs more will not hold at ${minSize ?? 16}px.`);
+  if (bytes > limits.bytes) fail(`${bytes} bytes; the ceiling for a ${kind} is ${limits.bytes}.`);
 
-  rows.push({ slug, ok: failures.length === before, family: mark.family, frame: box ? `${box[0]}x${box[1]}` : "?", shapes, bytes, paint: [...paints].sort().join(",") || "none", favicon: square ? "yes" : "no (not square)" });
+  // Only the small tier's square marks are drawn to hold at favicon sizes.
+  const favicon = !square ? "no (not square)" : tier.name === "hero" ? `no (from ${minSize}px)` : "yes";
+  rows.push({ slug, ok: failures.length === before, family: mark.family, tier: tier.name, frame: box ? `${box[0]}x${box[1]}` : "?", shapes, bytes, paint: [...paints].sort().join(",") || "none", favicon });
 }
 
 for (const row of rows) {
-  console.log(`${row.ok ? "ok  " : "FAIL"} ${row.slug.padEnd(26)} ${row.family.padEnd(8)} ${row.frame.padEnd(9)} ${String(row.shapes).padStart(2)} shapes ${String(row.bytes).padStart(5)} bytes  paint: ${row.paint.padEnd(12)} favicon: ${row.favicon}`);
+  console.log(`${row.ok ? "ok  " : "FAIL"} ${row.slug.padEnd(26)} ${row.family.padEnd(8)} ${row.tier.padEnd(6)} ${row.frame.padEnd(10)} ${String(row.shapes).padStart(2)} shapes ${String(row.bytes).padStart(5)} bytes  paint: ${row.paint.padEnd(12)} favicon: ${row.favicon}`);
 }
 if (failures.length) {
   console.error(`\nMarks check failed:\n${failures.map((failure) => `  - ${failure}`).join("\n")}`);
   process.exit(1);
 }
-console.log(`Marks check passed: ${rows.length} marks (${rows.filter((row) => row.family === "product").length} product, ${rows.filter((row) => row.family === "brand").length} brand) are valid, self-contained, single-colour, effect-free and within their ceilings.`);
+const count = (predicate) => rows.filter(predicate).length;
+console.log(`Marks check passed: ${rows.length} marks (${count((row) => row.family === "product")} product, ${count((row) => row.family === "badge")} product badge, ${count((row) => row.family === "brand")} brand; ${count((row) => row.tier === "hero")} of them in the hero/lockup tier) are valid, self-contained, single-colour, effect-free and within their tier's ceilings.`);
 
 // Reads path data by the SVG path grammar and returns the box it draws in.
 // Enforced: the data starts with a moveto; every command has its full

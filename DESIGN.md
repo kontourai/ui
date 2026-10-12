@@ -481,8 +481,14 @@ Surface
 by Kontour AI
 ```
 
+**Decided (owner, 2026-10-12) — endorsement presentation.** An endorsement sets the product
+name in Fraunces, "by Kontour AI" beneath it in Hanken Grotesk capitals ("BY KONTOUR AI"), and
+the product mark in the product's brand color. It is composed from live text and the shipped
+mark: no endorsement lockup asset ships, and per-product lockup assets stay open.
+
 **OPEN-9 — Flow endorsement form and product tiering.** Whether the endorsed product is
-presented as "Flow" or "Flow Agents", and how other products are tiered, is open.
+presented as "Flow" or "Flow Agents", and how other products are tiered, is open. The
+endorsement presentation above does not decide it.
 
 Don't invent compound names that stack the company name, a product name, and "AI" or
 "Platform" (e.g. "Kontour `<Product>` AI"); use the endorsement form above, or the approved one
@@ -956,23 +962,31 @@ Never add Station's S-river, a compass rose, a literal mountain, a location pin,
 shield, lock, brain, neural nodes, circuitry, AI sparkles, a robot, a chat bubble, a generic
 hexagon, or an infinity loop to the corporate mark.
 
-**Decided (owner, 2026-10-05) — corporate symbol.** The owner kept the proposed symbol,
-`icons/kontour-symbol.svg`, as shipped: three nested circular contours whose centres step down
-and to the left, the outer one continuous around the lower left and broken into two dashes and
-a dot at the upper right, on the product marks' 24-unit frame and stroke weight.
+**Decided (owner, 2026-10-12) — corporate symbol: B · Headland.** The symbol is Headland: nested
+contours that are exact insets of one lobed silhouette (long and low, with a squared shoulder
+and a deep notch low right), continuous round the lower left and dissolving round the right
+into shorter dashes and then dots. The outer contours break furthest. It replaces the
+three-circle symbol and **reverses the 2026-10-05 symbol decision** recorded below.
 
-It departs from the direction above in three ways. They were listed in the proposal
-([#114](https://github.com/kontourai/ui/pull/114)) and are accepted with the symbol rather than
-open:
+It ships as three cuts of one construction (`scripts/marks/headland.mjs`):
 
-- it has three nested contours, not 4–6; the dashes and dot are pieces of the outer contour,
-  not further contours
-- every contour is a perfect circular arc, so there is no organic variation; only the offset
-  centres keep it from being concentric
-- at 16px the contours close up and the broken section stops reading; it reads from 24px, which
-  is why the [usage rules](#usage) prefer 24px or more for it
+| Cut | File | Contours | Frame | Drawn for |
+| --- | --- | --- | --- | --- |
+| Small | `icons/kontour-symbol.svg` | 3, regular stroke | 24 units | below 64px, and in the 24-unit lockup |
+| Lockup | `icons/kontour-symbol-lockup.svg` | 5, heavier stroke | 96 units | 64px and up, beside the wordmark |
+| Hero | `icons/kontour-symbol-hero.svg` | 6, fine line | 96 units | 64px and up, hero use |
 
-The direction above still guides other contour artwork; it does not reopen the symbol.
+The small cut has three contours, fewer than the 4–6 above; the larger cuts have five and six.
+The contours are evenly spaced, being insets of one outline, so the silhouette carries the
+organic variation.
+
+The wordmark is unchanged. The lockups pair it with the Headland symbol (see
+[Production assets](#production-assets)).
+
+*Superseded record.* **Decided (owner, 2026-10-05) — corporate symbol.** The owner had kept the
+proposed symbol as shipped then: three nested circular contours whose centres stepped down and to
+the left, the outer one broken into two dashes and a dot at the upper right
+([#114](https://github.com/kontourai/ui/pull/114)). The 2026-10-12 decision reverses it.
 
 ### Station
 
@@ -981,8 +995,30 @@ landscape rather than appearing as a letter. Station-specific: never the corpora
 Station communicates orientation, location, arrival, state, inspection, checkpoint, reference,
 and reliability. A compass or reference marker may stay Station-specific if simplified,
 subordinate, and semantically useful. Do not propagate it to every product. Release channels
-(stable, beta, dev, nightly) may use controlled accent variants that keep the geometry; the
-channel colors are OPEN.
+(stable, beta, dev, nightly) may use controlled accent variants that keep the geometry.
+
+**Decided (owner, 2026-10-12) — Station mark: River.** `icons/station.svg` is River: one S-shaped
+river of constant width with thinner contours at its exact parallel offsets, which stop where
+a bend leaves no room, as a valley's contours do. The S is constructed, not drawn: lines and
+circular arcs joined on shared tangents, both bowls the same bowl, its leads on one line
+through the centre, set at 115°. Its badge form, `icons/station-badge.svg`, sets it in a ring
+that the river meets square-on.
+
+**Decided (owner, 2026-10-12) — release-channel colors, for Station's app icon and favicons.**
+The geometry is the same in every channel; only the water changes. Each channel's water
+palette is the stable palette with its hue rotated and its saturation scaled (in HSL):
+
+| Channel | Water | Hue rotation | Saturation | Water | Background |
+| --- | --- | --- | --- | --- | --- |
+| stable | blue, as approved | 0° | ×1 | `#25729c` | `#0a4560` |
+| beta | green | −62° | ×0.7 | `#378a51` | `#175328` |
+| nightly | rose (water hue about 336°) | +135° | ×0.82 | `#913056` | `#581230` |
+| dev | amber | −175° | ×1 | `#9c5925` | `#602c0a` |
+
+Nightly's rose sits 74–79° of hue from Station's brand purple (light and dark), so a nightly
+build does not read as the brand color. These colors are for Station's app icon and favicons
+only; they are not UI tokens. Environment colors, and channel colors for other products, are
+still open.
 
 ### Flow
 
@@ -990,11 +1026,21 @@ Progression, routing, transfer, orchestration, transformation: work moving throu
 Use contour-derived directional behavior. A subtle F may emerge naturally; never force a
 literal F. Flow must stay distinct from Station at app-icon size.
 
+**Decided (owner, 2026-10-12) — Flow mark: A · Current.** `icons/flow.svg` is Current: four
+equal streamlines, exact parallel offsets of one constructed wave (a lead, two circular arcs, a
+lead), carrying it diagonally across the frame. There is no hero line. Its badge form is
+`icons/flow-badge.svg`. OPEN-9 stays open.
+
 ### Surface
 
 A state, region, layer, or plane made visible: exposed plane, plateau, basin, bounded region,
 section, or revealed layer. **See the state clearly.** Surface is not another generic contour
 blob; the surface itself is the defining phenomenon.
+
+**Decided (owner, 2026-10-12) — Surface mark: A · Mesa.** `icons/surface.svg` is Mesa: an
+oblique mesa whose exposed top is a filled plane, with two tiers below it that show only their
+front edges. The tiers are the top's outline, each a step wider and a step lower. Its badge
+form is `icons/surface-badge.svg`.
 
 ### Future products
 
@@ -1023,24 +1069,31 @@ differ:
 
 | Marks | Status |
 | --- | --- |
-| The 22 product icons | **Decided (owner, 2026-10-01; [#75](https://github.com/kontourai/ui/issues/75)):** promoted to production marks as drawn, having passed the gates below. |
-| `kontour-symbol.svg` | **Decided (owner, 2026-10-05)**, as shipped. See [Corporate mark](#corporate-mark). |
-| `kontour-wordmark.svg` | The word "Kontour": **decided (owner, 2026-10-05)**. The cut: adopted with it, as proposed. See [Wordmark](#wordmark). |
-| `kontour-lockup-horizontal.svg` | **Adopted with the decided marks, as proposed**: symbol, then wordmark, at the shipped gap. Not separately decided. Composed from the other two, never drawn separately. |
+| The other 19 product icons | **Decided (owner, 2026-10-01; [#75](https://github.com/kontourai/ui/issues/75)):** promoted to production marks as drawn, having passed the gates below. Unchanged. |
+| `station.svg`, `flow.svg`, `surface.svg` | **Decided (owner, 2026-10-12):** Station River, Flow A · Current and Surface A · Mesa replace the flat UI icons. See [Station](#station), [Flow](#flow), [Surface](#surface). |
+| `station-badge.svg`, `flow-badge.svg`, `surface-badge.svg` | **Decided (owner, 2026-10-12)** with those marks: the same marks in a ring, for 32px and up. |
+| `kontour-symbol.svg`, `kontour-symbol-lockup.svg`, `kontour-symbol-hero.svg` | **Decided (owner, 2026-10-12):** the Headland symbol's three cuts. Reverses the 2026-10-05 symbol. See [Corporate mark](#corporate-mark). |
+| `kontour-wordmark.svg` | The word "Kontour": **decided (owner, 2026-10-05)**, unchanged. The cut: adopted with it, as proposed. See [Wordmark](#wordmark). |
+| `kontour-lockup-horizontal.svg`, `kontour-lockup-large.svg` | **Decided (owner, 2026-10-12):** the lockups pair the unchanged wordmark with the Headland symbol: the small cut on the 24-unit frame, and the lockup cut on a 96-unit frame for 64px and up. The arrangement (symbol, a gap of a quarter of the frame height, wordmark) is the one adopted in [#114](https://github.com/kontourai/ui/pull/114). Each is composed from a symbol cut and the wordmark, never drawn separately. |
 
-The product marks are flat UI icons. They do not implement the contour-derived directions
-above for Station, Flow, and Surface, and redrawing toward those directions stays open. The
-owner decided (2026-10-05) that no such redraw is published until the owner has seen it
-rendered at real sizes (the contact sheet below, at 16, 24, and 32px). A stacked lockup and
-per-product lockups do not exist.
+Station, Flow, and Surface carry the contour-derived marks above. The other 19 product marks are
+flat UI icons. The owner's rule (2026-10-05) that no redraw is published until the owner has
+seen it rendered at real sizes stands for any further redraw; the 2026-10-12 marks were approved
+from the exploration's renders, which show each from 16px up. A stacked lockup and per-product
+lockups do not exist.
 
-Components: `ProductIcon` and `<k-product-icon>` for product marks; `BrandMark`
-(`KontourSymbol`, `KontourWordmark`, `KontourLockup`) and `<k-brand-mark>` for the corporate
-marks. The path modules under `react/src/` are the source; `node scripts/check-marks.mjs
---write` regenerates the files. The wordmark is outlines, so drawing it needs no font;
-`scripts/generate-wordmark.py --check` re-derives it from the vendored Fraunces file. Raster
-exports derive from the SVGs; never use generated concept images as production logo sources,
-and never trace one.
+Components: `ProductIcon` and `<k-product-icon>` for product marks, with `variant="badge"` for
+the badge form of Station, Flow, and Surface (32px by default; nothing renders for a product
+without one). `BrandMark` and `<k-brand-mark>` for the corporate marks, with `KontourSymbol`,
+`KontourWordmark`, `KontourLockup`, and, for the large cuts, `KontourSymbolLockup`,
+`KontourSymbolHero`, and `KontourLockupLarge`; a large cut defaults to its 96-unit frame height.
+The path modules under `react/src/` are the source; `node scripts/check-marks.mjs --write`
+regenerates the files. The contour marks' path data is generated from their construction in
+`scripts/marks/` by `node scripts/generate-marks.mjs`, and `--check` re-derives it, so the
+committed paths cannot drift from the geometry. The wordmark is outlines, so drawing it needs no
+font; `scripts/generate-wordmark.py --check` re-derives it from the vendored Fraunces file.
+Raster exports derive from the SVGs; never use generated concept images as production logo
+sources, and never trace one.
 
 **Accessible name.** The wordmark and the lockup are exposed to assistive tech as an image
 named "Kontour" by default, so a header that shows only the lockup still announces the company.
@@ -1063,6 +1116,25 @@ fixed or not shipped.
 - shape-count and file-size ceilings
 - for the square marks: renders standalone, square, at 16 and 32px, as a favicon does
 
+Those are the **small tier**, which holds every mark drawn for UI sizes: a 24-unit-high frame,
+and the ceilings and stroke range in `scripts/check-marks.mjs`. The large cuts are a second,
+**hero/lockup tier**: `kontour-symbol-lockup`, `kontour-symbol-hero`, and
+`kontour-lockup-large`. Their fine lines are not drawn to hold at 16px, and they fail the small
+tier: all three on its 24-unit frame, and the two square cuts on its size ceiling too. Their own
+tier keeps the first two rules above unchanged and replaces the rest:
+
+- a 96-unit-high frame
+- ceilings of 12 shapes and 6 KB for a square cut, 16 shapes and 16 KB for a wide one
+- strokes no finer than the small tier's floor is at 16px once drawn at the mark's minimum size,
+  and no heavier than an eighth of the frame
+- at its minimum size, 64px, rendered alone: the same ink rules as above, on the same surfaces,
+  and no two marks alike at that size
+- not favicons
+
+Tier membership and each minimum size are pinned in `scripts/check-marks.mjs` and the browser
+suite, and the stated minimum size in the path module must match. A mark joins the hero tier
+only by changing those lists.
+
 **What the gates do not establish.** They measure ink: how much, how dark against the surface,
 and how it is distributed. They do not measure whether anyone can tell what a mark is.
 Compared with the requirements this section carried before:
@@ -1080,15 +1152,26 @@ Compared with the requirements this section carried before:
 #### Usage
 
 Adopted with the decided corporate marks, as proposed in
-[#114](https://github.com/kontourai/ui/pull/114). These rules are in force, but they were not
+[#114](https://github.com/kontourai/ui/pull/114), and extended for the 2026-10-12 cuts (which
+cut at which size), as proposed with them. These rules are in force, but they were not
 separately put to the owner, so changing one does not reverse an owner decision.
 
 - **Color.** One color, from the surrounding text color. Use a text or brand role that holds
   3:1 on the surface behind it. Never color parts of a mark differently.
 - **Clear space.** Keep a margin of one quarter of the mark's rendered height on every side,
   free of text, other marks, and container edges.
-- **Minimum size.** 16px high for every mark. Prefer 24px or more for the symbol, the
-  wordmark, and the lockup.
+- **Minimum size.** 16px high for every small-tier mark. Prefer 24px or more for the symbol,
+  the wordmark, and the lockup. 64px for the large cuts (the hero/lockup tier).
+- **Which cut, at which size.** Each cut is gated at the sizes it is drawn for.
+
+  | Mark | Below 64px | 64px and up |
+  | --- | --- | --- |
+  | Corporate symbol | `kontour-symbol` | `kontour-symbol-lockup` (heavier), the cut beside the wordmark; `kontour-symbol-hero` (fine line), for hero use |
+  | Lockup | `kontour-lockup-horizontal` | `kontour-lockup-large` |
+  | Station, Flow, Surface | the frameless mark at UI sizes; the badge (`variant="badge"`) from 32px, for endorsements and hero use | as below 64px |
+  | Other products | the product mark | the product mark |
+
+  Never render a large cut below 64px: that is under the size its gate rates it at.
 - **Which mark.** The lockup where the company is introduced; the symbol where space is tight
   or the name is already present; the wordmark where a symbol would repeat. Product marks
   identify products and never stand in for the corporate mark.
@@ -1101,7 +1184,7 @@ Don't:
 - stretch, rotate, skew, outline, or crop a mark
 - add a gradient, shadow, glow, texture, or container shape to a flat mark
 - retype the wordmark as live text, in Fraunces or any other face
-- pair the symbol and wordmark in an arrangement other than the shipped lockup
+- pair the symbol and wordmark in an arrangement other than the shipped lockups
 - place a mark on a photo or a surface where it falls under 3:1
 - redraw a mark outside an explicit identity task
 
@@ -1367,13 +1450,26 @@ record of the decision.
 | OPEN-11 | Marketing-site palette relationship | Decided (owner, 2026-10-01): the marketing site keeps its own palette, as a documented exception for now | — | — | — |
 | OPEN-12 | Trust-state vocabulary | Resolved (owner, 2026-09-27) | Surface's claim statuses and display names, checked against `@kontourai/surface` | — | [#73](https://github.com/kontourai/ui/issues/73) |
 
+### Brand decisions
+
+| Item | Status | Recorded in |
+| --- | --- | --- |
+| Corporate symbol | Decided (owner, 2026-10-12): B · Headland, in three cuts. Reverses the 2026-10-05 decision (the three-circle symbol). | [Corporate mark](#corporate-mark) |
+| Wordmark | Decided (owner, 2026-10-05): "Kontour" in Fraunces. Unchanged on 2026-10-12. | [Wordmark](#wordmark) |
+| Lockups | Decided (owner, 2026-10-12): the wordmark with the Headland symbol, small and large. | [Production assets](#production-assets) |
+| Station, Flow, and Surface marks | Decided (owner, 2026-10-12): Station River, Flow A · Current, Surface A · Mesa replace the flat UI icons; each also has a badge form. | [Station](#station), [Flow](#flow), [Surface](#surface) |
+| Endorsement presentation | Decided (owner, 2026-10-12): product name in Fraunces, "BY KONTOUR AI" in Hanken Grotesk capitals, the mark in the product brand color. No lockup asset. | [Brand hierarchy](#brand-hierarchy) |
+| Release-channel colors | Decided (owner, 2026-10-12) for Station's app icon and favicons: stable blue, beta green, nightly rose, dev amber. | [Station](#station) |
+| Flow endorsement form and product tiering | **OPEN** (OPEN-9) | [Brand hierarchy](#brand-hierarchy) |
+
 ### Brand decisions still open
 
-Contour spacing and line weights; contour-derived Station, Flow, and Surface vectors (the
-shipped product marks are flat UI icons, [#75](https://github.com/kontourai/ui/issues/75); none
-is published before the owner sees it at real sizes); stacked and per-product lockups; app-icon
-treatments; complete typography tuning; environment and release-channel colors; exact motion
-durations and easing; final breakpoints; final component-library mappings.
+Contour spacing and line weights as a family-wide rule; contour-derived marks for the other 19
+products (they are flat UI icons, [#75](https://github.com/kontourai/ui/issues/75); none is
+published before the owner sees it at real sizes); stacked and per-product lockups; app-icon
+treatments; complete typography tuning; environment colors, and release-channel colors beyond
+Station's app icon and favicons; exact motion durations and easing; final breakpoints; final
+component-library mappings.
 
 ## Final Principle
 

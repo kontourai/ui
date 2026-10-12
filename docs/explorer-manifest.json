@@ -991,7 +991,22 @@
       "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
     },
     {
+      "id": "react:KontourLockupLarge",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
       "id": "react:KontourSymbol",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:KontourSymbolHero",
+      "owner": "kontourai/ui",
+      "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
+    },
+    {
+      "id": "react:KontourSymbolLockup",
       "owner": "kontourai/ui",
       "reason": "React-only primitive requires authored fixture work; tracked for a later curated explorer slice."
     },
