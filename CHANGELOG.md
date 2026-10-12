@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.20.0](https://github.com/kontourai/ui/compare/v1.19.0...v1.20.0) (2026-10-12)
+
+
+### Features
+
+* **marks:** ship the Headland symbol and contour-derived Station, Flow and Surface marks ([#120](https://github.com/kontourai/ui/issues/120)) ([1665b14](https://github.com/kontourai/ui/commit/1665b14b4e2743ac5f997ef82db4c6424790563c))
+
+
+### Documentation
+
+* adopt docs-kit gate, Pages site, and MCP bundle ([#116](https://github.com/kontourai/ui/issues/116)) ([a15dd80](https://github.com/kontourai/ui/commit/a15dd803678d13b606afba042bd19f6f29e95bde))
+* **readme:** add Docs badge and documentation link to the header ([#118](https://github.com/kontourai/ui/issues/118)) ([044a736](https://github.com/kontourai/ui/commit/044a73641c8c94bad3b3e95a69d8ef43acd16e06))
+
 ## [1.19.0](https://github.com/kontourai/ui/compare/v1.18.0...v1.19.0) (2026-10-06)
 
 
