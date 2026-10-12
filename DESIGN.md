@@ -481,10 +481,13 @@ Surface
 by Kontour AI
 ```
 
-**Decided (owner, 2026-10-12) — endorsement presentation.** An endorsement sets the product
-name in Fraunces, "by Kontour AI" beneath it in Hanken Grotesk capitals ("BY KONTOUR AI"), and
-the product mark in the product's brand color. It is composed from live text and the shipped
-mark: no endorsement lockup asset ships, and per-product lockup assets stay open.
+**Decided (owner, 2026-10-12) — endorsement presentation.** The endorsement is presented as
+the product name over "BY KONTOUR AI", with the product mark, as in the owner-approved
+endorsement mocks.
+
+*Adopted with it, as proposed in [#120](https://github.com/kontourai/ui/pull/120); not separately decided:* the product name is set in Fraunces, "by Kontour AI" beneath it in Hanken Grotesk
+capitals, and the mark in the product's brand color. It is composed from live text and the
+shipped mark, so no endorsement lockup asset ships; per-product lockup assets stay open.
 
 **OPEN-9 — Flow endorsement form and product tiering.** Whether the endorsed product is
 presented as "Flow" or "Flow Agents", and how other products are tiered, is open. The
@@ -962,15 +965,17 @@ Never add Station's S-river, a compass rose, a literal mountain, a location pin,
 shield, lock, brain, neural nodes, circuitry, AI sparkles, a robot, a chat bubble, a generic
 hexagon, or an infinity loop to the corporate mark.
 
-**Decided (owner, 2026-10-12) — corporate symbol: B · Headland.** The symbol is Headland: nested
-contours that are exact insets of one lobed silhouette (long and low, with a squared shoulder
-and a deep notch low right), continuous round the lower left and dissolving round the right
-into shorter dashes and then dots. The outer contours break furthest. It replaces the
-three-circle symbol and **reverses the 2026-10-05 symbol decision** recorded below.
+**Decided (owner, 2026-10-12) — corporate symbol: B · Headland.** Headland replaces the
+three-circle symbol, which **reverses the 2026-10-05 symbol decision** recorded below.
 
-It ships as three cuts of one construction (`scripts/marks/headland.mjs`):
+Headland is nested contours that are exact insets of one lobed silhouette (long and low, with
+a squared shoulder and a deep notch low right), continuous round the lower left and dissolving
+round the right into shorter dashes and then dots. The outer contours break furthest.
 
-| Cut | File | Contours | Frame | Drawn for |
+*Adopted with it, as proposed in [#120](https://github.com/kontourai/ui/pull/120); not separately decided:* the symbol ships as three cuts of one construction (`scripts/marks/headland.mjs`),
+each for the size range in [Usage](#usage):
+
+| Cut | File | Contours | Frame | Size range |
 | --- | --- | --- | --- | --- |
 | Small | `icons/kontour-symbol.svg` | 3, regular stroke | 24 units | below 64px, and in the 24-unit lockup |
 | Lockup | `icons/kontour-symbol-lockup.svg` | 5, heavier stroke | 96 units | 64px and up, beside the wordmark |
@@ -997,16 +1002,20 @@ and reliability. A compass or reference marker may stay Station-specific if simp
 subordinate, and semantically useful. Do not propagate it to every product. Release channels
 (stable, beta, dev, nightly) may use controlled accent variants that keep the geometry.
 
-**Decided (owner, 2026-10-12) — Station mark: River.** `icons/station.svg` is River: one S-shaped
-river of constant width with thinner contours at its exact parallel offsets, which stop where
+**Decided (owner, 2026-10-12) — Station mark: River.** River replaces the flat Station icon.
+`icons/station.svg` is River: one S-shaped river of constant width with thinner contours at its exact parallel offsets, which stop where
 a bend leaves no room, as a valley's contours do. The S is constructed, not drawn: lines and
 circular arcs joined on shared tangents, both bowls the same bowl, its leads on one line
 through the centre, set at 115°. Its badge form, `icons/station-badge.svg`, sets it in a ring
-that the river meets square-on.
+that the river meets square-on (adopted with the mark, as proposed; see
+[Production assets](#production-assets)).
 
-**Decided (owner, 2026-10-12) — release-channel colors, for Station's app icon and favicons.**
-The geometry is the same in every channel; only the water changes. Each channel's water
-palette is the stable palette with its hue rotated and its saturation scaled (in HSL):
+**Decided (owner, 2026-10-12) — Station release-channel colors:** stable blue, beta green,
+nightly rose, dev amber.
+
+*Adopted with it, as proposed in [#120](https://github.com/kontourai/ui/pull/120); not separately decided:* the values below, their derivation, and their scope. The geometry is the same in
+every channel; only the water changes. Each channel's water palette is the stable palette with
+its hue rotated and its saturation scaled (in HSL), using the exploration's values:
 
 | Channel | Water | Hue rotation | Saturation | Water | Background |
 | --- | --- | --- | --- | --- | --- |
@@ -1016,7 +1025,7 @@ palette is the stable palette with its hue rotated and its saturation scaled (in
 | dev | amber | −175° | ×1 | `#9c5925` | `#602c0a` |
 
 Nightly's rose sits 74–79° of hue from Station's brand purple (light and dark), so a nightly
-build does not read as the brand color. These colors are for Station's app icon and favicons
+build does not read as the brand color. The colors apply to Station's app icon and favicons
 only; they are not UI tokens. Environment colors, and channel colors for other products, are
 still open.
 
@@ -1026,10 +1035,11 @@ Progression, routing, transfer, orchestration, transformation: work moving throu
 Use contour-derived directional behavior. A subtle F may emerge naturally; never force a
 literal F. Flow must stay distinct from Station at app-icon size.
 
-**Decided (owner, 2026-10-12) — Flow mark: A · Current.** `icons/flow.svg` is Current: four
+**Decided (owner, 2026-10-12) — Flow mark: A · Current.** Current replaces the flat Flow icon.
+`icons/flow.svg` is Current: four
 equal streamlines, exact parallel offsets of one constructed wave (a lead, two circular arcs, a
-lead), carrying it diagonally across the frame. There is no hero line. Its badge form is
-`icons/flow-badge.svg`. OPEN-9 stays open.
+lead), carrying it diagonally across the frame. There is no hero line. Its badge form,
+`icons/flow-badge.svg`, is adopted with it, as proposed. OPEN-9 stays open.
 
 ### Surface
 
@@ -1037,10 +1047,11 @@ A state, region, layer, or plane made visible: exposed plane, plateau, basin, bo
 section, or revealed layer. **See the state clearly.** Surface is not another generic contour
 blob; the surface itself is the defining phenomenon.
 
-**Decided (owner, 2026-10-12) — Surface mark: A · Mesa.** `icons/surface.svg` is Mesa: an
+**Decided (owner, 2026-10-12) — Surface mark: A · Mesa.** Mesa replaces the flat Surface icon.
+`icons/surface.svg` is Mesa: an
 oblique mesa whose exposed top is a filled plane, with two tiers below it that show only their
 front edges. The tiers are the top's outline, each a step wider and a step lower. Its badge
-form is `icons/surface-badge.svg`.
+form, `icons/surface-badge.svg`, is adopted with it, as proposed.
 
 ### Future products
 
@@ -1071,10 +1082,11 @@ differ:
 | --- | --- |
 | The other 19 product icons | **Decided (owner, 2026-10-01; [#75](https://github.com/kontourai/ui/issues/75)):** promoted to production marks as drawn, having passed the gates below. Unchanged. |
 | `station.svg`, `flow.svg`, `surface.svg` | **Decided (owner, 2026-10-12):** Station River, Flow A · Current and Surface A · Mesa replace the flat UI icons. See [Station](#station), [Flow](#flow), [Surface](#surface). |
-| `station-badge.svg`, `flow-badge.svg`, `surface-badge.svg` | **Decided (owner, 2026-10-12)** with those marks: the same marks in a ring, for 32px and up. |
-| `kontour-symbol.svg`, `kontour-symbol-lockup.svg`, `kontour-symbol-hero.svg` | **Decided (owner, 2026-10-12):** the Headland symbol's three cuts. Reverses the 2026-10-05 symbol. See [Corporate mark](#corporate-mark). |
+| `station-badge.svg`, `flow-badge.svg`, `surface-badge.svg` | **Adopted with the decided marks, as proposed** ([#120](https://github.com/kontourai/ui/pull/120)): the same marks in a ring, for 32px and up. Not separately decided. |
+| `kontour-symbol.svg` | **Decided (owner, 2026-10-12):** the Headland symbol replaces the three-circle symbol, reversing the 2026-10-05 decision. See [Corporate mark](#corporate-mark). |
+| `kontour-symbol-lockup.svg`, `kontour-symbol-hero.svg` | **Adopted with the decided symbol, as proposed** ([#120](https://github.com/kontourai/ui/pull/120)): Headland's large cuts, for 64px and up. Not separately decided. |
 | `kontour-wordmark.svg` | The word "Kontour": **decided (owner, 2026-10-05)**, unchanged. The cut: adopted with it, as proposed. See [Wordmark](#wordmark). |
-| `kontour-lockup-horizontal.svg`, `kontour-lockup-large.svg` | **Decided (owner, 2026-10-12):** the lockups pair the unchanged wordmark with the Headland symbol: the small cut on the 24-unit frame, and the lockup cut on a 96-unit frame for 64px and up. The arrangement (symbol, a gap of a quarter of the frame height, wordmark) is the one adopted in [#114](https://github.com/kontourai/ui/pull/114). Each is composed from a symbol cut and the wordmark, never drawn separately. |
+| `kontour-lockup-horizontal.svg`, `kontour-lockup-large.svg` | **Adopted with the decided symbol, as proposed** ([#120](https://github.com/kontourai/ui/pull/120)): the unchanged wordmark with Headland's small cut on the 24-unit frame (below 64px), and with its lockup cut on a 96-unit frame (64px and up). The arrangement (symbol, a gap of a quarter of the frame height, wordmark) is the one adopted in [#114](https://github.com/kontourai/ui/pull/114). Not separately decided. Each is composed from a symbol cut and the wordmark, never drawn separately. |
 
 Station, Flow, and Surface carry the contour-derived marks above. The other 19 product marks are
 flat UI icons. The owner's rule (2026-10-05) that no redraw is published until the owner has
@@ -1152,8 +1164,9 @@ Compared with the requirements this section carried before:
 #### Usage
 
 Adopted with the decided corporate marks, as proposed in
-[#114](https://github.com/kontourai/ui/pull/114), and extended for the 2026-10-12 cuts (which
-cut at which size), as proposed with them. These rules are in force, but they were not
+[#114](https://github.com/kontourai/ui/pull/114), and extended for the 2026-10-12 marks (which
+cut at which size, including the 64px and 32px thresholds), as proposed in
+[#120](https://github.com/kontourai/ui/pull/120). These rules are in force, but they were not
 separately put to the owner, so changing one does not reverse an owner decision.
 
 - **Color.** One color, from the surrounding text color. Use a text or brand role that holds
@@ -1162,7 +1175,10 @@ separately put to the owner, so changing one does not reverse an owner decision.
   free of text, other marks, and container edges.
 - **Minimum size.** 16px high for every small-tier mark. Prefer 24px or more for the symbol,
   the wordmark, and the lockup. 64px for the large cuts (the hero/lockup tier).
-- **Which cut, at which size.** Each cut is gated at the sizes it is drawn for.
+- **Which cut, at which size.** One rule: the small cuts below 64px, the large cuts from 64px.
+  The pixel gates rate the small cuts at 16, 24 and 32px and the large cuts at 64px. From 33 to
+  63px the small cut is used, scaled up; no gate renders it at those sizes, so a mark used there
+  is checked by eye on the contact sheet.
 
   | Mark | Below 64px | 64px and up |
   | --- | --- | --- |
@@ -1452,14 +1468,21 @@ record of the decision.
 
 ### Brand decisions
 
+What the owner decided and what was adopted with it, as proposed, are separate rows. An adopted
+item is in force, but changing it does not reverse an owner decision.
+
 | Item | Status | Recorded in |
 | --- | --- | --- |
-| Corporate symbol | Decided (owner, 2026-10-12): B · Headland, in three cuts. Reverses the 2026-10-05 decision (the three-circle symbol). | [Corporate mark](#corporate-mark) |
+| Corporate symbol | Decided (owner, 2026-10-12): Headland replaces the three-circle symbol, reversing the 2026-10-05 decision. | [Corporate mark](#corporate-mark) |
+| Symbol cuts and lockups | Adopted with it, as proposed ([#120](https://github.com/kontourai/ui/pull/120)): the small, lockup and hero cuts, and the small and large lockups. | [Corporate mark](#corporate-mark), [Production assets](#production-assets) |
 | Wordmark | Decided (owner, 2026-10-05): "Kontour" in Fraunces. Unchanged on 2026-10-12. | [Wordmark](#wordmark) |
-| Lockups | Decided (owner, 2026-10-12): the wordmark with the Headland symbol, small and large. | [Production assets](#production-assets) |
-| Station, Flow, and Surface marks | Decided (owner, 2026-10-12): Station River, Flow A · Current, Surface A · Mesa replace the flat UI icons; each also has a badge form. | [Station](#station), [Flow](#flow), [Surface](#surface) |
-| Endorsement presentation | Decided (owner, 2026-10-12): product name in Fraunces, "BY KONTOUR AI" in Hanken Grotesk capitals, the mark in the product brand color. No lockup asset. | [Brand hierarchy](#brand-hierarchy) |
-| Release-channel colors | Decided (owner, 2026-10-12) for Station's app icon and favicons: stable blue, beta green, nightly rose, dev amber. | [Station](#station) |
+| Station, Flow, and Surface marks | Decided (owner, 2026-10-12): Station River, Flow A · Current, Surface A · Mesa replace the flat UI icons. | [Station](#station), [Flow](#flow), [Surface](#surface) |
+| Product badge forms | Adopted with them, as proposed ([#120](https://github.com/kontourai/ui/pull/120)). | [Production assets](#production-assets) |
+| Size thresholds | Adopted, as proposed ([#120](https://github.com/kontourai/ui/pull/120)): small cuts below 64px, large cuts from 64px, badges from 32px. | [Usage](#usage) |
+| Endorsement presentation | Decided (owner, 2026-10-12): "`<Product>` / BY KONTOUR AI", as in the mocks. | [Brand hierarchy](#brand-hierarchy) |
+| Endorsement details | Adopted with it, as proposed ([#120](https://github.com/kontourai/ui/pull/120)): Fraunces name, Hanken Grotesk capitals, the mark in the product brand color; no lockup asset. | [Brand hierarchy](#brand-hierarchy) |
+| Station release-channel colors | Decided (owner, 2026-10-12): stable blue, beta green, nightly rose, dev amber. | [Station](#station) |
+| Channel color values | Adopted with it, as proposed ([#120](https://github.com/kontourai/ui/pull/120)): the hue and saturation derivation, the hex values, and the scope (Station's app icon and favicons only). | [Station](#station) |
 | Flow endorsement form and product tiering | **OPEN** (OPEN-9) | [Brand hierarchy](#brand-hierarchy) |
 
 ### Brand decisions still open

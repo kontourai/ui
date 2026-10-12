@@ -18,15 +18,30 @@ export interface ProductIconProps extends Omit<SVGProps<SVGSVGElement>, "width" 
   className?: string;
 }
 
-type ProductIconComponentProps = ProductIconProps &
-  ({ product: ProductIconSlug; variant?: "default" } | { product: ProductBadgeSlug; variant: "badge" });
+interface ProductIconDefaultProps extends ProductIconProps {
+  product: ProductIconSlug;
+  variant?: "default";
+}
+
+interface ProductIconBadgeProps extends ProductIconProps {
+  product: ProductBadgeSlug;
+  variant: "badge";
+}
 
 /**
  * Renders a single Kontour product mark. Stroke uses `currentColor`, so colour
  * is themeable via the surrounding text colour. `variant="badge"` draws the
  * badge form, 32px by default; it renders nothing for a product without one.
+ *
+ * Overloaded rather than typed with a props union so the default form keeps
+ * the pre-badge signature: `{ product } & ProductIconProps` in, a
+ * `ReactElement` out. The default signature is last, so
+ * `ComponentProps<typeof ProductIcon>` still names it
+ * (tests/types/product-icon-api.tsx).
  */
-export function ProductIcon({ product, variant = "default", size, title, className, ...props }: ProductIconComponentProps) {
+export function ProductIcon(props: ProductIconBadgeProps): ReactElement | null;
+export function ProductIcon(props: ProductIconDefaultProps): ReactElement;
+export function ProductIcon({ product, variant = "default", size, title, className, ...props }: ProductIconDefaultProps | ProductIconBadgeProps): ReactElement | null {
   const badge = variant === "badge";
   // A variant that does not exist for this product draws nothing, rather than another form of the mark.
   if (variant !== "default" && !(badge && isProductBadgeSlug(product))) return null;

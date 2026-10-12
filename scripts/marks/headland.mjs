@@ -183,7 +183,7 @@ const HERO_ZONES = [
 /** The three cuts, as inner markup for brand-mark-paths.ts. */
 export function headlandCuts() {
   return {
-    // 24-unit small cut: 3 rings at stroke 1.25, for 32px and below and the 24-unit lockup.
+    // 24-unit small cut: 3 rings at stroke 1.25, below 64px and in the 24-unit lockup.
     small: symbol({ size: 24, count: 3, step: 2.6, margin: 1.4, stroke: 1.25, zones: [{ from: -80, low: 2, to: 64, floor: 0 }, { from: -34, low: 6, to: 34, floor: 0.45 }, null], dash: 3.2, gap: 1.6, maxGap: 1.9, dotBelow: 0.45, knot: 6.5, decimals: 2 }),
     // Lockup cut: 96 units, one ring fewer than the fine cut, so a stroke about
     // 70% heavier keeps the same open gaps beside the Fraunces wordmark.

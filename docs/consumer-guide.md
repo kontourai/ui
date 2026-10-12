@@ -493,7 +493,8 @@ height in px.
 Station, Flow, and Surface have a badge form, the mark inside a ring, for 32px and up; other
 products have none, and asking for it renders nothing. The large cuts (`kontour-symbol-lockup`,
 `kontour-symbol-hero`, `kontour-lockup-large`) are drawn on a 96-unit frame for 64px and up, and
-default to 96px; below 64px use `kontour-symbol` and `kontour-lockup-horizontal`.
+default to 96px; below 64px use `kontour-symbol` and `kontour-lockup-horizontal`. Those small
+cuts are rated at 16, 24 and 32px; from 33 to 63px they are scaled up and not separately rated.
 
 The wordmark and lockup spell the company name, so they are named "Kontour" for assistive tech
 unless you pass `title` or `decorative`. The symbol and the product marks are hidden unless
