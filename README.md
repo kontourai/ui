@@ -6,7 +6,10 @@
 
 [![npm version](https://img.shields.io/npm/v/%40kontourai%2Fui)](https://www.npmjs.com/package/@kontourai/ui)
 [![CI](https://github.com/kontourai/ui/actions/workflows/ci.yml/badge.svg)](https://github.com/kontourai/ui/actions/workflows/ci.yml)
+[![Docs](https://img.shields.io/badge/docs-kontourai.github.io-blue)](https://kontourai.github.io/ui/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
+[Documentation](https://kontourai.github.io/ui/)
 
 Use Kontour UI when you are building a Kontour product interface (Surface
 Console, Flow Console, Survey Review Workbench, Station, or a custom operator
