@@ -1,7 +1,14 @@
 import type { ReactElement, SVGProps } from "react";
-import { productIconPaths, type ProductIconSlug } from "./product-icon-paths.js";
+import { isProductBadgeSlug, productBadgePaths, productIconPaths, type ProductBadgeSlug, type ProductIconSlug } from "./product-icon-paths.js";
 
-export type { ProductIconSlug } from "./product-icon-paths.js";
+export type { ProductBadgeSlug, ProductIconSlug } from "./product-icon-paths.js";
+
+/**
+ * Which form of a product mark to draw. `default` is the mark itself, for UI
+ * sizes. `badge` is the mark inside a ring, for 32px and up (endorsements,
+ * product cards, hero use); only the products in `ProductBadgeSlug` have one.
+ */
+export type ProductIconVariant = "default" | "badge";
 
 export interface ProductIconProps extends Omit<SVGProps<SVGSVGElement>, "width" | "height"> {
   /** Square edge length in px applied to both width and height. */
@@ -11,32 +18,60 @@ export interface ProductIconProps extends Omit<SVGProps<SVGSVGElement>, "width" 
   className?: string;
 }
 
-interface ProductIconComponentProps extends ProductIconProps {
+interface ProductIconDefaultProps extends ProductIconProps {
   product: ProductIconSlug;
+  variant?: "default";
+}
+
+interface ProductIconBadgeProps extends ProductIconProps {
+  product: ProductBadgeSlug;
+  variant: "badge";
+}
+
+/** A badge product with the variant chosen at runtime (`variant={big ? "badge" : "default"}`). */
+interface ProductIconEitherProps extends ProductIconProps {
+  product: ProductBadgeSlug;
+  variant: ProductIconVariant;
 }
 
 /**
  * Renders a single Kontour product mark. Stroke uses `currentColor`, so colour
- * is themeable via the surrounding text colour.
+ * is themeable via the surrounding text colour. `variant="badge"` draws the
+ * badge form, 32px by default; it renders nothing for a product without one.
+ *
+ * Overloaded rather than typed with a props union so the default form keeps
+ * the pre-badge signature: `{ product } & ProductIconProps` in, a
+ * `ReactElement` out. The middle signature takes a variant chosen at runtime
+ * for a product that has a badge. The default signature is last, so
+ * `ComponentProps<typeof ProductIcon>` still names it
+ * (tests/types/product-icon-api.tsx).
  */
-export function ProductIcon({ product, size = 24, title, className, ...props }: ProductIconComponentProps) {
+export function ProductIcon(props: ProductIconBadgeProps): ReactElement | null;
+export function ProductIcon(props: ProductIconEitherProps): ReactElement | null;
+export function ProductIcon(props: ProductIconDefaultProps): ReactElement;
+export function ProductIcon({ product, variant = "default", size, title, className, ...props }: ProductIconDefaultProps | ProductIconEitherProps): ReactElement | null {
+  const badge = variant === "badge";
+  // A variant that does not exist for this product draws nothing, rather than another form of the mark.
+  if (variant !== "default" && !(badge && isProductBadgeSlug(product))) return null;
+  const inner = badge ? productBadgePaths[product as ProductBadgeSlug] : productIconPaths[product];
   const accessibility = title ? { role: "img", "aria-label": title } : { "aria-hidden": true };
+  const edge = size ?? (badge ? 32 : 24);
   return (
     <svg
       viewBox="0 0 24 24"
-      width={size}
-      height={size}
+      width={edge}
+      height={edge}
       fill="none"
       stroke="currentColor"
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={["product-icon", `product-icon-${product}`, className].filter(Boolean).join(" ")}
+      className={["product-icon", `product-icon-${product}`, badge ? "product-icon--badge" : null, className].filter(Boolean).join(" ")}
       {...accessibility}
       {...props}
     >
       {title ? <title>{title}</title> : null}
-      <g dangerouslySetInnerHTML={{ __html: productIconPaths[product] }} />
+      <g dangerouslySetInnerHTML={{ __html: inner }} />
     </svg>
   );
 }

@@ -68,10 +68,17 @@ try {
     "icons/survey.svg",
     "icons/console.svg",
     "icons/flow-agents.svg",
-    // Corporate marks (ui#75), in both shipped forms.
+    // The badge forms of the contour-derived product marks.
+    "icons/station-badge.svg",
+    "icons/flow-badge.svg",
+    "icons/surface-badge.svg",
+    // Corporate marks (ui#75), in both shipped forms, and the large cuts.
     "icons/kontour-symbol.svg",
     "icons/kontour-wordmark.svg",
     "icons/kontour-lockup-horizontal.svg",
+    "icons/kontour-symbol-lockup.svg",
+    "icons/kontour-symbol-hero.svg",
+    "icons/kontour-lockup-large.svg",
     "dist/react/BrandMark.js",
     "dist/react/BrandMark.d.ts",
     "dist/elements/elements/src/index.js",

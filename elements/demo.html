@@ -144,12 +144,16 @@
           </div>
         </k-panel>
 
-        <k-panel title="Corporate Marks" count="symbol, wordmark, lockup">
+        <k-panel title="Corporate Marks" count="symbol, wordmark, lockups, large cuts">
           <div class="row" id="brand-marks-mount">
             <!-- The wordmark names itself ("Kontour"). The symbol needs a title to be exposed; the lockup here is decorative because the wordmark beside it already says the name. -->
             <k-brand-mark mark="kontour-symbol" title="Kontour symbol"></k-brand-mark>
             <k-brand-mark mark="kontour-wordmark"></k-brand-mark>
             <k-brand-mark mark="kontour-lockup-horizontal" size="32" decorative></k-brand-mark>
+            <!-- The large cuts are drawn for 64px and up; they default to their 96-unit frame height. -->
+            <k-brand-mark mark="kontour-symbol-lockup" size="64"></k-brand-mark>
+            <k-brand-mark mark="kontour-symbol-hero"></k-brand-mark>
+            <k-brand-mark mark="kontour-lockup-large" size="64" decorative></k-brand-mark>
           </div>
         </k-panel>
 
@@ -177,6 +181,12 @@
             <k-product-icon product="ui"></k-product-icon>
             <k-product-icon product="evals"></k-product-icon>
             <k-product-icon product="kit-research"></k-product-icon>
+          </div>
+          <!-- The badge form, for 32px and up: Station, Flow and Surface only. -->
+          <div class="row" id="product-badges-mount">
+            <k-product-icon product="station" variant="badge" title="Station"></k-product-icon>
+            <k-product-icon product="flow" variant="badge"></k-product-icon>
+            <k-product-icon product="surface" variant="badge"></k-product-icon>
           </div>
         </k-panel>
 

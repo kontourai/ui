@@ -1,5 +1,16 @@
 export { Badge, type BadgeProps } from "./Badge.js";
-export { BrandMark, brandMarks, type BrandMarkProps, type BrandMarkSlug, KontourLockup, KontourSymbol, KontourWordmark } from "./BrandMark.js";
+export {
+  BrandMark,
+  brandMarks,
+  type BrandMarkProps,
+  type BrandMarkSlug,
+  KontourLockup,
+  KontourLockupLarge,
+  KontourSymbol,
+  KontourSymbolHero,
+  KontourSymbolLockup,
+  KontourWordmark,
+} from "./BrandMark.js";
 export { Button, type ButtonProps, type ButtonVariant } from "./Button.js";
 export { Checkbox, type CheckboxProps } from "./Checkbox.js";
 export { Dialog, type DialogProps } from "./Dialog.js";
@@ -15,8 +26,10 @@ export {
   FlowIcon,
   ProductIcon,
   productIcons,
+  type ProductBadgeSlug,
   type ProductIconProps,
   type ProductIconSlug,
+  type ProductIconVariant,
   StationIcon,
   SurfaceIcon,
   SurveyIcon,

@@ -466,10 +466,13 @@ const basis = claimBasisView(claim, bundle.evidence);
 
 Product marks: `ProductIcon` (or `StationIcon`, `FlowIcon`, …) in React, `<k-product-icon
 product="station">` as an element, and `@kontourai/ui/icons/<name>.svg` as files. Corporate
-marks: `BrandMark` (`KontourSymbol`, `KontourWordmark`, `KontourLockup`), `<k-brand-mark
+marks: `BrandMark` (`KontourSymbol`, `KontourWordmark`, `KontourLockup`, and the large cuts
+`KontourSymbolLockup`, `KontourSymbolHero`, `KontourLockupLarge`), `<k-brand-mark
 mark="kontour-lockup-horizontal">`, and the `kontour-*.svg` files. The owner decided the
-corporate symbol and the "Kontour" wordmark on 2026-10-05. The lockup, the wordmark's cut and
-the usage rules were adopted with them as proposed; `DESIGN.md` records which is which.
+Headland corporate symbol and the Station, Flow, and Surface marks on 2026-10-12, and the
+"Kontour" wordmark on 2026-10-05. The symbol's cuts, the lockups, the badges and the size rules
+were adopted with them, as proposed; `DESIGN.md` records which is which, and which cut to use at
+which size.
 
 Every mark paints with `currentColor`, so it takes the surrounding text color. `size` is the
 height in px.
@@ -478,12 +481,21 @@ height in px.
 <KontourLockup size={32} />                      {/* announced as the image "Kontour" */}
 <KontourLockup size={32} decorative />           {/* hidden: visible text beside it says the name */}
 <KontourSymbol size={24} title="Kontour" />      {/* the symbol needs a title to be announced */}
+<KontourLockupLarge size={96} />                 {/* a large cut: drawn for 64px and up */}
+<ProductIcon product="station" variant="badge" /> {/* the badge form, 32px by default */}
 ```
 
 ```html
 <k-brand-mark mark="kontour-wordmark"></k-brand-mark>
 <k-brand-mark mark="kontour-lockup-horizontal" decorative></k-brand-mark>
+<k-product-icon product="flow" variant="badge" size="48"></k-product-icon>
 ```
+
+Station, Flow, and Surface have a badge form, the mark inside a ring, for 32px and up; other
+products have none, and asking for it renders nothing. The large cuts (`kontour-symbol-lockup`,
+`kontour-symbol-hero`, `kontour-lockup-large`) are drawn on a 96-unit frame for 64px and up, and
+default to 96px; below 64px use `kontour-symbol` and `kontour-lockup-horizontal`. Those small
+cuts are rated at 16, 24 and 32px; from 33 to 63px they are scaled up and not separately rated.
 
 The wordmark and lockup spell the company name, so they are named "Kontour" for assistive tech
 unless you pass `title` or `decorative`. The symbol and the product marks are hidden unless

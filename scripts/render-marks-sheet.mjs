@@ -6,8 +6,9 @@ import { chromium } from "@playwright/test";
 
 // Renders every mark in icons/ to one PNG contact sheet for review: light and
 // dark, on the page (--k-bg) and panel (--k-panel) surfaces, at 16, 24, 32 and
-// 64px high. One CSS pixel is one image pixel, so the small sizes are what a
-// standard-density screen shows. Colours come from the shipped tokens.
+// 64px high; the large cuts (a 96-unit frame, drawn for 64px and up) at 64,
+// 96 and 128px. One CSS pixel is one image pixel, so the small sizes are what
+// a standard-density screen shows. Colours come from the shipped tokens.
 //
 //   node scripts/render-marks-sheet.mjs <output.png>
 //
@@ -18,19 +19,20 @@ const output = process.argv[2];
 if (!output) throw new Error("Usage: node scripts/render-marks-sheet.mjs <output.png>");
 
 const SIZES = [16, 24, 32, 64];
+const LARGE_SIZES = [64, 96, 128];
 const marks = readdirSync(path.join(root, "icons")).filter((name) => name.endsWith(".svg")).sort().map((name) => {
   const svg = readFileSync(path.join(root, "icons", name), "utf8");
   const [, width, height] = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);
-  return { slug: name.slice(0, -4), svg, aspect: Number(width) / Number(height) };
+  return { slug: name.slice(0, -4), svg, aspect: Number(width) / Number(height), sizes: Number(height) === 96 ? LARGE_SIZES : SIZES };
 });
 // Corporate marks first, then product marks; wide marks get a full-width row.
 const brand = marks.filter((mark) => mark.slug.startsWith("kontour-"));
 const product = marks.filter((mark) => !mark.slug.startsWith("kontour-"));
 
 const sized = (mark, size) => mark.svg.replace(/ width="[\d.]+" height="[\d.]+"/, ` width="${Math.round(size * mark.aspect * 100) / 100}" height="${size}"`);
-const strip = (mark, surface) => `<div class="strip ${surface}">${SIZES.map((size) => `<span class="cell">${sized(mark, size)}</span>`).join("")}</div>`;
-const row = (mark) => `<div class="mark${mark.aspect > 1 ? " wide" : ""}"><span class="name">${mark.slug}</span>${strip(mark, "bg")}${strip(mark, "panel")}</div>`;
-const block = (mode) => `<section data-theme="${mode}"><h2>${mode} · sizes ${SIZES.join(" / ")} px · left on --k-bg, right on --k-panel</h2><div class="marks">${[...brand, ...product].map(row).join("")}</div></section>`;
+const strip = (mark, surface) => `<div class="strip ${surface}">${mark.sizes.map((size) => `<span class="cell">${sized(mark, size)}</span>`).join("")}</div>`;
+const row = (mark) => `<div class="mark${mark.aspect > 1 || mark.sizes === LARGE_SIZES ? " wide" : ""}"><span class="name">${mark.slug}</span>${strip(mark, "bg")}${strip(mark, "panel")}</div>`;
+const block = (mode) => `<section data-theme="${mode}"><h2>${mode} · sizes ${SIZES.join(" / ")} px (large cuts ${LARGE_SIZES.join(" / ")} px) · left on --k-bg, right on --k-panel</h2><div class="marks">${[...brand, ...product].map(row).join("")}</div></section>`;
 
 const html = `<!doctype html><html data-theme="dark"><head><meta charset="utf-8">
 <link rel="stylesheet" href="${pathToFileURL(path.join(root, "tokens/index.css")).href}">

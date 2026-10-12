@@ -197,11 +197,12 @@
         if (target?.startsWith("k-")) card.append(createPlayground(target, entry.name));
         explorer.append(card);
       }
-      // Every mark at 16, 24 and 32px, on the page and panel surfaces, in both
-      // modes. tests/browser/marks.spec.ts reads the ink and surface colours
-      // from here, so the legibility gates rate what this page shows.
-      const { productIconSlugs } = await import("../dist/react/product-icon-paths.js");
-      const { brandMarkSlugs } = await import("../dist/react/brand-mark-paths.js");
+      // Every mark at 16, 24 and 32px (the large cuts at their minimum size),
+      // on the page and panel surfaces, in both modes. tests/browser/marks.spec.ts
+      // reads the ink and surface colours from here, so the legibility gates
+      // rate what this page shows.
+      const { productIconSlugs, productBadgeSlugs } = await import("../dist/react/product-icon-paths.js");
+      const { brandMarkSlugs, brandMarkPaths } = await import("../dist/react/brand-mark-paths.js");
       const marksGallery = document.getElementById("marks-gallery");
       for (const mode of ["light", "dark"]) for (const surface of ["bg", "panel"]) {
         const sample = document.createElement("div");
@@ -212,24 +213,29 @@
         title.className = "label";
         title.textContent = `${mode} on --k-${surface}`;
         sample.append(title);
-        const cell = (tag, attribute, slug) => {
+        const cell = (tag, attribute, slug, { sizes = [16, 24, 32], variant } = {}) => {
           const group = document.createElement("span");
           group.className = "marks-cell";
-          group.dataset.mark = slug;
-          for (const size of [16, 24, 32]) {
+          group.dataset.mark = variant ? `${slug}-${variant}` : slug;
+          for (const size of sizes) {
             const mark = document.createElement(tag);
             mark.setAttribute(attribute, slug);
+            if (variant) mark.setAttribute("variant", variant);
             mark.setAttribute("size", String(size));
             // One named specimen per mark; the other sizes repeat it, so they are decorative.
-            if (size === 24) mark.setAttribute("title", slug);
+            if (size === 24 || sizes.length === 1) mark.setAttribute("title", group.dataset.mark);
             else if (tag === "k-brand-mark") mark.setAttribute("decorative", "");
             mark.dataset.size = String(size);
             group.append(mark);
           }
           return group;
         };
-        for (const slug of brandMarkSlugs) sample.append(cell("k-brand-mark", "mark", slug));
+        for (const slug of brandMarkSlugs) {
+          const { minSize } = brandMarkPaths[slug];
+          sample.append(cell("k-brand-mark", "mark", slug, minSize ? { sizes: [minSize] } : {}));
+        }
         for (const slug of productIconSlugs) sample.append(cell("k-product-icon", "product", slug));
+        for (const slug of productBadgeSlugs) sample.append(cell("k-product-icon", "product", slug, { variant: "badge" }));
         marksGallery.append(sample);
       }
       const matrix = document.getElementById("theme-matrix");

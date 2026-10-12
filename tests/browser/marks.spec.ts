@@ -15,11 +15,20 @@ import { contrastRatio } from "../../contrast/index.js";
 // Pinned here, not read from the path modules, so a mark cannot leave or join
 // the set without this list changing.
 const PRODUCT = ["bearing", "cli", "conduit", "console", "datum", "dispatch", "evals", "fieldwork", "flow", "flow-agents", "forage", "hachure", "kit-research", "lookout", "plumb", "relay", "station", "surface", "survey", "traverse", "ui", "veritas"];
+// The badge forms of the contour-derived product marks: small-tier marks too.
+const BADGE = ["flow-badge", "station-badge", "surface-badge"];
 const BRAND = ["kontour-lockup-horizontal", "kontour-symbol", "kontour-wordmark"];
-// Square marks: the ones that can be a favicon.
-const SQUARE = [...PRODUCT, "kontour-symbol"];
-const MARKS = [...BRAND, ...PRODUCT].sort();
+// The hero/lockup tier (scripts/check-marks.mjs pins the same list): the large
+// cuts on a 96-unit frame, each with the smallest height in px it is drawn
+// for. They are rated by the same ink rules at that size, not at 16-32px.
+const HERO: Record<string, number> = { "kontour-lockup-large": 64, "kontour-symbol-hero": 64, "kontour-symbol-lockup": 64 };
+// Square small-tier marks: the ones that can be a favicon.
+const SQUARE = [...PRODUCT, ...BADGE, "kontour-symbol"];
+const SMALL = [...BRAND, ...PRODUCT, ...BADGE].sort();
+const MARKS = [...SMALL, ...Object.keys(HERO)].sort();
 const SIZES = [16, 24, 32];
+/** The sizes each mark is rendered and rated at. */
+const sizesOf = (slug: string) => (slug in HERO ? [HERO[slug]] : SIZES);
 const SURFACES = ["light:bg", "light:panel", "dark:bg", "dark:panel"];
 
 // WCAG 1.4.11: a graphical object needs 3:1 against what is behind it.
@@ -74,7 +83,7 @@ test.describe("mark files", () => {
   test.beforeEach(async ({ page }) => {
     const consoleErrors = await loadKitPage(page, "/docs/gallery.html");
     await expect(page.locator("[data-marks-surface]")).toHaveCount(SURFACES.length);
-    ({ rasters, documents } = await page.evaluate(async ({ marks, sizes }) => {
+    ({ rasters, documents } = await page.evaluate(async ({ marks, sizesBySlug }) => {
       const rasters = [];
       const documents = [];
       for (const slug of marks) {
@@ -93,7 +102,7 @@ test.describe("mark files", () => {
           viewBox: parsed.documentElement.getAttribute("viewBox"),
         });
         const [, , boxWidth, boxHeight] = (parsed.documentElement.getAttribute("viewBox") ?? "0 0 1 1").split(" ").map(Number);
-        for (const size of sizes) {
+        for (const size of sizesBySlug[slug]) {
           const canvas = document.createElement("canvas");
           canvas.height = size;
           canvas.width = Math.round((size * boxWidth) / boxHeight);
@@ -106,7 +115,7 @@ test.describe("mark files", () => {
         }
       }
       return { rasters, documents };
-    }, { marks: MARKS, sizes: SIZES }));
+    }, { marks: MARKS, sizesBySlug: Object.fromEntries(MARKS.map((slug) => [slug, sizesOf(slug)])) }));
     // The ink and surface colours the gallery really paints, per mode and surface.
     colours = await page.evaluate((surfaces) => {
       const hex = (value: string) => {
@@ -136,8 +145,9 @@ test.describe("mark files", () => {
     }
   });
 
-  test("each is legible at 16, 24 and 32px on bg and panel, light and dark", () => {
-    expect(rasters).toHaveLength(MARKS.length * SIZES.length);
+  test("each is legible at 16, 24 and 32px (hero/lockup tier: at its minimum size) on bg and panel, light and dark", () => {
+    expect(rasters).toHaveLength(SMALL.length * SIZES.length + Object.keys(HERO).length);
+    expect(rasters.filter((raster) => raster.slug in HERO).map((raster) => [raster.slug, raster.size])).toEqual(Object.entries(HERO).sort());
     expect(Object.keys(colours).sort()).toEqual([...SURFACES].sort());
     for (const [id, { ink, surface }] of Object.entries(colours)) {
       expect(contrastRatio(ink, surface), `mark ink ${ink} on ${id} ${surface}`).toBeGreaterThanOrEqual(MIN_CONTRAST);
@@ -166,7 +176,7 @@ test.describe("mark files", () => {
   });
 
   test("no two marks render alike at any size", () => {
-    for (const size of SIZES) {
+    for (const size of new Set([...SIZES, ...Object.values(HERO)])) {
       const atSize = rasters.filter((raster) => raster.size === size);
       for (let first = 0; first < atSize.length; first += 1) {
         for (let second = first + 1; second < atSize.length; second += 1) {
@@ -201,11 +211,19 @@ test.describe("corporate marks", () => {
     const consoleErrors = await loadKitPage(page, "/elements/demo.html");
     await expect(page.getByRole("main")).toContainText("Corporate Marks");
 
-    const expectedWidth = { "kontour-symbol": 24, "kontour-wordmark": 72.24, "kontour-lockup-horizontal": 102.24 } as const;
-    for (const [mark, width] of Object.entries(expectedWidth)) {
+    const expectedFrame = {
+      "kontour-symbol": [24, 24],
+      "kontour-wordmark": [72.24, 24],
+      "kontour-lockup-horizontal": [102.24, 24],
+      "kontour-symbol-lockup": [96, 96],
+      "kontour-symbol-hero": [96, 96],
+      "kontour-lockup-large": [408.96, 96],
+    } as const;
+    expect(Object.keys(expectedFrame).sort()).toEqual([...BRAND, ...Object.keys(HERO)].sort());
+    for (const [mark, [width, height]] of Object.entries(expectedFrame)) {
       const svg = page.locator(`#brand-marks-mount k-brand-mark[mark="${mark}"] svg`);
       await expect(svg).toBeVisible();
-      await expect(svg).toHaveAttribute("viewBox", `0 0 ${width} 24`);
+      await expect(svg).toHaveAttribute("viewBox", `0 0 ${width} ${height}`);
       await expect(svg).toHaveClass(new RegExp(`brand-mark-${mark}`));
       const paints = await svg.evaluate((node) => [...node.querySelectorAll("[fill], [stroke]")].flatMap((element) => [element.getAttribute("fill"), element.getAttribute("stroke")]).filter((value) => value !== null));
       expect(paints.length).toBeGreaterThan(0);
@@ -215,6 +233,11 @@ test.describe("corporate marks", () => {
     const lockup = page.locator('#brand-marks-mount k-brand-mark[mark="kontour-lockup-horizontal"] svg');
     await expect(lockup).toHaveAttribute("height", "32");
     await expect(lockup).toHaveAttribute("width", "136.32");
+    // A large cut defaults to its 96-unit frame height, and scales the same way.
+    await expect(page.locator('#brand-marks-mount k-brand-mark[mark="kontour-symbol-hero"] svg')).toHaveAttribute("height", "96");
+    const large = page.locator('#brand-marks-mount k-brand-mark[mark="kontour-lockup-large"] svg');
+    await expect(large).toHaveAttribute("height", "64");
+    await expect(large).toHaveAttribute("width", "272.64");
 
     // The wordmark names itself, so a header showing only it still announces the company.
     const wordmark = page.locator('#brand-marks-mount k-brand-mark[mark="kontour-wordmark"] svg');
@@ -281,10 +304,13 @@ test.describe("corporate marks", () => {
           sameMarkup: parsed.innerHTML.length > 0 && parsed.innerHTML === rendered?.innerHTML,
         };
       });
-    }, BRAND);
+    }, [...BRAND, ...Object.keys(HERO)].sort());
     expect(results).toEqual([
       { mark: "kontour-lockup-horizontal", viewBox: "0 0 102.24 24", height: 48, label: "Kontour", hidden: null, decorative: true, titled: "Kontour AI", keyed: "KontourLockup", sameMarkup: true },
+      { mark: "kontour-lockup-large", viewBox: "0 0 408.96 96", height: 48, label: "Kontour", hidden: null, decorative: true, titled: "Kontour AI", keyed: "KontourLockupLarge", sameMarkup: true },
       { mark: "kontour-symbol", viewBox: "0 0 24 24", height: 48, label: null, hidden: true, decorative: true, titled: "Kontour AI", keyed: "KontourSymbol", sameMarkup: true },
+      { mark: "kontour-symbol-hero", viewBox: "0 0 96 96", height: 48, label: null, hidden: true, decorative: true, titled: "Kontour AI", keyed: "KontourSymbolHero", sameMarkup: true },
+      { mark: "kontour-symbol-lockup", viewBox: "0 0 96 96", height: 48, label: null, hidden: true, decorative: true, titled: "Kontour AI", keyed: "KontourSymbolLockup", sameMarkup: true },
       { mark: "kontour-wordmark", viewBox: "0 0 72.24 24", height: 48, label: "Kontour", hidden: null, decorative: true, titled: "Kontour AI", keyed: "KontourWordmark", sameMarkup: true },
     ]);
     // An unknown mark renders nothing instead of throwing, as the element does.
@@ -297,7 +323,7 @@ test.describe("corporate marks", () => {
   });
 });
 
-test("the gallery shows every mark at 16, 24 and 32px in light and dark", async ({ page }) => {
+test("the gallery shows every mark at 16, 24 and 32px (the large cuts at their minimum size) in light and dark", async ({ page }) => {
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");
   await expect(page.locator("[data-marks-surface]")).toHaveCount(SURFACES.length);
   const shown = await page.evaluate(() => [...document.querySelectorAll("[data-marks-surface]")].map((surface) => ({
@@ -312,7 +338,7 @@ test("the gallery shows every mark at 16, 24 and 32px in light and dark", async 
   for (const surface of shown) {
     expect(surface.id!.split(":")[0]).toBe(surface.mode);
     expect(surface.marks.map((mark) => mark.slug).sort(), surface.id!).toEqual(MARKS);
-    for (const mark of surface.marks) expect(mark.heights, `${mark.slug} on ${surface.id}`).toEqual(SIZES);
+    for (const mark of surface.marks) expect(mark.heights, `${mark.slug} on ${surface.id}`).toEqual(sizesOf(mark.slug!));
   }
   expect(consoleErrors).toEqual([]);
 });
