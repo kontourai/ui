@@ -1090,8 +1090,10 @@ differ:
 
 Station, Flow, and Surface carry the contour-derived marks above. The other 19 product marks are
 flat UI icons. The owner's rule (2026-10-05) that no redraw is published until the owner has
-seen it rendered at real sizes stands for any further redraw; the 2026-10-12 marks were approved
-from the exploration's renders, which show each from 16px up. A stacked lockup and per-product
+seen it rendered at real sizes stands for any further redraw. On 2026-10-12 the owner approved
+the Headland symbol and the Station, Flow, and Surface marks from the exploration's renders,
+which show each from 16px up; the symbol's other cuts, the lockups, and the badges were adopted
+with them, as proposed. A stacked lockup and per-product
 lockups do not exist.
 
 Components: `ProductIcon` and `<k-product-icon>` for product marks, with `variant="badge"` for

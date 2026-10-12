@@ -469,9 +469,10 @@ product="station">` as an element, and `@kontourai/ui/icons/<name>.svg` as files
 marks: `BrandMark` (`KontourSymbol`, `KontourWordmark`, `KontourLockup`, and the large cuts
 `KontourSymbolLockup`, `KontourSymbolHero`, `KontourLockupLarge`), `<k-brand-mark
 mark="kontour-lockup-horizontal">`, and the `kontour-*.svg` files. The owner decided the
-Headland corporate symbol, its lockups, and the Station, Flow, and Surface marks on 2026-10-12,
-and the "Kontour" wordmark on 2026-10-05; `DESIGN.md` records which decision covers what, and
-which cut to use at which size.
+Headland corporate symbol and the Station, Flow, and Surface marks on 2026-10-12, and the
+"Kontour" wordmark on 2026-10-05. The symbol's cuts, the lockups, the badges and the size rules
+were adopted with them, as proposed; `DESIGN.md` records which is which, and which cut to use at
+which size.
 
 Every mark paints with `currentColor`, so it takes the surrounding text color. `size` is the
 height in px.
