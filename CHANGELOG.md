@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.1](https://github.com/kontourai/ui/compare/v1.20.0...v1.20.1) (2026-10-13)
+
+
+### Performance
+
+* **marks:** split mark path data into per-mark modules so bundles carry only the marks they import ([#122](https://github.com/kontourai/ui/issues/122)) ([725162f](https://github.com/kontourai/ui/commit/725162ffd011fcf32c493e0949ec0c837bce9479)), closes [#121](https://github.com/kontourai/ui/issues/121)
+
 ## [1.20.0](https://github.com/kontourai/ui/compare/v1.19.0...v1.20.0) (2026-10-12)
 
 
