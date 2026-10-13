@@ -31,8 +31,8 @@
     "check:tree-shaking": "node scripts/check-tree-shaking.mjs",
     "check:wordmark": "python3 scripts/generate-wordmark.py --check",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
-    "docs:check": "npx -y github:kontourai/docs-kit#482fb2e691fe7686f79a9a4da8bc2247384b85c3 docs-kit check",
-    "docs:build": "npx -y github:kontourai/docs-kit#482fb2e691fe7686f79a9a4da8bc2247384b85c3 docs-kit build"
+    "docs:check": "npx -y github:kontourai/corpus#cc7f6e4939dcc0777c4c3e2d5222b30455013861 corpus check",
+    "docs:build": "npx -y github:kontourai/corpus#cc7f6e4939dcc0777c4c3e2d5222b30455013861 corpus build"
   },
   "peerDependencies": {
     "react": "^19.0.0"
