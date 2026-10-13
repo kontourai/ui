@@ -1,5 +1,7 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "purpose": "Build visually consistent Kontour product interfaces through one shared visual language.",
+  "builtOn": [],
   "product": "ui",
   "title": "Kontour UI",
   "tagline": "The shared design tokens, React primitives, and web components for Kontour product interfaces.",
