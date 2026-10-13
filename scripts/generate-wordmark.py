@@ -4,7 +4,7 @@
     python3 scripts/generate-wordmark.py           # print width and path data as JSON
     python3 scripts/generate-wordmark.py --check   # compare with the committed path data
 
-The result is committed in react/src/brand-mark-paths.ts, and
+The result is committed in react/src/marks/kontour-wordmark.ts, and
 icons/kontour-wordmark.svg is generated from that module, so this script is
 provenance, not a build step: `npm run verify` does not need Python. Where
 fontTools is installed, tests/unit/wordmark-provenance.test.mjs runs --check, so
@@ -12,7 +12,7 @@ the committed outline cannot drift from the font unnoticed; where it is not,
 that test is skipped and says so.
 
 Re-run without --check only for an explicit identity change, then paste the
-output into brand-mark-paths.ts and run `node scripts/check-marks.mjs --write`.
+output into react/src/marks/kontour-wordmark.ts and run `node scripts/check-marks.mjs --write`.
 
 Needs fontTools and brotli (`pip install fonttools brotli`). The committed
 outline was first produced with fontTools 4.66.1, brotli 1.2.0 and uharfbuzz
@@ -100,12 +100,12 @@ for position, name in enumerate(names):
 result = {"text": TEXT, "location": LOCATION, "width": round(ink_right * scale + 0.005, 2), "d": pen.getCommands()}
 
 if "--check" in sys.argv:
-    source = (ROOT / "react/src/brand-mark-paths.ts").read_text()
+    source = (ROOT / "react/src/marks/kontour-wordmark.ts").read_text()
     committed_d = re.search(r"""const WORDMARK =\s*'<g fill="currentColor"><path d="([^"]+)"/></g>';""", source)
     committed_width = re.search(r"const WORDMARK_WIDTH = ([\d.]+);", source)
     committed_text = re.search(r'const WORDMARK_TEXT = "([^"]+)";', source)
     if not (committed_d and committed_width and committed_text):
-        sys.exit("generate-wordmark: could not find WORDMARK, WORDMARK_WIDTH and WORDMARK_TEXT in react/src/brand-mark-paths.ts.")
+        sys.exit("generate-wordmark: could not find WORDMARK, WORDMARK_WIDTH and WORDMARK_TEXT in react/src/marks/kontour-wordmark.ts.")
     problems = []
     if committed_text.group(1) != TEXT:
         problems.append(f'WORDMARK_TEXT is "{committed_text.group(1)}"; this script outlines "{TEXT}".')

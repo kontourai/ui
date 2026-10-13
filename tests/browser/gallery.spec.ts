@@ -30,6 +30,7 @@ test("renders the package gallery with tokens, themes, and primitive components"
 
 test("applies each product theme selector to component behavior and detects a corrupted theme rule", async ({ page }) => {
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");
+  await galleryBuilt(page);
 
   const matrix = await page.locator("[data-theme-matrix]").evaluateAll((samples) => samples.map((sample) => {
     const button = sample.querySelector("k-button button");
@@ -219,6 +220,7 @@ test("shows a k-tooltip on hover and toggles a k-popover on click", async ({ pag
 test("keeps gallery layout within the mobile viewport", async ({ page }) => {
   test.skip(test.info().project.name !== "chromium-mobile", "mobile-only layout check");
   const consoleErrors = await loadKitPage(page, "/docs/gallery.html");
+  await galleryBuilt(page);
 
   const viewport = page.viewportSize();
   const mainBox = await page.locator("main").boundingBox();
@@ -251,6 +253,13 @@ async function loadKitPage(page: Page, path: string): Promise<string[]> {
   await page.goto(path);
   await expect(page.locator("body")).toBeVisible();
   return consoleErrors;
+}
+
+// The gallery's module script awaits the path-module imports (one module per
+// mark since ui#121) before it builds the theme matrix, and page.goto does not
+// wait for a module's top-level await, so wait for the matrix (5 themes x 2 modes).
+async function galleryBuilt(page: Page): Promise<void> {
+  await expect(page.locator("[data-theme-matrix]")).toHaveCount(10);
 }
 
 async function assertTokenStylesResolved(page: Page): Promise<void> {
