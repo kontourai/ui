@@ -12,13 +12,14 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const work = mkdtempSync(path.join(tmpdir(), "kui-marks-provenance-"));
 after(() => rmSync(work, { recursive: true, force: true }));
-const MODULES = ["react/src/product-icon-paths.ts", "react/src/brand-mark-paths.ts"];
+// One module per mark (ui#121).
+const MODULES = ["react/src/marks/station.ts", "react/src/marks/kontour-symbol-hero.ts"];
 
 let copies = 0;
 /** Copies the generator, its constructions and the path modules, applies `mutate(dir)`, and runs the generator there. */
 function run(mutate, args) {
   const dir = path.join(work, String(copies++));
-  for (const entry of ["scripts/generate-marks.mjs", "scripts/marks", ...MODULES]) cpSync(path.join(root, entry), path.join(dir, entry), { recursive: true });
+  for (const entry of ["scripts/generate-marks.mjs", "scripts/marks", "react/src/marks"]) cpSync(path.join(root, entry), path.join(dir, entry), { recursive: true });
   mutate(dir);
   return { ...spawnSync(process.execPath, [path.join(dir, "scripts/generate-marks.mjs"), ...args], { encoding: "utf8" }), dir };
 }
@@ -35,12 +36,12 @@ test("--check rejects hand-edited markup and a missing constant; --write restore
   // One coordinate of the Station mark nudged by hand.
   const edited = run((dir) => {
     original = readFileSync(path.join(dir, file), "utf8");
-    const match = /^const STATION =\n {2}'<path stroke-width="1\.25" d="M(\d+\.\d+)/m.exec(original);
+    const match = /^export const STATION =\n {2}'<path stroke-width="1\.25" d="M(\d+\.\d+)/m.exec(original);
     assert.ok(match, "STATION's first coordinate must be found");
     writeFileSync(path.join(dir, file), original.replace(match[0], match[0].replace(match[1], String(Number(match[1]) + 0.01))));
   }, ["--check"]);
   assert.equal(edited.status, 1, edited.stdout);
-  assert.match(edited.stderr, /product-icon-paths\.ts: STATION differs from the markup its construction in scripts\/marks\/ generates/);
+  assert.match(edited.stderr, /marks\/station\.ts: STATION differs from the markup its construction in scripts\/marks\/ generates/);
   assert.equal(edited.stderr.split("\n").filter((line) => line.startsWith("  - ")).length, 1, edited.stderr);
 
   const restored = spawnSync(process.execPath, [path.join(edited.dir, "scripts/generate-marks.mjs"), "--write"], { encoding: "utf8" });
@@ -50,10 +51,10 @@ test("--check rejects hand-edited markup and a missing constant; --write restore
 
   const missing = run((dir) => {
     const brand = path.join(dir, MODULES[1]);
-    writeFileSync(brand, readFileSync(brand, "utf8").replace("const SYMBOL_HERO =", "const SYMBOL_FINE ="));
+    writeFileSync(brand, readFileSync(brand, "utf8").replace("export const SYMBOL_HERO =", "export const SYMBOL_FINE ="));
   }, ["--check"]);
   assert.equal(missing.status, 1, missing.stdout);
-  assert.match(missing.stderr, /brand-mark-paths\.ts: no `const SYMBOL_HERO =` literal to compare/);
+  assert.match(missing.stderr, /marks\/kontour-symbol-hero\.ts: no `export const SYMBOL_HERO =` literal to compare/);
 });
 
 test("--check rejects a construction changed without regenerating", () => {

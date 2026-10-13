@@ -1,13 +1,14 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import ts from "typescript";
+import { build } from "esbuild";
 
 // Static gates for the production marks in icons/ (ui#75).
 //
-// Every mark ships in two forms: an SVG file under icons/ and inner markup in
-// react/src/*-paths.ts that the React components and custom elements render.
-// The path modules are the source; `--write` regenerates the files from them,
+// Every mark ships in two forms: an SVG file under icons/<slug>.svg and inner
+// markup in react/src/marks/<slug>.ts that the React components and custom
+// elements render, gathered by the lookup maps in react/src/*-paths.ts. The
+// path modules are the source; `--write` regenerates the files from them,
 // and the check fails when a file differs, so the two forms cannot drift.
 //
 // Each file is then parsed and held to an allowlist rather than scanned for
@@ -100,10 +101,11 @@ const REASONS = [
 ];
 const explain = (name) => REASONS.find(([pattern]) => pattern.test(name))?.[1] ?? "it is not in the marks allowlist";
 
+// The lookup maps import one module per mark (react/src/marks/), so a path
+// module is bundled with its imports rather than transpiled alone.
 async function loadModule(file) {
-  const source = readFileSync(path.join(root, file), "utf8");
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } });
-  return import(`data:text/javascript;base64,${Buffer.from(outputText).toString("base64")}`);
+  const { outputFiles } = await build({ entryPoints: [path.join(root, file)], bundle: true, format: "esm", platform: "neutral", write: false, logLevel: "silent" });
+  return import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 }
 
 const { productIconPaths, productBadgePaths } = await loadModule("react/src/product-icon-paths.ts");

@@ -1,5 +1,27 @@
 import type { ReactElement, SVGProps } from "react";
 import { isProductBadgeSlug, productBadgePaths, productIconPaths, type ProductBadgeSlug, type ProductIconSlug } from "./product-icon-paths.js";
+import { BEARING } from "./marks/bearing.js";
+import { CLI } from "./marks/cli.js";
+import { CONDUIT } from "./marks/conduit.js";
+import { CONSOLE } from "./marks/console.js";
+import { DATUM } from "./marks/datum.js";
+import { DISPATCH } from "./marks/dispatch.js";
+import { EVALS } from "./marks/evals.js";
+import { FIELDWORK } from "./marks/fieldwork.js";
+import { FLOW } from "./marks/flow.js";
+import { FLOW_AGENTS } from "./marks/flow-agents.js";
+import { FORAGE } from "./marks/forage.js";
+import { HACHURE } from "./marks/hachure.js";
+import { KIT_RESEARCH } from "./marks/kit-research.js";
+import { LOOKOUT } from "./marks/lookout.js";
+import { PLUMB } from "./marks/plumb.js";
+import { RELAY } from "./marks/relay.js";
+import { STATION } from "./marks/station.js";
+import { SURFACE } from "./marks/surface.js";
+import { SURVEY } from "./marks/survey.js";
+import { TRAVERSE } from "./marks/traverse.js";
+import { UI } from "./marks/ui.js";
+import { VERITAS } from "./marks/veritas.js";
 
 export type { ProductBadgeSlug, ProductIconSlug } from "./product-icon-paths.js";
 
@@ -49,11 +71,22 @@ interface ProductIconEitherProps extends ProductIconProps {
 export function ProductIcon(props: ProductIconBadgeProps): ReactElement | null;
 export function ProductIcon(props: ProductIconEitherProps): ReactElement | null;
 export function ProductIcon(props: ProductIconDefaultProps): ReactElement;
-export function ProductIcon({ product, variant = "default", size, title, className, ...props }: ProductIconDefaultProps | ProductIconEitherProps): ReactElement | null {
+export function ProductIcon({ product, variant = "default", ...props }: ProductIconDefaultProps | ProductIconEitherProps): ReactElement | null {
   const badge = variant === "badge";
   // A variant that does not exist for this product draws nothing, rather than another form of the mark.
   if (variant !== "default" && !(badge && isProductBadgeSlug(product))) return null;
   const inner = badge ? productBadgePaths[product as ProductBadgeSlug] : productIconPaths[product];
+  return drawProductIcon(product, inner, badge, props);
+}
+
+/**
+ * Draws one product mark from its inner markup, returning the svg element
+ * itself. ProductIcon looks the markup up in productIconPaths and
+ * productBadgePaths, which load every mark; the named icons below pass their
+ * own, so a bundle that uses only StationIcon carries only the Station mark
+ * (ui#121, scripts/check-tree-shaking.mjs).
+ */
+function drawProductIcon(product: ProductIconSlug, inner: string, badge: boolean, { size, title, className, ...props }: ProductIconProps) {
   const accessibility = title ? { role: "img", "aria-label": title } : { "aria-hidden": true };
   const edge = size ?? (badge ? 32 : 24);
   return (
@@ -76,36 +109,39 @@ export function ProductIcon({ product, variant = "default", size, title, classNa
   );
 }
 
-function makeProductIcon(product: ProductIconSlug) {
+// Each named icon is built from its own mark's module, never from
+// productIconPaths, and each call is marked pure, so a bundle keeps only the
+// icons it uses.
+function makeProductIcon(product: ProductIconSlug, inner: string) {
   function Icon(props: ProductIconProps) {
-    return <ProductIcon product={product} {...props} />;
+    return drawProductIcon(product, inner, false, props);
   }
   Icon.displayName = `${product.replace(/(^|-)([a-z])/g, (_, _sep, ch: string) => ch.toUpperCase())}Icon`;
   return Icon;
 }
 
-export const StationIcon = makeProductIcon("station");
-export const SurfaceIcon = makeProductIcon("surface");
-export const FlowIcon = makeProductIcon("flow");
-export const VeritasIcon = makeProductIcon("veritas");
-export const SurveyIcon = makeProductIcon("survey");
-export const ConsoleIcon = makeProductIcon("console");
-export const FlowAgentsIcon = makeProductIcon("flow-agents");
-export const FieldworkIcon = makeProductIcon("fieldwork");
-export const HachureIcon = makeProductIcon("hachure");
-export const ForageIcon = makeProductIcon("forage");
-export const TraverseIcon = makeProductIcon("traverse");
-export const LookoutIcon = makeProductIcon("lookout");
-export const RelayIcon = makeProductIcon("relay");
-export const DispatchIcon = makeProductIcon("dispatch");
-export const DatumIcon = makeProductIcon("datum");
-export const BearingIcon = makeProductIcon("bearing");
-export const ConduitIcon = makeProductIcon("conduit");
-export const PlumbIcon = makeProductIcon("plumb");
-export const CliIcon = makeProductIcon("cli");
-export const UiIcon = makeProductIcon("ui");
-export const EvalsIcon = makeProductIcon("evals");
-export const KitResearchIcon = makeProductIcon("kit-research");
+export const StationIcon = /* @__PURE__ */ makeProductIcon("station", STATION);
+export const SurfaceIcon = /* @__PURE__ */ makeProductIcon("surface", SURFACE);
+export const FlowIcon = /* @__PURE__ */ makeProductIcon("flow", FLOW);
+export const VeritasIcon = /* @__PURE__ */ makeProductIcon("veritas", VERITAS);
+export const SurveyIcon = /* @__PURE__ */ makeProductIcon("survey", SURVEY);
+export const ConsoleIcon = /* @__PURE__ */ makeProductIcon("console", CONSOLE);
+export const FlowAgentsIcon = /* @__PURE__ */ makeProductIcon("flow-agents", FLOW_AGENTS);
+export const FieldworkIcon = /* @__PURE__ */ makeProductIcon("fieldwork", FIELDWORK);
+export const HachureIcon = /* @__PURE__ */ makeProductIcon("hachure", HACHURE);
+export const ForageIcon = /* @__PURE__ */ makeProductIcon("forage", FORAGE);
+export const TraverseIcon = /* @__PURE__ */ makeProductIcon("traverse", TRAVERSE);
+export const LookoutIcon = /* @__PURE__ */ makeProductIcon("lookout", LOOKOUT);
+export const RelayIcon = /* @__PURE__ */ makeProductIcon("relay", RELAY);
+export const DispatchIcon = /* @__PURE__ */ makeProductIcon("dispatch", DISPATCH);
+export const DatumIcon = /* @__PURE__ */ makeProductIcon("datum", DATUM);
+export const BearingIcon = /* @__PURE__ */ makeProductIcon("bearing", BEARING);
+export const ConduitIcon = /* @__PURE__ */ makeProductIcon("conduit", CONDUIT);
+export const PlumbIcon = /* @__PURE__ */ makeProductIcon("plumb", PLUMB);
+export const CliIcon = /* @__PURE__ */ makeProductIcon("cli", CLI);
+export const UiIcon = /* @__PURE__ */ makeProductIcon("ui", UI);
+export const EvalsIcon = /* @__PURE__ */ makeProductIcon("evals", EVALS);
+export const KitResearchIcon = /* @__PURE__ */ makeProductIcon("kit-research", KIT_RESEARCH);
 
 /** Map keyed by product slug, so consumers can look up an icon dynamically. */
 export const productIcons: Record<ProductIconSlug, (props: ProductIconProps) => ReactElement> = {

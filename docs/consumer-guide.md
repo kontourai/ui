@@ -501,8 +501,11 @@ The wordmark and lockup spell the company name, so they are named "Kontour" for 
 unless you pass `title` or `decorative`. The symbol and the product marks are hidden unless
 given a `title`. An unknown `mark` renders nothing.
 
-The package declares `sideEffects`, so a bundler drops the marks you do not import; importing
-`@kontourai/ui/elements` for its effect still registers every element.
+The package declares `sideEffects`, so a bundler drops the marks you do not import: a named mark
+(`KontourWordmark`, `StationIcon`) carries only its own path data. `BrandMark`, `ProductIcon`,
+`brandMarks`, `productIcons` and the custom elements take the mark at runtime, so they carry every
+mark they can draw (`ProductIcon` includes the badges). Importing `@kontourai/ui/elements` for
+its effect still registers every element.
 
 ## Tone Mapping
 

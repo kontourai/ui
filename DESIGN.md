@@ -1101,8 +1101,8 @@ the badge form of Station, Flow, and Surface (32px by default; nothing renders f
 without one). `BrandMark` and `<k-brand-mark>` for the corporate marks, with `KontourSymbol`,
 `KontourWordmark`, `KontourLockup`, and, for the large cuts, `KontourSymbolLockup`,
 `KontourSymbolHero`, and `KontourLockupLarge`; a large cut defaults to its 96-unit frame height.
-The path modules under `react/src/` are the source; `node scripts/check-marks.mjs --write`
-regenerates the files. The contour marks' path data is generated from their construction in
+The path modules under `react/src/marks/`, one per mark and named for its file in `icons/`, are
+the source; `node scripts/check-marks.mjs --write` regenerates the files. The contour marks' path data is generated from their construction in
 `scripts/marks/` by `node scripts/generate-marks.mjs`, and `--check` re-derives it, so the
 committed paths cannot drift from the geometry. The wordmark is outlines, so drawing it needs no
 font; `scripts/generate-wordmark.py --check` re-derives it from the vendored Fraunces file.

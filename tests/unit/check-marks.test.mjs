@@ -14,12 +14,14 @@ after(() => rmSync(work, { recursive: true, force: true }));
 
 const FRAME = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">';
 const PRODUCT_PATHS = "react/src/product-icon-paths.ts";
+// One module per mark (ui#121); the lookup maps in PRODUCT_PATHS and brand-mark-paths.ts import them.
+const BEARING = "react/src/marks/bearing.ts";
 
 let copies = 0;
 /** Copies the marks, applies `mutate(dir)`, and runs the check there. */
 function runCheck(mutate = () => {}, args = []) {
   const dir = path.join(work, String(copies++));
-  for (const entry of ["scripts/check-marks.mjs", "icons", PRODUCT_PATHS, "react/src/brand-mark-paths.ts"]) cpSync(path.join(root, entry), path.join(dir, entry), { recursive: true });
+  for (const entry of ["scripts/check-marks.mjs", "icons", "react/src"]) cpSync(path.join(root, entry), path.join(dir, entry), { recursive: true });
   symlinkSync(path.join(root, "node_modules"), path.join(dir, "node_modules"), "dir");
   mutate(dir);
   const result = spawnSync(process.execPath, [path.join(dir, "scripts/check-marks.mjs"), ...args], { encoding: "utf8" });
@@ -133,7 +135,7 @@ test("rejects files and path modules that disagree", () => {
 
 test("--write regenerates the files from the path modules, and an edit to a path module is gated", () => {
   const edit = (to) => (dir) => {
-    const file = path.join(dir, PRODUCT_PATHS);
+    const file = path.join(dir, BEARING);
     const source = readFileSync(file, "utf8");
     const from = '<circle cx="12" cy="12" r="8.5"/><path d="M15 9l-2 4.5L9 15l2-4.5Z"/>';
     assert.equal(source.split(from).length, 2, "bearing's markup anchor must appear once");
@@ -165,7 +167,7 @@ test("refuses to pass when no marks are declared", () => {
 // files, so the sync gate is satisfied and only the markup itself is judged.
 function runCheckWithBearingSource(inner) {
   const generated = runCheck((dir) => {
-    const file = path.join(dir, PRODUCT_PATHS);
+    const file = path.join(dir, BEARING);
     const source = readFileSync(file, "utf8");
     const from = '<circle cx="12" cy="12" r="8.5"/><path d="M15 9l-2 4.5L9 15l2-4.5Z"/>';
     assert.equal(source.split(from).length, 2, "bearing's markup anchor must appear once");
@@ -307,14 +309,14 @@ test("holds the hero/lockup tier to its own frame, ceilings and stroke range", (
 });
 
 test("rejects a stated minimum size that is not the size the tier rates", () => {
-  const restate = (from, to) => (dir) => {
-    const file = path.join(dir, "react/src/brand-mark-paths.ts");
+  const restate = (module, from, to) => (dir) => {
+    const file = path.join(dir, "react/src/marks", module);
     const source = readFileSync(file, "utf8");
     assert.equal(source.split(from).length, 2, `${from} must appear once`);
     writeFileSync(file, source.replace(from, to));
   };
-  rejects(runCheck(restate("const LARGE_MIN_SIZE = 64;", "const LARGE_MIN_SIZE = 48;")), /kontour-symbol-hero\.svg: the path module states a minimum size of 48px, but its tier rates it at 64px/);
-  rejects(runCheck(restate('"kontour-symbol": { width: 24, inner: SYMBOL }', '"kontour-symbol": { width: 24, minSize: 64, inner: SYMBOL }')), /kontour-symbol\.svg: the path module states a minimum size of 64px, but its tier rates it at 16px/);
+  rejects(runCheck(restate("frame.ts", "export const LARGE_MIN_SIZE = 64;", "export const LARGE_MIN_SIZE = 48;")), /kontour-symbol-hero\.svg: the path module states a minimum size of 48px, but its tier rates it at 64px/);
+  rejects(runCheck(restate("kontour-symbol.ts", "kontourSymbol: BrandMarkDefinition = { width: 24, inner: SYMBOL }", "kontourSymbol: BrandMarkDefinition = { width: 24, minSize: 64, inner: SYMBOL }")), /kontour-symbol\.svg: the path module states a minimum size of 64px, but its tier rates it at 16px/);
 });
 
 test("gates the product badges as product marks", () => {
