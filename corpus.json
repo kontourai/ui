@@ -22,6 +22,7 @@
     },
     { "source": "DESIGN.md", "section": "Concepts" },
     { "source": "docs/adr/0001-console-kit-token-contract.md", "section": "Concepts" },
+    { "source": "docs/decisions/index.md", "section": "Concepts" },
     {
       "source": "tokens/fonts/README.md",
       "section": "Reference",
@@ -49,5 +50,10 @@
     { "id": "checks", "title": "Package checks and what each one catches", "source": "README.md#checks" },
     { "id": "adopter-checks", "title": "Adopter verification matrix", "source": "docs/release-readiness.md#adopter-checks" }
   ],
-  "exclude": ["docs/audits/**"]
+  "exclude": ["docs/audits/**"],
+  "decisions": {
+    "adr": {
+      "dir": "docs/adr"
+    }
+  }
 }

@@ -15,6 +15,7 @@ across every product surface.
 - Token contract: `tokens/` (CSS custom properties; per-product accents live in `themes.css`).
 - React primitives: `react/`; light-DOM wrappers: `elements/`; docs in `docs/`.
 - Docs are published with Corpus: `corpus.json` lists the published docs and MCP topics, `npm run docs:check` is the gate, and when you change code a document `covers`, update that document.
+- Decisions: one living record per subject in `docs/decisions/<slug>.md`, in the [Corpus decision-record format](https://github.com/kontourai/corpus/blob/main/docs/decisions.md); list a new record in `corpus.json` `documents`. The numbered ADRs in `docs/adr/` are frozen history: never add one, and cite them as `adr` evidence instead. After editing a record, run `npm run gen:decisions-index`. `npm run check:decisions` (part of `npm run verify`) validates the records and the index, and refuses files added under `docs/adr/` since `$DECISIONS_BASE` (default `origin/main`; CI sets it to the pull request base, or to the pushed range on `main`).
 - `dist/` is generated.
 
 ## Match Checks To Change Type

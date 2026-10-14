@@ -1,5 +1,7 @@
 # ADR 0001: Console Kit Token Contract
 
+> Numbered ADRs in `docs/adr/` are frozen history: new decisions go to `docs/decisions/<slug>.md` in the [Corpus decision-record format](https://github.com/kontourai/corpus/blob/main/docs/decisions.md), citing this ADR as `adr` evidence.
+
 ## Status
 
 Accepted
