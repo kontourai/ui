@@ -40,6 +40,7 @@
   "devDependencies": {
     "@kontourai/flow-agents": "5.5.0",
     "@kontourai/surface": "3.3.0",
+    "@kontourai/veritas": "1.11.2",
     "@playwright/test": "^1.60.0",
     "@types/react": "^19.2.7",
     "esbuild": "0.28.1",
