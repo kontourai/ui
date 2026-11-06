@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.20.2](https://github.com/kontourai/ui/compare/v1.20.1...v1.20.2) (2026-11-06)
+
+
+### Documentation
+
+* declare Corpus v2 purpose and building blocks ([#125](https://github.com/kontourai/ui/issues/125)) ([525fcc5](https://github.com/kontourai/ui/commit/525fcc5e1f22ef47a490cac7556545c78a6071b0))
+* require source-bound freshness reviews ([#130](https://github.com/kontourai/ui/issues/130)) ([07fec1e](https://github.com/kontourai/ui/commit/07fec1e2cf4b92ebbca5f5fa78484427cfe3e24f))
+
 ## [1.20.1](https://github.com/kontourai/ui/compare/v1.20.0...v1.20.1) (2026-10-13)
 
 
