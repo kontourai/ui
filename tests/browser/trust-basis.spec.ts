@@ -240,6 +240,8 @@ test("the line is never blank: unusable input renders \"Basis not available\" an
 
 test("k-trust-basis: basis-json from the parser, property before upgrade, property over attribute", async ({ page }) => {
   const messages = await load(page);
+  // Replacing the document must wait for the gallery's asynchronous construction.
+  await expect(page.locator("[data-theme-matrix]").first()).toBeVisible();
   const extracted = cases.get("extracted")!;
   const restricted = cases.get("restricted")!;
   const result = await page.evaluate(async ({ extracted, restricted }) => {
